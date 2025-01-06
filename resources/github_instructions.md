@@ -42,7 +42,7 @@ Go to Canvas. Under Assignments, click on *Example assignment (ungraded)*. Click
 
 If you are not already logged in, GitHub will prompt you to log in to your account:
 
-<img src="github_instruction_pictures/assignment_link_login.png" width="30%"/>
+<img src="github_instruction_pictures/assignment_link_login.png" />
 
 #### Step 3: Join the Classroom (only needs to be done once!)
 
