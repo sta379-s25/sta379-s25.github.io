@@ -36,5 +36,11 @@ This section describes the steps for accepting and submitting your first assignm
 
 #### Step 1: Open the assignment link
 
+Go to Canvas. Under Assignments, click on *Example assignment (ungraded)*. Click on the GitHub Classroom link provided in the assignment description.
 
+#### Step 2: Log in to GitHub
+
+If you are not already logged in, GitHub will prompt you to log in to your account:
+
+![](github_instruction_pictures/assignment_link_login.png)
 
