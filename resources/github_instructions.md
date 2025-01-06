@@ -55,11 +55,11 @@ The first time you click on an assignment link, GitHub will ask you to join the 
 
 You will now be prompted to accept the assignment (in this case, `example-assignment`). This will give you access to a new repository on GitHub called `example-assignment-USERNAME` (e.g., `example-assignment-ciaran-evans`). Click the green "Accept this assignment" button.
 
-<img src="github_instruction_pictures/assignment_accept_assignment.png" width="30%"/>
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/assignment_accept_assignment.png" width="30%"/>
 
 Once you have accepted the assignment, you will be taken to the assignment repository on GitHub (e.g., `example-assignment-ciaran-evans`). In the example assignment, there are two files already in the repository: `README.md` provides some information about the assignment (short because full assignment instructions are on the course website), and `example_template.R` provides an R script with starter code.
 
-<img src="github_instruction_pictures/assignment_landing_page.png" width="60%"/>
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/assignment_landing_page.png" width="60%"/>
 
 If you click on the `example_template.R` file, for example, you will see an incomplete R function for calculating the mean, called `my_mean`. In most assignments, you will have one or more .R files, containing starter code and unit tests. Assignments involving C++ will also have one or more `.cpp` starter files.
 
@@ -67,20 +67,20 @@ If you click on the `example_template.R` file, for example, you will see an inco
 
 Click the green "Code" button, and select HTTPS. You will see a web URL that you can copy to the clipboard:
 
-<img src="github_instruction_pictures/assignment_get_https.png" width="30%"/>
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/assignment_get_https.png" width="30%"/>
 
 Click the icon next to this URL to copy it to the clipboard
 
-<img src="github_instruction_pictures/assignment_copy_url_clipboard.png" width="30%"/>
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/assignment_copy_url_clipboard.png" width="30%"/>
 
 
 Now open RStudio, and click *File* -> *New Project*. This will open the new project wizard. Select *Version Control*
 
-<img src="github_instruction_pictures/new_project_wizard_vc.png" width="30%"/>
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/new_project_wizard_vc.png" width="30%"/>
 
 Then select *Git*
 
-<img src="github_instruction_pictures/new_project_wizard_git.png" width="30%"/>
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/new_project_wizard_git.png" width="30%"/>
 
 The project wizard will then ask for Git repository info. 
 
@@ -90,23 +90,23 @@ The project wizard will then ask for Git repository info.
 * Select "Open in new session"
 * Then click "Create Project".
 
-<img src="github_instruction_pictures/new_project_wizard_directory_info.png" width="30%"/>
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/new_project_wizard_directory_info.png" width="30%"/>
 
 This will clone the repository from GitHub to your local computer, and will create a new R project in that repository. This project will then be opened as a new RStudio session on your computer. In the new RStudio session, click the Files viewer (next to Plots, in one of the four panes). You should see the files for the example assignment repository:
 
-<img src="github_instruction_pictures/new_project_file_listing.png" width="30%"/>
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/new_project_file_listing.png" width="30%"/>
 
 
 #### Step 6: Pull
 
 In one of the panes on RStudio, you should see a *Git* tab, which has the Git tools (pull, staging, commit, and push) that we will use to save work and interact with GitHub:
 
-<img src="github_instruction_pictures/new_assignment_pull_first.png" width="30%"/>
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/new_assignment_pull_first.png" width="30%"/>
 
 Before doing work in the repository, pull from the remote GitHub repository (click the "Pull" arrow, pointing down). Try to make this a habit whenever you start work on an assignment, or go back to an assignment you have worked on previously. If you are the only one making changes to a repository, and you are only using one computer, then it won't really matter, but it is still a good habit for the future. However, if you are working on the same code across multiple computers, or collaborating with other people, then pulling first is very important!
 
 Because nothing has changed on the remote repository, you will get a message saying everything is up to date:
 
-<img src="github_instruction_pictures/new_assignment_pull_uptodate.png" width="30%"/>
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/new_assignment_pull_uptodate.png" width="30%"/>
 
 
