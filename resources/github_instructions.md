@@ -69,3 +69,27 @@ Click the green "Code" button, and select HTTPS. You will see a web URL that you
 
 <img src="github_instruction_pictures/assignment_get_https.png" width="30%"/>
 
+Click the icon next to this URL to copy it to the clipboard
+
+<img src="github_instruction_pictures/assignment_copy_url_clipboard.png" width="30%"/>
+
+
+Now open RStudio, and click *File* -> *New Project*. This will open the new project wizard. Select *Version Control*
+
+<img src="github_instruction_pictures/new_project_wizard_vc.png" width="30%"/>
+
+Then select *Git*
+
+<img src="github_instruction_pictures/new_project_wizard_git.png" width="30%"/>
+
+The project wizard will then ask for Git repository info. 
+
+* Paste the URL you copied from GitHub into the "Repository URL" field. 
+* Under "Project directory name:", enter the assignment name (e.g., `example-assignment`). 
+* Under "Create project as subdirectory of:", browse and select the folder on your local computer that you created for your work in this class (e.g., `Documents/sta379-s25-work`). 
+* Select 
+* Then click "Create Project".
+
+<img src="github_instruction_pictures/new_project_wizard_directory_info.png" width="30%"/>
+
+
