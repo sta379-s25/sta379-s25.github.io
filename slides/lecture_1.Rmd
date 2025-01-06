@@ -1,0 +1,169 @@
+---
+title: "Lecture 1: Course Overview"
+author: "Ciaran Evans"
+output: beamer_presentation
+---
+
+## "Statistical computing" vs. "computational statistics" 
+
+* **Statistical computing**: programming languages and computing tools for working with statistics (think: storing and accessing data, data transformations and wrangling, some data visualization, etc.)
+
+* **Computational statistics**: the use of computational algorithms algorithms to implement statistical methods (think: simulating data from a distribution, fitting a regression model, performing hypothesis testing)
+
+
+## Key points {.smaller}
+
+* Focus on *how* to statistical methods work. E.g., how do we fit a logistic regression model? What is R actually doing "under the hood"?
+
+* Focus on *implementation* -- much of your work will be turning statistical methods and algorithms into code
+
+* Focus on efficiency
+    * Efficient algorithms (e.g. dynamic programming approaches)
+    * Efficient approximations (e.g. integral and Hessian approximations)
+    * Efficient languages (particularly the use of C++)
+
+* Focus on iteration
+
+## Tentative course outline
+
+* Simulation (simulation studies, generating random numbers, simulating from a distribution)
+* Model fitting (linear and generalized linear models, maximum likelihood, Newton and quasi-Newton methods)
+* Missing data and EM algorithm (Gaussian mixtures, Hidden Markov Models)
+* Integration (numerical integration, Monte Carlo integration, MCMC)
+* Bootstrapping
+
+## Course structure and grading
+
+## Roadmap for the first few weeks 
+
+* Motivation: simulation studies
+* Simulation: behind the scenes
+    * Generating random numbers
+    * Transformation methods
+    * Acceptance/rejection sampling
+    * Computing topics: iteration, functions, C++
+    * Simulation for linear models and multivariate normal distributions
+* Following unit: how do you actually fit a regression model? (linear, GLMs, GEEs, etc.)
+
+## Recap
+
+Suppose we have a sample $X_1,...,X_n \overset{iid}{\sim} N(\mu, 1)$. Want to test the hypotheses
+
+$$H_0: \mu = 0 \hspace{0.5cm} H_A: \mu \neq 0$$
+
+How do I test these hypotheses? (What is my test statistic, and how do I make a decision?)
+
+## Recap
+
+Suppose we have a sample $X_1,...,X_n \overset{iid}{\sim} N(\mu, 1)$. Want to test the hypotheses
+
+$$H_0: \mu = 0 \hspace{0.5cm} H_A: \mu \neq 0$$
+
+If actually $\mu = 0$, do we want to reject $H_0$, or fail to reject?
+
+## Recap
+
+* Either $H_0$ is true or false (usually we don't know)
+
+* We either reject or fail to reject $H_0$
+
+Possible outcomes of a hypothesis test:
+
+## Recap
+
+| | $H_0$ is true | $H_0$ is false |
+| --- | --- | --- |
+| fail to reject | correct decision | type II error |
+| reject | type I error | correct decision |
+
+
+**Usual goal:** Minimize type II error, subject to control of type I error (i.e. want $P(\text{reject } H_0 | H_0 \text{ true}) <= \alpha$)
+
+
+## In R
+
+```{r, echo=T}
+mu_x <- 0
+n <- 20
+x <- rnorm(n, mean=mu_x, sd=1)
+x
+t.test(x, alternative="two.sided", mu=0)
+```
+
+## In R
+
+```{r, echo=T}
+t.test(x, alternative="two.sided", mu=0)
+```
+
+Here we fail to reject $H_0$. Does this give us our type I error?
+
+
+## In R
+
+```{r, echo=T}
+t.test(x, alternative="two.sided", mu=0)
+```
+
+Here we fail to reject $H_0$. Does this give us our type I error rate?
+
+No! Type I error rate = $P(\text{reject } H_0 | H_0 \text{ true})$. Need more than one observation to estimate a probability.
+
+## Repeating many times
+
+```{r, echo=T}
+set.seed(379)
+n <- 20
+mu_x <- 0
+nsim <- 1000  # number of times to repeat
+test_results <- rep(NA, nsim)  # vector to store the test results
+
+for(i in 1:nsim){
+  x <- rnorm(n, mean=mu_x, sd=1)
+  test_results[i] <- t.test(x, alternative="two.sided", mu=0)$p.value
+}
+
+head(test_results)
+```
+
+What is this code doing?
+
+## Repeating many times
+
+```{r, echo=T}
+set.seed(379)
+n <- 20
+mu_x <- 0
+nsim <- 1000  # number of times to repeat
+test_results <- rep(NA, nsim)  # vector to store the test results
+
+for(i in 1:nsim){
+  x <- rnorm(n, mean=mu_x, sd=1)
+  test_results[i] <- t.test(x, alternative="two.sided", mu=0)$p.value
+}
+
+head(test_results)
+```
+
+How do I find the fraction of times we rejected $H_0$?
+
+## Repeating many times
+
+```{r, echo=T}
+set.seed(379)
+n <- 20
+mu_x <- 0
+nsim <- 1000  # number of times to repeat
+test_results <- rep(NA, nsim)  # vector to store the test results
+
+for(i in 1:nsim){
+  x <- rnorm(n, mean=mu_x, sd=1)
+  test_results[i] <- t.test(x, alternative="two.sided", mu=0)$p.value
+}
+
+mean(test_results < 0.05)
+```
+
+## Your turn
+
+Experiment with changing $\mu$ and $n$. How does the probability of rejecting change?

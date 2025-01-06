@@ -1,0 +1,332 @@
+---
+title: "Homework 1"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+**Due:** 
+
+**Submission:** For this assignment, you will submit two files to Canvas:
+
+* An R script containing your functions for questions 1--3 and the corresponding unit tests (see the Unit Testing section below for further details)
+* A pdf containing your written answers to questions 4--6
+
+**Mastery:** To master this assignment, you must satisfy the following requirements:
+
+* Your code must pass all specified unit tests, *as written* (you may not modify the unit tests which I provide)
+* Your code must meet all requirements described in the questions below (matching the requested inputs and outputs)
+* You must comment your code
+* Your written solutions must be complete and correct, with no missing steps or mistakes
+* Your work must abide by the academic honesty requirements in the syllabus 
+
+If you make an honest effort to answer all questions, but you do not master all of the questions on your first submission, you will have one resubmission attempt after receiving feedback.
+
+**Resources:** 
+
+## Function practice
+
+### Empirical cdf, Part I
+
+**Definition:** (Empirical CDF) Suppose that $X_1,...,X_n$ are a random sample from some distribution with cdf $F$. That is, $F(t) = P(X_i \leq t)$. An empirical estimate of $F$, called the *empirical cdf*, is given by
+
+$$\widehat{F}(t) = \frac{1}{n} \sum \limits_{i=1}^n {\bf 1}\{X_i \leq t\} = \frac{\#\{X_i \leq t\}}{n}$$
+
+Here, ${\bf 1}\{\cdot\}$ is the *indicator function*:
+
+$${\bf 1}\{X_i \leq t\} = \begin{cases} 1 & X_i \leq t \\ 0 & X_i > t  \end{cases}$$
+
+In R, the empirical cdf can be calculated with the `ecdf` function; in this assignment, you will write your own empirical cdf function.
+
+:::{.question}
+#### Question 1
+
+Write a function in R called `my_ecdf1` which satisfies the following requirements:
+
+Inputs:
+
+* `x`: a vector, containing the random sample for which to calculate the empirical cdf
+* `t`: a vector, containing the points at which to evaluate the empirical cdf
+
+Output: a vector containing the empirical cdf evaluated at each point in `t`, i.e. $\widehat{F}(t)$.
+
+You may not use any existing empirical cdf implementations.
+
+*Hints:* There are two R functions which may be very useful in your implementation: the `mean` function, and the `sapply` function. It is possible to write code which uses neither of these, but using them may result in a much shorter, cleaner function.
+
+**Test cases:** Here is example output which your function should match:
+
+```{r, echo=F}
+my_ecdf1 <- function(x, t){
+  return(sapply(t, function(ti){mean(x <= ti)}))
+}
+```
+
+```{r}
+set.seed(3)
+x <- runif(100)
+my_ecdf1(x, seq(0, 1, 0.1))
+```
+
+:::
+
+
+### Empirical cdf, Part II
+
+If we examine the `ecdf` function in R, we notice that it doesn't work *quite* like the function we have written in question 1. Rather, R's `ecdf` takes in a single argument (the sample, `x`), and returns a *function* object that we can then apply to whichever points we want. For example:
+
+```{r}
+samp_ecdf <- ecdf(x) # samp_ecdf will be a function
+samp_ecdf(seq(0, 1, 0.1)) # applying this new function to evaluation points
+```
+
+The key here is that the functions in R are just another type of object, and the output of a function can be a function!
+
+Here is a small example to illustrate this point. The `rchisq` function generates random samples from a $\chi^2$ distribution, with specified degrees of freedom. E.g., `rchisq(n=5, df=2)` will generate 5 samples from a $\chi^2_2$. Note that the `rchisq` function has no default for the degrees of freedom -- we always have to specify it when we call the function.
+
+The following function is a "function factory": we specify a degrees of freedom, and we get back a function that simulates from that specific $\chi^2$ distribution:
+
+```{r}
+my_chisq <- function(df){
+  function(n){
+    rchisq(n, df)
+  }
+}
+
+# function to sample from a chi-square with 1 df
+chisq1 <- my_chisq(1)
+class(chisq1)
+chisq1(5) # sample 5 observations from chi-square with 1 df
+
+# function to sample from a chi-square with 2 df
+chisq2 <- my_chisq(2)
+chisq2(5) # sample 5 observations from chi-square with 2 df
+```
+
+Now let's modify our empirical cdf function from question 1 so that it behaves like the `ecdf` function in R.
+
+
+:::{.question}
+#### Question 2
+
+Write a function in R called `my_ecdf2` which satisfies the following requirements:
+
+Inputs:
+
+* `x`: a vector, containing the random sample for which to calculate the empirical cdf
+* `t`: a vector, containing the points at which to evaluate the empirical cdf
+
+Output: 
+
+* a *function* that can be used to evaluate the empirical cdf of `x` at specified input points. This output function should satisfy the following requirements:
+    * input: `t`, a vector, containing the points at which to evaluate the empirical cdf
+    * output: a vector containing the empirical cdf evaluated at each point in `t`, i.e. $\widehat{F}(t)$.
+
+You may not use any existing empirical cdf implementations.
+
+**Test cases:** Here is example output which your function should match:
+
+```{r, echo=F}
+my_ecdf2 <- function(x){
+  function(t){
+    return(sapply(t, function(ti){mean(x <= ti)}))
+  }
+}
+```
+
+```{r}
+set.seed(3)
+x <- runif(100)
+my_ecdf2(x)(seq(0, 1, 0.1))
+```
+
+:::
+
+### Diehard test: permutations of consecutive random numbers
+
+In class, we used the empirical cdf as a first check that our random numbers follow a $Uniform(0, 1)$ distribution; if the numbers don't even look uniform, then we have fallen at the first hurdle, and there is no point worrying about more complicated aspects of randomness.
+
+However, as we saw in the practice activity, marginal uniformity is a *necessary*, but not a *sufficient*, condition for randomness. For example, consider the following two sequences:
+
+```{r, echo=F}
+x <- runif(10)
+x
+sort(x)
+```
+Both contain the same numbers, scattered between 0 and 1, and so have the same empirical cdf. From the perspective of the marginal distribution, both sequences appear equally "random". However, the second sequence appears in increasing order! Appearance in increasing order is a decidedly *non*-random trait.
+
+Batteries of statistical tests exist to assess other aspects of randomness, such as the ordering of consecutive numbers in the sequence (see the Wikipedia article on the [diehard tests](https://en.wikipedia.org/wiki/Diehard_tests) for some examples). One diehard test, designed to detect non-random orderings, examines permutations of consecutive numbers in the sequence.
+
+Suppose that we generate, say, 18000 random numbers, $X_1,...,X_{18000}$. We divide the sequence into 6000 chunks, with each chunk consisting of 3 consecutive numbers: chunk 1 = $X_1, X_2, X_3$; chunk 2 = $X_4, X_5, X_6$, etc.
+
+For each chunk, look at the ordering of the three numbers. There are $3! = 6$ ways you can order three numbers, and if the numbers were truly random, we would expect all 6 orderings to occur with equal probability. Therefore, in our example, there should be approximately 1000 occurrences of each of the 6 orderings in our sequence. Substantial deviations from equal numbers of occurrences suggest that our generated numbers are not behaving randomly. And how do we test for "substantial deviations"? With a Chi-square test, of course!
+
+In this question, you will write a function to implement this diehard test. 
+
+:::{.question}
+#### Question 3
+
+Write a function in R called `diehard_permtest` which satisfies the following requirements:
+
+Inputs:
+
+* `x`: a vector, containing the sequence of generated numbers which we want to assess for randomness
+* `chunk_size`: the number of consecutive numbers that make up a chunk. Default: 3.  
+
+Output: a *list* containing the following named elements:
+
+* `perm_counts`: a named vector containing the observed counts for all permutations of `chunk_size` elements
+* `p_value`: a p-value for the Chi-square test assessing whether all permutations are equally likely, using the observed counts
+
+*Hints*:
+
+* The `permn` function in the `combinat` package can be used to find all possible permutations of a vector
+* The `order` function returns the ordering of a vector, e.g.
+```{r}
+order(c(0.5, 0.3, 0.7))
+```
+
+* The `paste0` function can collapse a vector into a single string, e.g.
+```{r}
+paste0(c(2, 1, 3), collapse="")
+```
+
+* The `chisq.test` function in R can be used to conduct Chi-square tests
+* You can name the entries of vectors, and access the entries by those names. For example:
+
+```{r}
+y <- c(0, 2, -4)
+names(y) <- c("a", "b", "c")
+y
+y["b"]
+```
+
+
+**Test cases:** Here is some example output which your function should match (recall the `my_lcg` implementation of the linear congruential generator from the practice activity):
+
+```{r, echo=F}
+diehard_permtest <- function(x, chunk_size = 3){
+  perms <- combinat::permn(1:chunk_size)
+  perms <- sapply(perms, function(x){paste0(x, collapse="")})
+  perm_counts <- rep(0, length(perms))
+  names(perm_counts) <- perms
+
+  for(i in seq(1, length(x) - chunk_size, chunk_size)){
+    cur_order <- paste0(order(x[i:(i+chunk_size - 1)]), collapse="")
+    perm_counts[cur_order] <- perm_counts[cur_order] + 1
+  }
+
+  return(list(perm_counts = perm_counts, 
+              p_value = chisq.test(perm_counts)$p.value))
+}
+
+my_lcg <- function(n, x0 = NA, m = 2^32, a = 1664525, c = 1013904223){
+  
+  if(is.na(x0)){
+    x0 <- ((Sys.time() |> lubridate::second()) * 100000) %% m
+  }
+  
+  x <- rep(NA, n+1)
+  x[1] <- x0
+  for(i in 1:n){
+    x[i+1] <- (a * x[i] + c) %% m
+  }
+  return(x/m)
+}
+```
+
+```{r}
+set.seed(311)
+x <- runif(18000)
+diehard_permtest(x)
+```
+
+```{r}
+set.seed(147)
+x <- runif(9600)
+diehard_permtest(x, chunk_size = 4)
+```
+
+```{r}
+x <- my_lcg(1000, x0=12, m=1024, a=1, c=1)
+diehard_permtest(x, chunk_size = 3)
+```
+```{r}
+x <- my_lcg(18000, x0=50, m=2^32, a=1664525, c=1013904223)
+diehard_permtest(x, chunk_size = 3)
+```
+
+:::
+
+
+## Unit testing, and moving beyond quarto / R Markdown documents
+
+In many of your stats courses, you have probably used quarto or R Markdown documents to compile your homework assignments into a single pdf or html file. These kinds of documents are valuable as you are learning how to work in R, and for combining R output with written responses, plots, tables, etc.
+
+As you get more advanced, however, you will often find that there is a benefit to putting our code in a separate file, particularly when we want our code to be shared and usable by others (for example, if you write a random number generator that I then want to run on my computer!). In R, these separate files are called *R scripts*, and they have the `.R` extension. 
+
+In this course, much of your work will be writing code to implement functions and algorithms, and then checking that your implementation worked -- just like you did in the three questions above. The process of testing your code to ensure that it behaves as expected is called **unit testing**; we have defined some test cases above, and we can formalize them by comparing the results to what the output *should* be (in this case, your knowledge of what the output should be is coming in part from me). Unit testing in R can be done with the `testthat` package. Here is an example of a unit test for the empirical cdf implementation in question 1:
+
+```{r}
+library(testthat)
+
+test_that("ECDF test 1", {
+  set.seed(3)
+  x <- runif(100)
+  expect_equal(my_ecdf1(x, seq(0, 1, 0.1)),
+               ecdf(x)(seq(0, 1, 0.1)))
+})
+```
+
+In this code, the `test_that` function from the `testthat` package is being used to compare our empirical cdf results (from `my_ecdf1`) to the output of R's `ecdf` function. `"ECDF test 1"` is the name of our test, and inside the test we use the `expect_equal` function to check whether the two results are equal. If the results *are* what we expected, we pass the test; otherwise, we fail.
+
+As you can see, in this case R tells us that we passed the test!
+
+### What you will do
+
+To make it easier to share your code and perform unit testing, for this assignment you will submit an R script which contains the functions that you wrote in questions 1--3, and the test cases described in those questions, implemented as unit tests with the `test_that` function. I can then run your R script and easily verify if all the tests are passed. Passing the unit tests is one of the minimum requirements for mastering this assignment.
+
+To get you started, I have provided a template R script with all the unit tests for this assignment.
+
+**Instructions:**
+
+* Download the template R script which contains the unit tests
+* Add any additional libraries need at the top of the file
+* Add your code for the functions for questions 1--3
+* Check that your code passes all unit tests
+* Submit the R script on Canvas
+
+
+## Probability review questions
+
+The focus of this course is on understanding and implementing statistical algorithms, and so the majority of your work will be computational. However, some mathematical background is needed to understand how and why the methods covered in this course work. 
+
+The remainder of this assignment contains a few probability review questions, to practice some skills that will be helpful throughout the semester (particularly with simulating random variables).
+
+For this part of the assignment, you will submit a pdf (e.g., a digital scan of your work, or a document prepared using LaTeX).
+
+
+:::{.question}
+#### Question 4
+
+Let $(X, Y)$ be uniformly distributed on the unit disk $\{(x, y): x^2 + y^2 \leq 1\}$. Let $R = \sqrt{X^2 + Y^2}$. Find the cdf and pdf of $R$. 
+
+:::
+
+:::{.question}
+#### Question 5
+
+Let $F$ be a continuous, strictly increasing cdf, and let $U \sim Uniform(0, 1)$. Let $X = F^{-1}(U)$. Prove that $F$ is the cdf of $X$.
+
+:::
+
+:::{.question}
+#### Question 6
+
+Let $X \sim N(0, 1)$, and $Y = e^X$. Find the expectation $\mathbb{E}[Y]$ and variance $Var(Y)$.
+
+:::
+
+

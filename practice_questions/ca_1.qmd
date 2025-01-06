@@ -1,0 +1,116 @@
+---
+title: "Practice Questions: Simulating to explore type I error and power"
+format: html
+---
+
+**Reading:**
+
+* [Chapter 3](https://adv-r.hadley.nz/vectors-chap.html) (vectors) in *Advanced R (2nd edition)*
+* [Chapter 4](https://adv-r.hadley.nz/subsetting.html) (indexing and subsetting) in *Advanced R (2nd edition)*
+* [Chapter 5](https://adv-r.hadley.nz/control-flow.html) (loops and logical statements) in *Advanced R (2nd edition)*
+
+
+## Assessing hypothesis tests with simulations
+
+We often test hypotheses in statistics. A good hypothesis test gives us a low type II error rate, while controlling the type I error rate at some pre-specified value (e.g., 0.05). Recall that: 
+
+* type I error rate = $P(\text{reject } H_0 | H_0 \text{ true})$
+* type II error rate = $P(\text{fail to reject } H_0 | H_0 \text{ false})$
+
+Of course, these probabilities depend on the value of the parameter under the null or alternative hypothesis, so we should really make the definitions a bit more formal. 
+
+To do so, let's consider the example from class. Suppose we have a sample $X_1,...,X_n \overset{iid}{\sim} N(\mu, 1)$, and we want to test the hypotheses
+
+$$H_0: \mu = 0 \hspace{0.5cm} H_A: \mu \neq 0$$
+
+Define the **power function:**
+
+$$Power(\mu) = P(\text{reject } H_0 | \mu)$$
+For example, $Power(2)$ is the probability we reject $H_0:\mu = 0$ when the true mean is really $\mu = 2$. In this example, we can see that $Power(0)$ is the type I error rate. Clearly, we want $Power(0) = \alpha$ here; for all other $\mu \neq 0$, we want $Power(\mu)$ as big as possible.
+
+### Simulation
+
+Our goal is to explore this power function through simulations. (As it turns out, there is a closed-form solution available in this case, which you will see in statistical inference courses, but for the purposes of this assignment we will use simulations). In class, we wrote the following code, which estimates power from 1000 simulation repetitions:
+
+```{r, eval=F}
+set.seed(379) # set seed for reproducibility
+n <- 20 # sample size
+mu_x <- 0 # true mean
+nsim <- 1000  # number of times to repeat
+test_results <- rep(NA, nsim)  # vector to store the test results
+
+for(i in 1:nsim){
+  x <- rnorm(n, mean=mu_x, sd=1)
+  test_results[i] <- t.test(x, alternative="two.sided", mu=0)$p.value
+}
+
+mean(test_results < 0.05)
+```
+
+However, power depends on both the true mean (`mu_x` in the code), and the sample size (`n`). In this assignment, you will explore the effect of both.
+
+### Questions
+
+1. **Question:** Repeat the simulation above, but this time change `mu_x` to 1. How does the power change?
+
+2. **Question:** Repeat the simulation above, but this time change `mu_x` to 1 and `n = 50`. How does the power change?
+
+3. **Question:** Repeat the simulation for all combinations of $\mu \in \{-2, -1.5, -1, -0.5, 0,0.5, 1, 1.5, 2\}$ and $n \in \{10, 20, 50\}$, and create a nice visualization showing your results, such as the following:
+
+```{r, echo=F, message=F}
+library(tidyverse)
+set.seed(379)
+
+nsim <- 1000
+n_values <- c(10, 20, 50)
+mu_x_values <- seq(-2, 2, 0.5)
+sim_settings <- expand.grid("mu" = mu_x_values, "n" = n_values)
+
+power_res <- rep(NA, nrow(sim_settings))
+for(j in 1:nrow(sim_settings)){
+  n <- sim_settings$n[j] # sample size
+  mu_x <- sim_settings$mu[j] # true mean
+  test_results <- rep(NA, nsim)  # vector to store the test results
+  
+  for(i in 1:nsim){
+    x <- rnorm(n, mean=mu_x, sd=1)
+    test_results[i] <- t.test(x, alternative="two.sided", mu=0)$p.value
+  }
+  
+  power_res[j] <- mean(test_results < 0.05)
+}
+
+cbind(sim_settings, power_res) |>
+  mutate(n = paste0("n = ", n)) |>
+  ggplot(aes(x = mu, y = power_res)) +
+  geom_point() +
+  geom_line() +
+  geom_hline(yintercept = 0.05, lty = 2) +
+  facet_wrap(~n) +
+  labs(x= "mu", y = "Power") +
+  theme_bw()
+```
+
+**Tip:** Use another `for` loop to avoid having 27 separate chunks of code here. The `expand.grid` function is useful for creating a data frame of all possible combinations of simulation settings. Here is some code to get you started:
+
+```{r, eval=F}
+set.seed(379)
+
+nsim <- 1000
+n_values <- c(10, 20, 50)
+mu_x_values <- seq(-2, 2, 0.5)
+sim_settings <- expand.grid("mu" = mu_x_values, "n" = n_values)
+
+power_res <- rep(NA, nrow(sim_settings))
+
+for(j in 1:nrow(sim_settings)){
+  n <- sim_settings$n[j] # sample size
+  mu_x <- sim_settings$mu[j] # true mean
+  
+  # now do the simulation for this n and mu_x with an inner for loop here...
+  
+  power_res[j] <- ... # fill this in
+}
+```
+
+
