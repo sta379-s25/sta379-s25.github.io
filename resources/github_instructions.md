@@ -44,4 +44,10 @@ If you are not already logged in, GitHub will prompt you to log in to your accou
 
 <img src="github_instruction_pictures/assignment_link_login.png" width="30%"/>
 
+#### Step 3: Join the Classroom (only needs to be done once!)
+
+The first time you click on an assignment link, GitHub will ask you to join the GitHub Classroom for the course (`sta379-s25-compstats-classroom`). Click on your email address from the list of identifiers. **Important:** Once you click on an identifier, GitHub will link your account to that email address. Do not click on anyone else's email, only your own!
+
+<img src="github_instruction_pictures/github_classroom_join_classroom.png" width="30%"/>
+
 
