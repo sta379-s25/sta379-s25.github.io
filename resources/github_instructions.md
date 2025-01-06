@@ -42,7 +42,7 @@ Go to Canvas. Under Assignments, click on *Example assignment (ungraded)*. Click
 
 If you are not already logged in, GitHub will prompt you to log in to your account:
 
-<img src="github_instruction_pictures/assignment_link_login.png" />
+<img src="./github_instruction_pictures/assignment_link_login.png" />
 
 #### Step 3: Join the Classroom (only needs to be done once!)
 
@@ -50,4 +50,9 @@ The first time you click on an assignment link, GitHub will ask you to join the 
 
 <img src="github_instruction_pictures/github_classroom_join_classroom.png" width="30%"/>
 
+#### Step 4: Accept the assignment
+
+You will now be prompted to accept the assignment (in this case, `example-assignment`). This will give you access to a new repository on GitHub called `example-assignment-USERNAME` (e.g., `example-assignment-ciaran-evans`). Click the green "Accept this assignment" button.
+
+<img src="github_instruction_pictures/assignment_accept_assignment.png" />
 
