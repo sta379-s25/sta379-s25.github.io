@@ -109,4 +109,58 @@ Because nothing has changed on the remote repository, you will get a message say
 
 <img src="https://sta379-s25.github.io/resources/github_instruction_pictures/new_assignment_pull_uptodate.png" width="30%"/>
 
+#### Step 7: Work on the assignment
 
+In this example assignment, you are asked to write a function in R to calculate the mean of a vector, *without* using the existing `mean` function. Open the `example_template.R` file from the assignment repository. You will see the stub of the `my_mean` function, asking you to fill it in.
+
+Suppose that you write the following (incorrect!) code, and save the R script:
+
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/example_assignment_initial_incorrect_code.png" width="30%"/>
+
+You then want to go ahead and submit your completed assignment.
+
+#### Step 8: Commit your changes
+
+Once you have made changes in the repository (e.g., made progress writing a function, completed part of the assignment, etc.), you will want to *commit* your changes. A Git *commit* takes a snapshot of your current repository (kind of like saving an essay as `essay1_rough_draft.docx`, only much better). As you complete more of the assignment, you will take more snapshots (more commits) of the update code, and the latest commit has your most recently stored version of the code. However, you can always look back through the previous commits to see what you have changed, and revert to a previous version if necessary (e.g., if it turns out you made a mistake in a later change which caused a bug in your code). 
+
+For an extended homework, challenge, or project, you should commit multiple times. In a homework assignment, plan to commit after you finish each coding question. In a project, plan to commit after you write a cohesive section of the code (e.g., some important helper functions).
+
+To make a commit, go to the Git panel in RStudio, where you will see any files which have changed since the last commit. You can ignore non-code files, like the .gitignore and the .Rproj files. Select the box next to the code files (.R, .cpp, etc) to *stage* them for a commit (if you have used Git previously, this is just doing a `git add`):
+
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/example_assignment_staging.png" width="30%"/>
+
+Once you have selected all the files you wish to commit, click the "Commit" box. This will open a new window for the commit, in which you can see the selected files you staged, and the changes you have made to those files (insertions are in green, deletions are in red):
+
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/example_assignment_initial_commit_box1.png" width="30%"/>
+
+In the top right, you can also see a box to add a commit message. Enter a short, meaningful message here to describe the commit:
+
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/example_assignment_initial_commit_message.png" width="30%"/>
+
+Then click the "Commit" button below the message box. You should see a pop-up "Git Commit" box once the commit is complete:
+
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/example_assignment_initial_commit_completed.png" width="30%"/>
+
+You can close the commit boxes now.
+
+#### Step 9: Push your changes to GitHub
+
+Now you have committed changes to your local Git repository, which means that there is a difference between the version of the code on your local machine, and the version on the remote repository. Indeed, in the Git tab on RStudio, you can see that there is a message saying that your local branch is *ahead* of the remote branch (`origin/main`) by 1 commit:
+
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/example_assignment_branch_ahead_after_commit.png" width="30%"/>
+
+We want to share the changes in our code with the remote repository. First, if the remote repository on GitHub is up-to-date, you could access your current code from other computers, and collaborators can have the latest edits. Second, if something happens to your local computer, you still have a back-up of all your code on the remote repository. And finally, for the purposes of this class, pushing to GitHub is how you will share your code with me for grading and feedback!
+
+A *push* is how we send code from a local repository to GitHub (whereas a *pull*, recall, is how we go the other way to get code from GitHub to our local computer). Once you have committed your latest changes, click the "Push" button (green arrow, pointing up) in the Git panel in RStudio. You should get a message saying that your changes have been pushed to GitHub:
+
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/example_assignment_push_completed.png" width="30%"/>
+
+You can close the pop-up message. Once you have pushed to GitHub, go to your web browser and navigate to the repository on GitHub. In the file list, you can see the corresponding commit message next to the file(s) that you have changed:
+
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/example_assignment_updated_file1.png" width="30%"/>
+
+If you click on the file, you can see that the updated version is now on GitHub:
+
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/example_assignment_updated_file2.png" width="30%"/>
+
+As with commits, you should push to GitHub multiple times throughout the course of working on your assignment. As a rule, push each time you make a commit.
