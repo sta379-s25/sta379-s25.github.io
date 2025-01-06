@@ -87,9 +87,26 @@ The project wizard will then ask for Git repository info.
 * Paste the URL you copied from GitHub into the "Repository URL" field. 
 * Under "Project directory name:", enter the assignment name (e.g., `example-assignment`). 
 * Under "Create project as subdirectory of:", browse and select the folder on your local computer that you created for your work in this class (e.g., `Documents/sta379-s25-work`). 
-* Select 
+* Select "Open in new session"
 * Then click "Create Project".
 
 <img src="github_instruction_pictures/new_project_wizard_directory_info.png" width="30%"/>
+
+This will clone the repository from GitHub to your local computer, and will create a new R project in that repository. This project will then be opened as a new RStudio session on your computer. In the new RStudio session, click the Files viewer (next to Plots, in one of the four panes). You should see the files for the example assignment repository:
+
+<img src="github_instruction_pictures/new_project_file_listing.png" width="30%"/>
+
+
+#### Step 6: Pull
+
+In one of the panes on RStudio, you should see a *Git* tab, which has the Git tools (pull, staging, commit, and push) that we will use to save work and interact with GitHub:
+
+<img src="github_instruction_pictures/new_assignment_pull_first.png" width="30%"/>
+
+Before doing work in the repository, pull from the remote GitHub repository (click the "Pull" arrow, pointing down). Try to make this a habit whenever you start work on an assignment, or go back to an assignment you have worked on previously. If you are the only one making changes to a repository, and you are only using one computer, then it won't really matter, but it is still a good habit for the future. However, if you are working on the same code across multiple computers, or collaborating with other people, then pulling first is very important!
+
+Because nothing has changed on the remote repository, you will get a message saying everything is up to date:
+
+<img src="github_instruction_pictures/new_assignment_pull_uptodate.png" width="30%"/>
 
 
