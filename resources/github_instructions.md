@@ -172,37 +172,42 @@ Once you have completed the assignment and pushed the final version of your work
 
 In the GitHub repository, navigate to the "Pull requests" tab. There should be one open pull request, called "Feedback":
 
-<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/pull_request_navigation.png" width="30%"/>
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/example_assignment_pull_request_navigation.png" width="30%"/>
 
 Click on this pull request. The pull request has tabs for Conversation (for us to make comments on the code), Commits, Checks (ignore this for now), and Files changed. Under the Conversation tab, you can see some information automatically populated by GitHub Classroom, and a list of the commits to the repository:
 
-<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/feedback_pr.png" width="30%"/>
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/example_assignment_feedback_pr.png" width="30%"/>
 
 **Very Important: DO NOT close or merge the pull request!** You should only every request reviews and make comments.
 
 To request feedback from me, click on the gears symbol next to "Reviewers" on the right:
 
-<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/pr_request_review_1.png" width="30%"/>
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/example_assignment_pr_request_review_1.png" width="30%"/>
 
 Click on my name (`ciaran-evans`) from the list that comes up:
 
-<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/pr_request_reviewer_2.png" width="30%"/>
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/example_assignment_pr_request_reviewer_2.png" width="30%"/>
 
 You should see that I have been assigned to review the code, and you are waiting for my comments:
 
-<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/pr_request_reviewer_3.png" width="30%"/>
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/example_assignment_pr_request_reviewer_3.png" width="30%"/>
 
 
 #### Step 11: I provide feedback
 
 Now it is my turn to look at your code, and provide feedback. For this example assignment, the initial code submitted was sadly incorrect, so my comments might look something like this:
 
-<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/review_requested.png" width="30%"/>
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/example_assignment_review_requested.png" width="30%"/>
 
 As you can see, I have left comments describing what needs to be done differently, and I have requested changes to the code.
 
 **If you have Not yet mastered the assignment, I will request changes. If you have Mastered the assignment (or at least the coding portion), I will instead accept your code.**
 
 #### Step 12: Revise code (if needed)
+
+If you have not yet mastered the assignment and changes are requested, you will now make changes to the code to address feedback:
+
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/example_assignment_correct_r_code.png" width="30%"/>
+
 
 
