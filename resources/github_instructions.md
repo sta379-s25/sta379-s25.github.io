@@ -74,6 +74,8 @@ Click the green "Code" button, and select HTTPS. You will see a web URL that you
 
 <img src="https://sta379-s25.github.io/resources/github_instruction_pictures/assignment_get_https.png" width="50%"/>
 
+**(Important: if you have used the SSH key instead of Personal Access Token setup, e.g. because you are connecting from an RStudio server, then you should instead select "SSH" and copy the corresponding SSH URL)**
+
 Click the icon next to this URL to copy it to the clipboard
 
 <img src="https://sta379-s25.github.io/resources/github_instruction_pictures/assignment_copy_url_clipboard.png" width="60%"/>
