@@ -7,16 +7,16 @@ output:
 link-citations: yes
 ---
 
-**Due:** 
+**Due:** Friday, January 24 at 11:00am
 
-**Submission:** For this assignment, you will submit two files to Canvas:
+**Submission:** For this assignment, you will submit two separate files:
 
-* An R script containing your functions for questions 1--3 and the corresponding unit tests (see the Unit Testing section below for further details)
-* A pdf containing your written answers to questions 4--6
+* An R script (`hw1_code.R`) containing your functions for questions 1--3. This will be submitted to GitHub; see the instructions below for more details
+* A pdf containing your written answers to questions 4--6. This will be submitted to Canvas
 
 **Mastery:** To master this assignment, you must satisfy the following requirements:
 
-* Your code must pass all specified unit tests, *as written* (you may not modify the unit tests which I provide)
+* Your code must pass all specified unit tests (`hw1_tests.R`), *as written* (you may not modify the unit tests which I provide)
 * Your code must meet all requirements described in the questions below (matching the requested inputs and outputs)
 * You must comment your code
 * Your written solutions must be complete and correct, with no missing steps or mistakes
@@ -25,6 +25,31 @@ link-citations: yes
 If you make an honest effort to answer all questions, but you do not master all of the questions on your first submission, you will have one resubmission attempt after receiving feedback.
 
 **Resources:** 
+
+* [Git and GitHub assignment instructions](https://sta379-s25.github.io/resources/github_instructions/)
+* [Chapter 5](https://adv-r.hadley.nz/control-flow.html) (loops and choices) in *Advanced R*
+* [Chapter 6](https://adv-r.hadley.nz/functions.html) (functions) in *Advanced R*
+* [Appendix C.2](https://mdsr-book.github.io/mdsr3e/C-algorithmic.html#simple-example) in *Modern Data Science with R*
+* [Chapter 19.1 -- 19.5.2](https://r4ds.had.co.nz/functions.html) (functions and conditions) in *R for Data Science* (1st edition)
+
+
+## Instructions
+
+### Coding questions
+
+1. If you have not yet done so, follow the [Git and GitHub assignment instructions](https://sta379-s25.github.io/resources/github_instructions/) on the course website to get everything set up. I also recommend experimenting with the **example assignment** described in those instructions.
+2. Go to Canvas -> Assignments -> HW 1. Open the GitHub Classroom assignment link.
+3. Follow the [instructions](https://sta379-s25.github.io/resources/github_instructions/#your-first-assignment-through-github) to accept the assignment and clone the repository to your local computer
+4. The repository contains the files `hw1_code.R` and `hw1_tests.R`. Write your code for questions 1--3 in the `hw1_code.R` file. Commit and push to GitHub regularly.
+5. Tests for questions 1--3 are contained in the `hw1_tests.R` file. See the section on unit testing below for more information. Use these unit tests to check that your code works as desired.
+6. When your code is complete and passes all tests and requirements, commit and push the final version to GitHub. Then [request feedback](https://sta379-s25.github.io/resources/github_instructions/#step-10-request-feedback) from me on the "Feedback" pull request in your homework 1 repository
+
+### Written questions
+
+Questions 4--6 below are written probability review questions chosen to help you practice a few important probability topics that we will use this semester. 
+
+1. Write your answers to questions 4--6 on a separate sheet of paper, or type them in a LaTeX document
+2. Submit a pdf of your answers (either a scan of handwritten work or pdf output from LaTeX) to the HW 1 assignment on Canvas
 
 ## Function practice
 
@@ -286,18 +311,9 @@ As you can see, in this case R tells us that we passed the test!
 
 ### What you will do
 
-To make it easier to share your code and perform unit testing, for this assignment you will submit an R script which contains the functions that you wrote in questions 1--3, and the test cases described in those questions, implemented as unit tests with the `test_that` function. I can then run your R script and easily verify if all the tests are passed. Passing the unit tests is one of the minimum requirements for mastering this assignment.
+To make it easier to share your code and perform unit testing, for this assignment you will submit an R script (`hw1_code.R`) which contains the functions that you wrote in questions 1--3. I have provided a separate file of unit tests (`hw1_tests.R`) which you can use to test your functions. You can run them individually from the `hw1_tests.R` file, or run the full suite of tests with the `test_file("hw1_tests.R")` command at the end of the `hw1_code.R` file. 
 
-To get you started, I have provided a template R script with all the unit tests for this assignment.
-
-**Instructions:**
-
-* Download the template R script which contains the unit tests
-* Add any additional libraries need at the top of the file
-* Add your code for the functions for questions 1--3
-* Check that your code passes all unit tests
-* Submit the R script on Canvas
-
+I can then run your R script and easily verify if all the tests are passed. Passing the unit tests is one of the minimum requirements for mastering this assignment.
 
 ## Probability review questions
 
