@@ -15,10 +15,11 @@ description: >-
     * [R cheatsheets](https://posit.co/resources/cheatsheets/)
     * [Armadillo documentation](https://arma.sourceforge.net/docs.html) (for the Armadillo C++ library)
     
-* Computational statistics books:
+* Books on computational statistics (and certain related topics):
 
     * *Statistical Computing with R*, by Maria L. Rizzo (available electronically through ZSR library)
     * *Computational Statistics* (2nd edition), by Geof H. Givens and Jennifer A. Hoeting (available electronically through ZSR library)
+    * *Numerical Optimization*, by Jorge Nocedal and Stephen J. Wright (available electronically through ZSR library)
 
 * Coding reference books:
 
