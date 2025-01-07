@@ -15,7 +15,7 @@ description: >-
 	* [R for Data Science (2nd edition)](https://r4ds.hadley.nz/)
 	* [Python for Data Analysis (3rd edition)](https://wesmckinney.com/book/)
 
-* [Software installation instructions](https://sta279-s24.github.io/resources/software_installation/)
+* [R installation instructions](https://sta379-s25.github.io/resources/r_installation/)
 
 * [R cheatsheets](https://posit.co/resources/cheatsheets/)
 

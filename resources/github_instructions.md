@@ -27,7 +27,12 @@ Before completing your first assignment, you will need to get all of your softwa
 2. Install or update R and RStudio; see the [R and RStudio installation instructions](https://sta379-s25.github.io/resources/software_installation/) on the course website, and [Chapter 5](https://happygitwithr.com/install-r-rstudio) of Happy Git with R. If you have not updated your versions of R and RStudio in a while, make sure to do so at the beginning of this course!
 3. Set up a GitHub account, if you don't already have one from a previous course. See [Chapter 4](https://happygitwithr.com/github-acct) of Happy Git with R.
 4. Install and setup Git on your machine; see [Chapter 6](https://happygitwithr.com/install-git) and [Chapter 7](https://happygitwithr.com/hello-git) of Happy Git with R. Chapter 8 also discusses options for Git clients to make interacting with Git locally on your computer easier / more visual. You can safely skip Chapter 8 (we will work with a curated subset of Git functionality in this course, so a client is probably not necessary for your Git interactions), but you are more than welcome to install and use one if you like.
-5. Set up credentials for interacting with GitHub; see [Chapter 9](https://happygitwithr.com/https-pat) of Happy Git with R. (You could use the SSH approach in Chapter 10, but I highly recommend the HTTPS approach presented in Chapter 9).
+5. Set up credentials for interacting with GitHub; see [Chapter 9](https://happygitwithr.com/https-pat) of Happy Git with R. 
+    * If you are connecting to GitHub on your personal computer, I highly recommend using the HTTPS approach described in Chapter 9
+    * Briefly, you will create a Personal Access Token on GitHub (section [9.3](https://happygitwithr.com/https-pat#get-a-pat)), save your PAT (section [9.4](https://happygitwithr.com/https-pat#store-pat)), and then store the credentials (section [9.4.1](https://happygitwithr.com/https-pat#call-an-r-function-to-store-your-credentials))
+    * **Important: Make sure to store your PAT somewhere secure where you can access it again when needed!**
+    * If you are connecting to GitHub on the RStudio server through DEAC OnDemand, you can use HTTPS, but your PAT will not be stored, meaning you will need to enter your GitHub username and PAT *every time* you want to do anything remote. For GitHub on the RStudio server, I recommend the SSH approach discussed in [Chapter 10](https://happygitwithr.com/ssh-keys) instead. Since it is perfectly fine to have multiple sets and types of credentials, I suggest doing the HTTPS setup first on your local computer, and then worrying about the SSH setup later when you need to use the RStudio server
+
 
 Once these initial steps are complete, proceed to the next section below, which describes the steps for joining the GitHub Classroom and completing your first assignment.
 
@@ -95,6 +100,10 @@ The project wizard will then ask for Git repository info.
 This will clone the repository from GitHub to your local computer, and will create a new R project in that repository. This project will then be opened as a new RStudio session on your computer. In the new RStudio session, click the Files viewer (next to Plots, in one of the four panes). You should see the files for the example assignment repository:
 
 <img src="https://sta379-s25.github.io/resources/github_instruction_pictures/new_project_file_listing.png" width="30%"/>
+
+It is possible that the first time you try to clone/pull/push from RStudio, you will be asked to enter your GitHub username (e.g., `ciaran-evans`) and your password (that is, your Personal Access Token, not the password you use to sign in to GitHub on the browser):
+
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/enter_git_token.png" width="30%"/>
 
 
 #### Step 6: Pull
@@ -190,7 +199,7 @@ Click on my name (`ciaran-evans`) from the list that comes up:
 
 You should see that I have been assigned to review the code, and you are waiting for my comments:
 
-<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/example_assignment_pr_request_reviewer_3.png" width="30%"/>
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/example_assignment_request_reviewer_3.png" width="30%"/>
 
 
 #### Step 11: I provide feedback
@@ -209,5 +218,21 @@ If you have not yet mastered the assignment and changes are requested, you will 
 
 <img src="https://sta379-s25.github.io/resources/github_instruction_pictures/example_assignment_correct_r_code.png" width="30%"/>
 
+Following the same workflow as before, stage and commit the changes:
 
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/example_assignment_corrected_code_commit.png" width="30%"/>
+
+Then push to GitHub; on GitHub, you should see that the file(s) are updated with your new code:
+
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/example_assignment_corrected_code_github.png" width="30%"/>
+
+#### Step 13: Re-request review (if needed)
+
+When you are finished revising your code to address all feedback from the initial submission, and you have committed and pushed the revised code to GitHub, it is time to ask me to review your revised code. In the feedback pull request, go to the right, where you should see my name under "Reviewers":
+
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/feedback_pr_request_review.png" width="30%"/>
+
+Click the spinny arrows next to my name to re-request a review from me. If you have mastered the assignment after submitting the revision, I will approve the changes after reviewing the code, and I will leave you a comment letting you know that you have mastered the assignment (or at least the coding portion):
+
+<img src="https://sta379-s25.github.io/resources/github_instruction_pictures/feedback_pr_changes_approved.png" width="30%"/>
 
