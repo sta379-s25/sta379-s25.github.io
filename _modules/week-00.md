@@ -10,6 +10,10 @@ Probability review
 
 R coding review
 : Practice questions
+  : [lists](https://sta379-s25.github.io/practice_questions/pq_lists.html), [iteration](https://sta379-s25.github.io/practice_questions/pq_iteration.html), [functions](https://sta379-s25.github.io/practice_questions/pq_functions.html)
+
+: Practice question solutions
+  : [lists](https://sta379-s25.github.io/practice_questions/pq_lists_solutions.html), [iteration](https://sta379-s25.github.io/practice_questions/pq_iteration_solutions.html), [functions](https://sta379-s25.github.io/practice_questions/pq_functions_solutions.html)
 
 : [MDSR](https://mdsr-book.github.io/mdsr3e/) Chapter 7 and Appendix C
 : [RforDS (1st ed)](https://r4ds.had.co.nz/index.html) Chapters 19--21

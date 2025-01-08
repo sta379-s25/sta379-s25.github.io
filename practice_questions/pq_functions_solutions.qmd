@@ -1,0 +1,226 @@
+---
+title: "Function practice questions: solutions"
+format: html
+---
+
+```{r include=F}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(message = F)
+knitr::opts_chunk$set(warning = F)
+knitr::opts_chunk$set(error = T)
+```
+
+1.
+
+```{r}
+my_mean <- function(x){
+  return(sum(x)/length(x))
+}
+```
+
+2.
+
+```{r}
+my_mean(c(1, 2, 3))
+mean(c(1, 2, 3))
+
+my_mean(1:100)
+mean(1:100)
+```
+
+3.
+
+```{r}
+my_mean <- function(x, w){
+  return(sum(x*w)/sum(w))
+}
+```
+
+4.
+
+```{r}
+my_mean <- function(x, w = rep(1, length(x))){
+  return(sum(x*w)/sum(w))
+}
+```
+
+
+5.
+
+```{r, eval=F}
+# should be 2
+my_mean(x = c(1, 2, 3))
+
+# should be 2
+my_mean(x = c(1, 2, 3), w = c(1, 1, 1))
+
+# should be 1.5
+my_mean(x = c(1, 2, 3), w = c(1, 1, 0))
+```
+
+6.
+
+```{r}
+my_sd <- function(x){
+  n <- length(x)
+  return(sqrt(sum((x - mean(x))^2)/(n-1)))
+}
+
+my_sd(1:100)
+sd(1:100)
+```
+
+7.
+
+```{r}
+p_norm <- function(x, p=2){
+  return(sum(abs(x)^p)^(1/p))
+}
+```
+
+8.
+
+```{r}
+my_kurtosis <- function(x){
+  numerator <- mean((x - mean(x))^4)
+  denominator <- (mean((x - mean(x))^2))^2
+  return(numerator/denominator - 3)
+}
+```
+
+9.
+
+```{r}
+my_cor <- function(x, y){
+  numerator <- sum((x - mean(x)) * (y - mean(y)))
+  denominator <- sqrt(sum((x - mean(x))^2)) * sqrt(sum((y - mean(y))^2))
+  return(numerator/denominator)
+}
+
+x <- rnorm(100)
+y <- rnorm(100)
+cor(x, y)
+my_cor(x, y)
+```
+
+10. 
+
+```{r}
+x <- 10
+
+g02 <- function(x){
+  x <- x + 1
+  return(x)
+}
+
+g02(x)
+x + 1
+```
+
+11.
+
+```{r}
+x <- 10
+
+g02 <- function(x){
+  x <- x + 1
+  return(x)
+}
+
+x <- g02(x)
+x + 1
+```
+
+12. 
+
+```{r}
+g02 <- function(y){
+  y <- y - 1
+  return(y)
+}
+
+g02(g02(20))
+```
+
+13. 
+
+```{r}
+x <- 10
+test_fun <- function(x = 11){
+  return(x)
+}
+test_fun()
+x
+```
+
+14. 
+
+```{r}
+x <- 10
+test_fun <- function(y = 11){
+  return(x + 1)
+}
+test_fun()
+x
+```
+
+15. 
+
+```{r}
+x <- 10
+test_fun <- function(y = 11){
+  x <- x + 1
+  return(x + 1)
+}
+test_fun()
+x
+```
+
+16. 
+
+```{r}
+x <- 10
+test_fun <- function(x = 11){
+  x <- x + 1
+  return(x + 1)
+}
+test_fun()
+x
+```
+
+17. 
+
+```{r}
+x <- 10
+test_fun <- function(x = 11){
+  x <- x + 1
+  return(x + 1)
+}
+x <- test_fun(x)
+x
+```
+
+18.
+
+```{r}
+f1 <- function(x = 1){
+  return(x + 1)
+}
+g1 <- function(x){
+  return(f1() + x)
+}
+
+f1(g1(3))
+```
+
+19.
+
+```{r}
+integrate(function(x){x^2 - x}, 0, 1)
+
+integrate(function(x){sin(x) + cos(x)}, -pi, pi)
+
+integrate(function(x){exp(x)/x}, 10, 20)
+```
+
+
