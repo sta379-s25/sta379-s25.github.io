@@ -1,0 +1,295 @@
+---
+title: "Review practice questions: iteration"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+# Iteration recap
+
+## `for` loops
+
+Suppose we want to repeat a process many times (e.g., simulate many sets of data). A `for` loop allows us to do this efficiently. Here is a simple `for` loop which prints out the number 214 five times:
+
+```{r}
+for(i in 1:5){
+  print(214)
+}
+```
+
+`for(...)` indicates that we are making a `for` loop. The code inside the curly braces `{ ... }` is the code which will get repeated. The index `i` here tells us how many times we run this code. Remember that `1:5` is R shorthand for 1,2,3,4,5. So `i in 1:5` means "run the code inside the loop for `i=1`, `i=2`, `i=3`, `i=4`, and `i=5`".
+
+The really neat thing about a `for` loop is that what we do inside the loop can depend on the index `i`! For example, suppose we want to print out the numbers 1 to 5, instead of 214:
+
+```{r}
+for(i in 1:5){
+  print(i)
+}
+```
+
+### Example: calculating a likelihood
+
+Suppose we have a coin with an unknown probability of heads $\pi$. Let $Y_i$ denote the outcome of a flip, with $Y_i = 0$ for tails and $Y_i = 1$ for heads. Then $Y_i \sim Bernoulli(\pi)$.
+
+Now suppose we observe five flips of the coin: T, T, T, T, H (i.e., 0, 0, 0, 0, 1). Given this observed data, the likelihood of a value for $\pi$ is
+
+$$L(\pi) = \pi(1 - \pi)^4$$
+
+We want to evaluate $L(\pi)$ for different values of $\pi$ between 0 and 1; say, $\pi = 0, 0.1, 0.2, ..., 0.9, 1$. We can do this calculation efficiently with a `for` loop:
+
+```{r}
+pis <- seq(from=0, to=1, by=0.1) # values of pi to consider
+likelihoods <- c() # empty vector to store the likelihoods we calculate
+for(i in 1:length(pis)){
+  # likelihood = pi*(1 - pi)^4, for each value of pi
+  likelihoods[i] <- pis[i]*(1 - pis[i])^4
+}
+
+likelihoods
+```
+
+**Note:** R does a good job at *vectorizing* functions (when you apply a function to a vector, it gets applied to every entry in that vector). So we could write this code without the `for` loop:
+
+```{r}
+pis <- seq(from=0, to=1, by=0.1)
+likelihoods <- pis*(1 - pis)^4
+
+likelihoods
+```
+
+## `while` loops
+
+A `for` loop will repeat a process a fixed number of times. Sometimes, however, we don't know how many times we will want to repeat the code. In this case, we use a `while` loop, which repeats code until some condition has been met.
+
+As a concrete example, suppose that I have a roulette wheel with 38 slots numbered 00, 0, and 1–36. Two are green, 18 are red, and 18 are black. A gambler bets based on color; the return on a \$1 bet is \$2 (if they get the color correct).
+
+Suppose that our gambler has \$50, and will continuously bet \$1 on red until they double their money (have \$100) or lose the money they came with. We want to know the probability that the gambler doubles their money. 
+
+We can represent the wheel as a vector with an entry for each of the 38 slots:
+
+```{r}
+wheel <- c(rep("green", 2), rep("black", 18), rep("red", 18))
+```
+
+We start with \$50, spin the wheel, and update the money based on the result:
+
+```{r}
+money <- 50 # starting money
+spin <- sample(wheel, size = 1)
+money <- ifelse(spin == "red", money + 1, money - 1)
+```
+
+Now we need to repeat this until the gambler has \$100 or \$0. That is, we don't know how many times we will need to spin the wheel. So, we want to spin the wheel until we reach one of those bounds (that is, *while* the amount of money is between 0 and 100):
+
+```{r}
+money <- 50 # starting money
+
+while(money > 0 & money < 100){
+  spin <- sample(wheel, size = 1)
+  money <- ifelse(spin == "red", money + 1, money - 1)
+}
+
+money
+```
+
+
+
+
+# Questions
+
+## Practice with `for` loops and vectorization
+
+The purpose of this section is to give you some more practice working with for loops and sequences, which are useful tools for efficiently repeating a process many times. Here is an example for loop that calculates $\sqrt{x}$ for a sequence of numbers $x = 0, 0.1, 0.2, ..., 0.9, 1$:
+
+```r
+x <- seq(from=0, to=1, by=0.1)
+sqrt_x <- rep(0, length(x))
+for(i in 1:length(x)){
+  sqrt_x[i] <- sqrt(x[i])
+}
+sqrt_x
+```
+
+Below are some short practice questions to help you get more comfortable creating `for` loops.
+
+:::{.question}
+#### Question 1
+
+Modify the loop above so that instead of calculating $\sqrt{x}$, we calculate $x^{1/3}$.
+:::
+
+:::{.question}
+#### Question 2
+
+Modify the loop from Question 1 so that instead of considering $x = 0, 0.1, 0.2, ..., 0.9, 1$ (i.e. the numbers between 0 and 1, in increments of 0.1), we consider $x = 0, 0.05, 0.10, 0.15, ..., 1.95, 2$ (the numbers between 0 and 2, in increments of 0.05).
+:::
+
+**Note:** In Questions 1 and 2, you are applying a function to each element in a vector. Here you have used a `for` loop, because the purpose of these questions is to practice loops. However, `for` loops are not always the most efficient way to write code. Instead, many functions in R are *vectorized*: if you apply the function to a vector, it is applied to each element of the vector. For example,
+
+```r
+x <- seq(from=0, to=1, by=0.1)
+sqrt_x <- sqrt(x)
+sqrt_x
+```
+
+produces the same output as the `for` loop above.
+
+:::{.question}
+#### Question 3
+
+Re-write the code for Question 1, using vectorization instead of the `for` loop.
+:::
+
+
+Now suppose we want to simulate a single draw from a normal distribution with mean 0 and standard deviation 1. The code in R is
+
+```r
+rnorm(n=1, mean=0, sd=1)
+```
+
+:::{.question}
+#### Question 4
+Fill in the following `for` loop to create a sample of 1000 draws from a normal distribution and plot a histogram of the results:
+
+```r
+n <- ...
+normal_sample <- rep(NA, n)
+for(i in 1:n){
+  normal_sample[i] <- ...
+}
+hist(normal_sample)
+```
+:::
+
+:::{.question}
+#### Question 5
+Look at the documentation for the `rnorm` function in R (you can get this with `?rnorm` in the console). Can you change the inputs to the `rnorm` function so that you take a sample of 1000 *without* using a loop?
+:::
+
+## More practice with iteration and indexing in R
+
+For each of the following questions, either write the output of the code, or explain why it gives an error. (Some questions will run correctly, others will cause errors)
+
+6.
+
+```{r, eval=F}
+output <- rep(NA, 10)
+for(i in 1:5){
+  output[i] <- i
+}
+
+output[6]
+```
+
+7.
+
+```{r, eval=F}
+output <- rep(0, 10)
+for(i in 1:10){
+  output[i] <- i
+}
+
+output[6]
+```
+
+8. 
+
+```{r, eval=F}
+output <- rep(0, 10)
+for(i in 1:10){
+  output[i] <- i
+}
+
+output[11]
+```
+
+9. 
+
+```{r, eval=F}
+output <- rep(1, 10)
+for(i in 2:10){
+  output[i] <- i + output[i-1]
+}
+
+output[5]
+```
+
+10. 
+
+```{r, eval=F}
+output <- rep(1, 10)
+for(i in 2:10){
+  output[i] <- i + output[i+1]
+}
+
+output[5]
+```
+
+11.
+
+```{r, eval=F}
+x <- list()
+for(i in 1:10){
+  x[i] <- i
+}
+x[2] + 1
+```
+
+12.
+
+```{r, eval=F}
+mat <- matrix(0, nrow=5, ncol=3)
+for(i in 1:5){
+  for(j in 1:3){
+    mat <- i + j
+  }
+}
+
+mat
+```
+
+13.
+
+```{r, eval=F}
+mat <- matrix(0, nrow=5, ncol=3)
+for(i in 1:5){
+  for(j in 1:3){
+    mat[j, i] <- i + j
+  }
+}
+
+mat
+```
+
+14.
+
+```{r, eval=F}
+mat <- matrix(1, 3, 3)
+for(i in 2:3){
+  for(j in 2:3){
+    mat[i,j] <- mat[i-1, j-1] + mat[i, j-1]
+  }
+}
+
+mat
+```
+
+15.
+
+```{r, eval=F}
+f1 <- function(n, groups){
+  x <- matrix(1, nrow=n, ncol=n)
+  unique_groups = unique(groups)
+  means <- matrix(nrow = length(unique_groups), ncol = n)
+  for(i in 1:length(unique_groups)){
+    means[i,] <- colMeans(x[groups == unique_groups[i],])
+  }
+  
+  return(means)
+}
+
+f1(5, groups = c(1, 1, 2, 2, 2))
+```
+

@@ -7,6 +7,8 @@ description: >-
 
 # Course resources
 
+* [Probability review sheet](https://sta379-s25.github.io/resources/probability_review.pdf)
+
 * Software instructions and documentation:
 
     * [R installation instructions](https://sta379-s25.github.io/resources/r_installation/)
@@ -15,11 +17,13 @@ description: >-
     * [R cheatsheets](https://posit.co/resources/cheatsheets/)
     * [Armadillo documentation](https://arma.sourceforge.net/docs.html) (for the Armadillo C++ library)
     
-* Books on computational statistics (and certain related topics):
+* Books on computational statistics and certain related topics:
 
     * *Statistical Computing with R*, by Maria L. Rizzo (available electronically through ZSR library)
     * *Computational Statistics* (2nd edition), by Geof H. Givens and Jennifer A. Hoeting (available electronically through ZSR library)
     * *Numerical Optimization*, by Jorge Nocedal and Stephen J. Wright (available electronically through ZSR library)
+    * *Statistical Inference* (2nd ed.) by Casella and Berger (a classic text covering probability and statistics. There are many ways to obtain copies.)
+    * *Mathematical Statistics with Applications* (7th ed.) by Wackerly, Mendenhall, and Scheaffer (another reference for probability)
 
 * Coding reference books:
 

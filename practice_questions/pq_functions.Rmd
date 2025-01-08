@@ -1,0 +1,312 @@
+---
+title: "Review practice questions: Functions and scoping"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+# Function recap
+
+Here is a simple function to calculate the absolute value (redundant since R already has the `abs` function, but we'll still use it as a toy example):
+
+```{r, echo=T}
+my_abs <- function(x){
+  return(ifelse(x >= 0, x, -1*x))
+}
+
+my_abs(-3)
+my_abs(c(-2, 5))
+```
+
+Functions in R (or other programming languages) behave very similarly to mathematical functions. Each function performs a certain task on the inputs, and produces some result. In this example:
+* the function is called `my_abs`
+* the input to the function is a vector `x`
+* and the output is another vector, containing the absolute value of the entries of `x`. 
+
+Note that by using the `ifelse` function here, we have vectorized the `my_abs` function.
+
+## Ordering and arguments
+
+Order of arguments doesn't matter if you name the arguments when calling the function. If you don't name the arguments when calling a function, R assumes you passed them in the order of the function definition:
+
+```{r, echo=T}
+my_power <- function(x, y){
+  return(x^y)
+}
+```
+
+```{r, echo=T}
+my_power(x = 2, y = 3)
+my_power(y = 3, x = 2)
+my_power(2, 3)
+my_power(3, 2)
+```
+
+All arguments which do not have a default value must be specified when calling the function. For example, the following code produces errors:
+
+```{r, error=T}
+my_power(3)
+```
+
+
+## Function defaults
+
+Default arguments can be specified when the function is defined:
+
+```{r, echo=T}
+my_power <- function(x, y=2){
+  return(x^y)
+}
+
+my_power(3)
+```
+
+If you don't specify the value of that argument, the default is used. You can, of course, choose to use a different value:
+
+```{r}
+my_power(2, 3)
+```
+
+
+
+# Questions
+
+## Writing a function to calculate the mean
+
+The *mean* of numbers $x_1,...,x_n$ is their average: 
+
+$$\frac{x_1 + x_2 + \cdots + x_n}{n}$$
+In R, we can calculate the mean with the `mean` function. For example:
+
+```{r}
+mean(c(1,2,3))
+```
+
+:::{.question}
+#### Question 1
+
+Write your own mean function, called `my_mean`, that calculates the mean of a vector. The input to your function should be a vector, and the output should be the mean of the values in that vector. You may *not* use the built-in `mean` function in R, but you *may* use the `sum` and `length` functions.
+:::
+
+:::{.question}
+#### Question 2
+
+Check that your function works by comparing the output with R's `mean` function for several different input vectors.
+:::
+
+## Weighted means
+
+A *weighted* mean is similar to the usual average, but now we add a *weight* to each value. The observations with greater weights contribute more to the weighted mean.
+
+The weighted mean of $x_1,...,x_n$ with weights $w_1,...,w_n$ is 
+
+$$\frac{w_1 x_1 + w_2 x_2 + \cdots + w_n x_n}{w_1 + w_2 + \cdots + w_n}$$
+The usual arithmetic mean is a special case of the weighted mean with $w_1 = w_2 = \cdots = w_n = 1$.
+
+:::{.question}
+#### Question 3
+Modify your `my_mean` function from Exercise 1 so that it now takes **two** inputs -- a vector of values `x`, and a vector of weights `w` -- and returns the *weighted* mean of `x` with weights `w`. *Hint*: If `x` and `w` are two vectors of the same length, then `x*w` is a vector created by multiplying each entry of `x` with the corresponding entry of `w`.
+:::
+
+:::{.question}
+#### Question 4
+When we calculate a mean, we usually don't need weights. Modify your `my_mean` function from Exercise 3 so that the *default* weights are all 1.
+:::
+
+:::{.question}
+#### Question 5
+
+Check that your function from Exercise 4 works by running the following:
+
+```{r, eval=F}
+# should be 2
+my_mean(x = c(1, 2, 3))
+
+# should be 2
+my_mean(x = c(1, 2, 3), w = c(1, 1, 1))
+
+# should be 1.5
+my_mean(x = c(1, 2, 3), w = c(1, 1, 0))
+```
+:::
+
+## Standard deviation
+
+The *sample standard deviation* of numbers $x_1,...,x_n$ is given by 
+
+$$\widehat{\sigma} = \sqrt{\frac{1}{n-1}\sum \limits_{i=1}^n (x_i - \bar{x})^2},$$
+
+where $\bar{x} = \frac{1}{n} \sum \limits_{i=1}^n x_i$.
+
+:::{.question}
+#### Question 6
+
+Write a function called `my_sd` which calculates the standard deviation of a vector in R.
+:::
+
+## p-norm
+
+The $\ell_p$ norm of a vector $x = (x_1,...,x_k)$ is given by
+
+$$||x||_p = \left( \sum \limits_{i=1}^k |x_i|^p \right)^{1/p}$$
+
+:::{.question}
+#### Question 7
+
+Write a function called `p_norm` in R, which takes two inputs: a vector `x`, and `p`, and returns $\ell_p(x)$. Make `p = 2` the default value (this corresponds to the usual Euclidean norm).
+:::
+
+
+## Kurtosis
+
+Suppose we have a sample $X_1,...,X_n$ from some population distribution. We know that the mean describes the "center" of the distribution, the standard deviation is a measure of variability, and skewness describes the shape of the distribution. 
+
+Another quantity we can calculate to describe a distribution is *kurtosis*, which describes how heavy the tails of the distribution are. The *sample kurtosis* is calculated by:
+
+$$\dfrac{\frac{1}{n} \sum \limits_{i=1}^n (X_i - \bar{X})^4}{\left( \frac{1}{n} \sum \limits_{i=1}^n (X_i - \bar{X})^2 \right)^2} \ \ - \ \ 3$$
+
+where $\bar{X}$ is the sample mean.
+
+:::{.question}
+#### Question 8
+
+Write a function in R to calculate the sample kurtosis. Your function should take in one argument: a vector `x`.
+:::
+
+## Correlation
+
+Suppose we have a sample $(X_1, Y_1),...,(X_n, Y_n)$ of $n$ observations collected on two variables, $X$ and $Y$. The strength of the linear relationship between $X$ and $Y$ is measured by their *correlation*, and the sample correlation is calculated with the following formula:
+
+
+$$\dfrac{ \sum \limits_{i=1}^n (X_i - \bar{X})(Y_i - \bar{Y})}{\left( \sum \limits_{i=1}^n (X_i - \bar{X})^2 \right)^{1/2} \left( \sum \limits_{i=1}^n (Y_i - \bar{Y})^2 \right)^{1/2}}$$
+
+:::{.question}
+#### Question 9
+
+Write a function in R to calculate the sample correlation. Your function should take in two arguments: a vector `x` and a vector `y`.
+:::
+
+## Function scoping and output
+
+For each question, predict what will happen when the code is run. Then run the code and check whether your prediction was correct.
+
+10. 
+
+```{r, eval=F}
+x <- 10
+
+g02 <- function(x){
+  x <- x + 1
+  return(x)
+}
+
+g02(x)
+x + 1
+```
+
+11.
+
+```{r, eval=F}
+x <- 10
+
+g02 <- function(x){
+  x <- x + 1
+  return(x)
+}
+
+x <- g02(x)
+x + 1
+```
+
+12. 
+
+```{r, eval=F}
+g02 <- function(y){
+  y <- y - 1
+  return(y)
+}
+
+g02(g02(20))
+```
+
+13. 
+
+```{r, eval=F}
+x <- 10
+test_fun <- function(x = 11){
+  return(x)
+}
+test_fun()
+x
+```
+
+14. 
+
+```{r, eval=F}
+x <- 10
+test_fun <- function(y = 11){
+  return(x + 1)
+}
+test_fun()
+x
+```
+
+15. 
+
+```{r, eval=F}
+x <- 10
+test_fun <- function(y = 11){
+  x <- x + 1
+  return(x + 1)
+}
+test_fun()
+x
+```
+
+16. 
+
+```{r, eval=F}
+x <- 10
+test_fun <- function(x = 11){
+  x <- x + 1
+  return(x + 1)
+}
+test_fun()
+x
+```
+
+17. 
+
+```{r, eval=F}
+x <- 10
+test_fun <- function(x = 11){
+  x <- x + 1
+  return(x + 1)
+}
+x <- test_fun(x)
+x
+```
+
+18.
+
+```{r, eval=F}
+f1 <- function(x = 1){
+  return(x + 1)
+}
+g1 <- function(x){
+  return(f1() + x)
+}
+
+f1(g1(3))
+```
+
+## Practice with anonymous functions
+
+19. Use `integrate()` and an anonymous function to find the area under the curve for the following functions:
+
+* `y = x^2 - x` for x in $[0, 1]$
+* `y = sin(x) + cos(x)` for x in $[-\pi, \pi]$
+* `y = exp(x)/x` for x in $[10, 20]$
+
