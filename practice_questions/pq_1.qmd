@@ -3,7 +3,7 @@ title: "Practice Questions: Simulating to explore type I error and power"
 format: html
 ---
 
-**Reading:**
+**Reference Reading:**
 
 * [Chapter 3](https://adv-r.hadley.nz/vectors-chap.html) (vectors) in *Advanced R (2nd edition)*
 * [Chapter 4](https://adv-r.hadley.nz/subsetting.html) (indexing and subsetting) in *Advanced R (2nd edition)*
