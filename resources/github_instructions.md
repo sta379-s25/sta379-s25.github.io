@@ -34,11 +34,27 @@ Full details on these steps is provided below.
 
 Before completing your first assignment, you will need to get all of your software set up and talking to each other. This means that you will need to install R and RStudio (if they are not already installed, or update them if needed), install Git, set up a GitHub account, and connect Git, GitHub, and RStudio. For the Git and GitHub setup, and the connection with RStudio, see the book [Happy Git and GitHub for the useR](https://happygitwithr.com/). You should also prepare a folder on your local computer that you will use for your classwork in 379 this semester.
 
-1. Create a folder on your local computer to store your work in this class. I would recommend calling it something like `sta379-s25-work`, and saving it somewhere permanent and accessible (NOT your Downloads folder, e.g.). For example, on my computer I created the folder `~/Documents/sta379-s25-work` (storing it under Documents). When you later accept assignments through GitHub Classroom, you should store them in this folder, with a subdirectory for each assignment.
-2. Install or update R and RStudio; see the [R and RStudio installation instructions](https://sta379-s25.github.io/resources/r_installation/) on the course website, and [Chapter 5](https://happygitwithr.com/install-r-rstudio) of Happy Git with R. If you have not updated your versions of R and RStudio in a while, make sure to do so at the beginning of this course!
-3. Set up a GitHub account, if you don't already have one from a previous course. See [Chapter 4](https://happygitwithr.com/github-acct) of Happy Git with R.
-4. Install and setup Git on your machine; see [Chapter 6](https://happygitwithr.com/install-git) and [Chapter 7](https://happygitwithr.com/hello-git) of Happy Git with R. Chapter 8 also discusses options for Git clients to make interacting with Git locally on your computer easier / more visual. You can safely skip Chapter 8 (we will work with a curated subset of Git functionality in this course, so a client is probably not necessary for your Git interactions), but you are more than welcome to install and use one if you like.
-5. Set up credentials for interacting with GitHub; see [Chapter 9](https://happygitwithr.com/https-pat) of Happy Git with R. 
+### Step 1: Local file organization
+
+Create a folder on your local computer to store your work in this class. I would recommend calling it something like `sta379-s25-work`, and saving it somewhere permanent and accessible (NOT your Downloads folder, e.g.). For example, on my computer I created the folder `~/Documents/sta379-s25-work` (storing it under Documents). When you later accept assignments through GitHub Classroom, you should store them in this folder, with a subdirectory for each assignment.
+
+### Step 2: Install or update R and RStudio
+
+Install or update R and RStudio; see the [R and RStudio installation instructions](https://sta379-s25.github.io/resources/r_installation/) on the course website, and [Chapter 5](https://happygitwithr.com/install-r-rstudio) of Happy Git with R. If you have not updated your versions of R and RStudio in a while, make sure to do so at the beginning of this course!
+
+### Step 3: Set up a GitHub account and send me details
+
+Set up a GitHub account, if you don't already have one from a previous course. See [Chapter 4](https://happygitwithr.com/github-acct) of Happy Git with R.
+
+**Once your account is created, email me your GitHub username.**
+
+### Step 4: Install and set up Git on your machine
+
+Install and set up Git on your machine; see [Chapter 6](https://happygitwithr.com/install-git) and [Chapter 7](https://happygitwithr.com/hello-git) of Happy Git with R. Chapter 8 also discusses options for Git clients to make interacting with Git locally on your computer easier / more visual. You can safely skip Chapter 8 (we will work with a curated subset of Git functionality in this course, so a client is probably not necessary for your Git interactions), but you are more than welcome to install and use one if you like.
+
+### Step 5: Set up credentials for interacting with GitHub
+
+Set up credentials for interacting with GitHub; see [Chapter 9](https://happygitwithr.com/https-pat) of Happy Git with R. 
     * If you are connecting to GitHub on your personal computer, I highly recommend using the HTTPS approach described in Chapter 9
     * Briefly, you will create a Personal Access Token on GitHub (section [9.3](https://happygitwithr.com/https-pat#get-a-pat)), save your PAT (section [9.4](https://happygitwithr.com/https-pat#store-pat)), and then store the credentials (section [9.4.1](https://happygitwithr.com/https-pat#call-an-r-function-to-store-your-credentials))
     * **Important: In addition to store the credentials through RStudio, make sure to store your PAT somewhere secure (like a password manager) where you can access it again when needed!**
