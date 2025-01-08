@@ -11,6 +11,9 @@ January 13
 
 : **Homework 1 released**{: .label .label-yellow }
   : [HW 1](https://sta379-s25.github.io/homework/hw1.html)
+  
+: **Challenge 1 released**{: .label .label-blue }
+  : [Challenge 1](https://sta379-s25.github.io/challenges/challenge_1.html)
 
 January 15
 : Random number generation and LCG
