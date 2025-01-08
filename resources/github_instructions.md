@@ -54,11 +54,12 @@ Install and set up Git on your machine; see [Chapter 6](https://happygitwithr.co
 
 ### Step 5: Set up credentials for interacting with GitHub
 
-Set up credentials for interacting with GitHub; see [Chapter 9](https://happygitwithr.com/https-pat) of Happy Git with R. 
-    * If you are connecting to GitHub on your personal computer, I highly recommend using the HTTPS approach described in Chapter 9
-    * Briefly, you will create a Personal Access Token on GitHub (section [9.3](https://happygitwithr.com/https-pat#get-a-pat)), save your PAT (section [9.4](https://happygitwithr.com/https-pat#store-pat)), and then store the credentials (section [9.4.1](https://happygitwithr.com/https-pat#call-an-r-function-to-store-your-credentials))
-    * **Important: In addition to store the credentials through RStudio, make sure to store your PAT somewhere secure (like a password manager) where you can access it again when needed!**
-    * If you are connecting to GitHub on the RStudio server through DEAC OnDemand, you can use HTTPS, but your PAT will not be stored, meaning you will need to enter your GitHub username and PAT *every time* you want to do anything remote. For GitHub on the RStudio server, I recommend the SSH approach discussed in [Chapter 10](https://happygitwithr.com/ssh-keys) instead. Since it is perfectly fine to have multiple sets and types of credentials, I suggest doing the HTTPS setup first on your local computer, and then worrying about the SSH setup later when you need to use the RStudio server
+Set up credentials for interacting with GitHub; see [Chapter 9](https://happygitwithr.com/https-pat) of Happy Git with R.  
+
+* If you are connecting to GitHub on your personal computer, I highly recommend using the HTTPS approach described in Chapter 9
+* Briefly, you will create a Personal Access Token on GitHub (section [9.3](https://happygitwithr.com/https-pat#get-a-pat)), save your PAT (section [9.4](https://happygitwithr.com/https-pat#store-pat)), and then store the credentials (section [9.4.1](https://happygitwithr.com/https-pat#call-an-r-function-to-store-your-credentials))
+* **Important: In addition to store the credentials through RStudio, make sure to store your PAT somewhere secure (like a password manager) where you can access it again when needed!**
+* If you are connecting to GitHub on the RStudio server through DEAC OnDemand, you can use HTTPS, but your PAT will not be stored, meaning you will need to enter your GitHub username and PAT *every time* you want to do anything remote. For GitHub on the RStudio server, I recommend the SSH approach discussed in [Chapter 10](https://happygitwithr.com/ssh-keys) instead. Since it is perfectly fine to have multiple sets and types of credentials, I suggest doing the HTTPS setup first on your local computer, and then worrying about the SSH setup later when you need to use the RStudio server
 
 
 Once these initial steps are complete, proceed to the next section below, which describes the steps for joining the GitHub Classroom and completing your first assignment.
