@@ -1,0 +1,101 @@
+---
+title: "Linear congruential generator practice: solutions"
+format: html
+---
+
+1.
+
+```{r}
+n <- 1000
+m = 16
+a = 5
+c = 3
+
+x0 <- 1
+
+x <- rep(NA, n)
+x[1] <- x0
+for(i in 2:n){
+  x[i] <- (a * x[i-1] + c) %% m
+}
+
+u <- x/m
+```
+
+2.
+
+```{r}
+x[1:16]
+x[17:32]
+length(unique(x))
+```
+
+3.
+
+```{r}
+grid_pts <- seq(0, 1, 0.01) # points t at which to evaluate empirical cdf
+plot(grid_pts, ecdf(u)(grid_pts), xlab = "t", ylab = "Fhat(t)", type="l")
+```
+
+This empirical cdf does not quite match the cdf of the uniform distribution; our output from the LCG takes only 16 discrete values, so we get a discrete cdf with noticeable steps.
+
+
+4.
+
+```{r}
+n <- 1000
+m = 2^32
+a = 1664525
+c = 1013904223
+
+x0 <- 1
+
+x <- rep(NA, n)
+x[1] <- x0
+for(i in 2:n){
+  x[i] <- (a * x[i-1] + c) %% m
+}
+
+u <- x/m
+
+plot(grid_pts, ecdf(u)(grid_pts), xlab = "t", ylab = "Fhat(t)", type="l")
+```
+
+This looks much closer to what we would expect from a uniform sample.
+
+
+5.
+
+```{r}
+n <- 1000
+m = 1024
+a = 1
+c = 1
+
+x0 <- 12
+
+x <- rep(NA, n)
+x[1] <- x0
+for(i in 2:n){
+  x[i] <- (a * x[i-1] + c) %% m
+}
+
+u2 <- x/m
+
+plot(grid_pts, ecdf(u2)(grid_pts), xlab = "t", ylab = "Fhat(t)", type="l")
+```
+
+This cdf also looks close to the uniform distribution (though in fact it does look a bit *too* close to the true cdf; we would expect a bit more variability just due to random chance, if we had sampled from a uniform).
+
+6.
+
+```{r}
+head(u)
+head(u2)
+```
+
+The sample from question 4 looks more random; the entries of the second sample are ordered! (Or at least, the first 1024 are ordered. Then the next 1024 are ordered, etc.)
+
+
+
+
