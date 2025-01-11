@@ -1,0 +1,167 @@
+---
+title: "Lecture 3: Functions"
+author: "Ciaran Evans"
+output: beamer_presentation
+---
+
+## Last time
+
+```{r, eval=F}
+n <- 1000
+m = 2^32
+a = 1664525
+c = 1013904223
+
+x0 <- 1
+
+x <- rep(NA, n)
+x[1] <- x0
+for(i in 2:n){
+  x[i] <- (a * x[i-1] + c) %% m
+}
+
+u <- x/m
+```
+
+
+What if I wanted to run the LCG with a different seed, or a different number of samples, or different parameters?
+
+## LCG code changing the settings
+
+```{r, eval=F}
+n <- 1000
+m = 2^32
+a = 1664525
+c = 1013904223
+
+x0 <- 1
+
+...
+
+n <- 5000
+m = 1024
+a = 1
+c = 1
+
+x0 <- 12
+
+...
+
+```
+
+## Functions
+
+```{r}
+my_lcg <- function(n, x0, m, a, c){
+  x <- rep(NA, n)
+  x[1] <- x0
+  for(i in 2:n){
+    x[i] <- (a * x[i-1] + c) %% m
+  }
+  return(x/m)
+}
+
+head(my_lcg(n = 1000, x0 = 1, m = 2^32, 
+            a = 1664525, c = 1013904223))
+
+head(my_lcg(n = 5000, x0 = 12, m = 1024, a = 1, c = 1))
+```
+
+## Function defaults
+
+```{r}
+my_lcg <- function(n, x0, m = 2^32, 
+                   a = 1664525, c = 1013904223){
+  x <- rep(NA, n)
+  x[1] <- x0
+  for(i in 2:n){
+    x[i] <- (a * x[i-1] + c) %% m
+  }
+  return(x/m)
+}
+
+my_lcg(n = 5, x0 = 1, m = 2^32, 
+       a = 1664525, c = 1013904223)
+
+my_lcg(n = 5, x0 = 1)
+```
+
+## What if we don't want to specify a seed?
+
+* In R, functions for simulating random variables don't *require* us to specify a seed:
+
+```{r}
+runif(5)
+```
+
+* But even if we don't manually set a seed, R's random number generators still require one!
+
+How might R choose a seed, if we don't specify one ourselves?
+
+
+## Getting the system time
+
+```{r}
+Sys.time()
+```
+
+
+## Getting the system time
+
+```{r}
+Sys.time() |>
+  lubridate::second()
+```
+
+```{r}
+(Sys.time() |> lubridate::second()) * 100000
+```
+
+
+## What if we don't want to specify a seed?
+
+```{r}
+my_lcg <- function(n, x0 = NA, m = 2^32, 
+                   a = 1664525, c = 1013904223){
+  if(is.na(x0)){
+    x0 <- ((Sys.time() |> 
+              lubridate::second()) * 100000) %% m
+  }
+  
+  x <- rep(NA, n)
+  x[1] <- x0
+  for(i in 2:n){
+    x[i] <- (a * x[i-1] + c) %% m
+  }
+  return(x/m)
+}
+
+my_lcg(n = 5)
+```
+
+## What if we don't want to specify a seed?
+
+```{r}
+my_lcg(n = 5)
+```
+
+```{r, include=F}
+Sys.sleep(3)
+```
+
+
+```{r}
+my_lcg(n = 5)
+```
+
+
+
+## Homework 1
+
+[https://sta379-s25.github.io/homework/hw1.html](https://sta379-s25.github.io/homework/hw1.html)
+
+* Function practice and probability review
+* Accept and submit coding portion of assignment on GitHub Classroom
+* Collaboration encouraged on homework, but everyone must submit their own work and acknowledge collaborators
+
+
