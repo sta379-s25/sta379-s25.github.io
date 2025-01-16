@@ -60,3 +60,14 @@ $$\sum \limits_{i=1}^k Z_i^2 \sim \ ?$$
 * If $V_1 \sim \chi^2_{d_1}$ and $V_2 \sim \chi^2_{d_2}$ are independent, then 
 
 $$\frac{V_1/d_1}{V_2/d_2} \sim \ ?$$
+
+## Your turn
+
+Practice questions on the course website:
+
+[https://sta379-s25.github.io/practice_questions/pq_5.html](https://sta379-s25.github.io/practice_questions/pq_5.html)
+
+* Practice generating random variables
+* Start in class. You are welcome to work with others
+* Practice questions are to help you practice. They are not submitted and not graded
+* Solutions are posted on the course website
