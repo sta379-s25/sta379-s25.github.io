@@ -20,5 +20,5 @@ January 15
   : [slides (pdf)](https://sta379-s25.github.io/slides/lecture_2.pdf), [practice questions](https://sta379-s25.github.io/practice_questions/pq_2.html), [practice question solutions](https://sta379-s25.github.io/practice_questions/pq_2_solutions.html)
 
 January 17
-: Functions
-
+: Functions recap
+  : [slides (pdf)](https://sta379-s25.github.io/slides/lecture_3.pdf)
