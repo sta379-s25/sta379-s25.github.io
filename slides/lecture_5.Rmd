@@ -1,0 +1,62 @@
+---
+title: "Lecture 5: Generating random variables -- transformations"
+author: "Ciaran Evans"
+output: beamer_presentation
+---
+
+## Previously
+
+Methods to generate $U \sim Uniform(0, 1)$:
+
+* Linear congruential generator
+* Mersenne twister 
+* lots of other variants and alternatives
+
+Now we want to generate random variables with *other* distributions.
+
+**Question:** If I have a uniform random variable, how can I get other random variables?
+
+## Inverse transform method
+
+
+## Example
+
+Suppose we want to generate $X \sim Exponential(\theta)$
+
+\vspace{5cm}
+
+## Discrete case
+
+Suppose that we want to generate $X \sim Bernoulli(p)$
+
+\vspace{5cm}
+
+## Generating a Normal random variable
+
+Suppose we want to simulate $X \sim N(0, 1)$
+
+$$f_X(x) = \frac{1}{\sqrt{2 \pi}} \exp \left\lbrace -\frac{1}{2} x^2 \right\rbrace$$
+
+$$F_X(t) = \ ?$$
+
+\vspace{3cm}
+
+## Box-Muller Transformation
+
+## Other Normals
+
+Suppose that $Z \sim N(0, 1)$. How do I get $X \sim N(\mu, \sigma^2)$?
+
+\vspace{4cm}
+
+## A few other transformations
+
+* If $X \sim N(\mu, \sigma^2)$, then $e^X \sim Lognormal(\mu, \sigma^2)$
+
+* If $Z_1,...,Z_k \overset{iid}{\sim} N(0, 1)$, then 
+
+$$\sum \limits_{i=1}^k Z_i^2 \sim \ ?$$
+
+* If $V_1 \sim \chi^2_{d_1}$ and $V_2 \sim \chi^2_{d_2}$ are independent, then 
+
+$$\frac{V_1/d_1}{V_2/d_2} \sim \ ?$$

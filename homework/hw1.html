@@ -1966,27 +1966,30 @@ names. For example:</li>
 ## 2</code></pre>
 <p><strong>Test cases:</strong> Here is some example output which your
 function should match (recall the <code>my_lcg</code> implementation of
-the linear congruential generator from the practice activity):</p>
+the linear congruential generator from the practice activity).
+<strong>Note:</strong> It is ok if you show the same counts, but in a
+different order (your permutations <code>123</code>, <code>132</code>,
+etc. do not need to appear in the same order as mine).</p>
 <div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">311</span>)</span>
 <span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">18000</span>)</span>
 <span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a><span class="fu">diehard_permtest</span>(x)</span></code></pre></div>
 <pre><code>## $perm_counts
 ##  123  132  312  321  231  213 
-##  995  985 1018  986  982 1033 
+##  995  985 1019  986  982 1033 
 ## 
 ## $p_value
-## [1] 0.8232593</code></pre>
+## [1] 0.8179419</code></pre>
 <div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">147</span>)</span>
 <span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">9600</span>)</span>
 <span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a><span class="fu">diehard_permtest</span>(x, <span class="at">chunk_size =</span> <span class="dv">4</span>)</span></code></pre></div>
 <pre><code>## $perm_counts
 ## 1234 1243 1423 4123 4132 1432 1342 1324 3124 3142 3412 4312 4321 3421 3241 3214 
-##  104   81  106  101   90   81  108   92  105  100  111  111  114   99  107   86 
+##  104   81  106  101   90   81  108   93  105  100  111  111  114   99  107   86 
 ## 2314 2341 2431 4231 4213 2413 2143 2134 
 ##  112  108  101   94  106   92   96   94 
 ## 
 ## $p_value
-## [1] 0.5750799</code></pre>
+## [1] 0.5847518</code></pre>
 <div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">my_lcg</span>(<span class="dv">1000</span>, <span class="at">x0=</span><span class="dv">12</span>, <span class="at">m=</span><span class="dv">1024</span>, <span class="at">a=</span><span class="dv">1</span>, <span class="at">c=</span><span class="dv">1</span>)</span>
 <span id="cb27-2"><a href="#cb27-2" tabindex="-1"></a><span class="fu">diehard_permtest</span>(x, <span class="at">chunk_size =</span> <span class="dv">3</span>)</span></code></pre></div>
 <pre><code>## $perm_counts

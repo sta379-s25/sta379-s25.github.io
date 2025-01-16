@@ -229,7 +229,7 @@ y["b"]
 ```
 
 
-**Test cases:** Here is some example output which your function should match (recall the `my_lcg` implementation of the linear congruential generator from the practice activity):
+**Test cases:** Here is some example output which your function should match (recall the `my_lcg` implementation of the linear congruential generator from the practice activity). **Note:** It is ok if you show the same counts, but in a different order (your permutations `123`, `132`, etc. do not need to appear in the same order as mine).
 
 ```{r, echo=F}
 diehard_permtest <- function(x, chunk_size = 3){
@@ -238,7 +238,7 @@ diehard_permtest <- function(x, chunk_size = 3){
   perm_counts <- rep(0, length(perms))
   names(perm_counts) <- perms
 
-  for(i in seq(1, length(x) - chunk_size, chunk_size)){
+  for(i in seq(1, length(x) - chunk_size + 1, chunk_size)){
     cur_order <- paste0(order(x[i:(i+chunk_size - 1)]), collapse="")
     perm_counts[cur_order] <- perm_counts[cur_order] + 1
   }
@@ -247,16 +247,17 @@ diehard_permtest <- function(x, chunk_size = 3){
               p_value = chisq.test(perm_counts)$p.value))
 }
 
-my_lcg <- function(n, x0 = NA, m = 2^32, a = 1664525, c = 1013904223){
-  
+my_lcg <- function(n, x0 = NA, m = 2^32, 
+                   a = 1664525, c = 1013904223){
   if(is.na(x0)){
-    x0 <- ((Sys.time() |> lubridate::second()) * 100000) %% m
+    x0 <- ((Sys.time() |> 
+              lubridate::second()) * 100000) %% m
   }
   
-  x <- rep(NA, n+1)
+  x <- rep(NA, n)
   x[1] <- x0
-  for(i in 1:n){
-    x[i+1] <- (a * x[i] + c) %% m
+  for(i in 2:n){
+    x[i] <- (a * x[i-1] + c) %% m
   }
   return(x/m)
 }
