@@ -33,6 +33,8 @@ To get started, click on the link and log in with your usual WFU credentials.
 
 Once you log on, you will see the STA 379/679 course homepage, with links to RStudio and VS Code at the bottom (you can ignore VS Code, although you are certainly welcome to use it if you like):
 
+<img src="https://sta379-s25.github.io/resources/deac_cluster_instruction_pictures/deac_cluster_homepage.png" width="70%"/>
+
 ## Starting an RStudio session
 
 Click on the RStudio app at the bottom of the course homepage. Before opening RStudio, you will be taken to a page in which you will configure details for the RStudio session.
@@ -46,6 +48,8 @@ At the top of the page, you will enter information about the working directory, 
 **Slurm account:** Select `sta379` from the drop-down menu
 
 **Slurm partition:** Select `ondemand` from the drop-down menu
+
+<img src="https://sta379-s25.github.io/resources/deac_cluster_instruction_pictures/deac_cluster_request1.png" width="50%"/>
 
 ### Resource request
 
@@ -61,6 +65,7 @@ There are three types of resources to specify: *time*, *cores*, and *memory*. To
 
 A standard request will look like this, with 1 hour, 1 core, and 8 GB requested (always use node type = Any):
 
+<img src="https://sta379-s25.github.io/resources/deac_cluster_instruction_pictures/deac_cluster_request2.png" width="50%"/>
 
 Once you have configured the session correctly, submit the request at the bottom of the page.
 
@@ -68,6 +73,7 @@ Once you have configured the session correctly, submit the request at the bottom
 
 Once you have submitted your session request, the request will be **queued** on the cluster. When there are available resources and it is your turn in the queue, the session will be ready to start (generally this should only take a minute), and you will see the following page:
 
+<img src="https://sta379-s25.github.io/resources/deac_cluster_instruction_pictures/deac_cluster_startsession.png" width="50%"/>
 
 This page tells you that you have a session running, provides some details about the session, and tells you how much time is left. To enter the session and open RStudio, click the `Connect to RStudio Server` button. This should open RStudio in a new tab in your browser.
 
@@ -77,7 +83,11 @@ Your session should be initialized in the working directory `/deac/sta/classes/s
 
 Most of the coding work you do in this course will be submitted through GitHub (see the next section), so typically you shouldn't need to move files between the RStudio Server and your local computer. If you do, however, then you can **upload** files with the `Upload` button on the files tab:
 
+<img src="https://sta379-s25.github.io/resources/deac_cluster_instruction_pictures/deac_cluster_files_tab.png" width="60%"/>
+
 To download files, select the files you want to download (click the checkbox next to them in the file list), then click on `More` -> `Export...`
+
+<img src="https://sta379-s25.github.io/resources/deac_cluster_instruction_pictures/deac_cluster_files_export.png" width="30%"/>
 
 ## GitHub 
 
@@ -101,15 +111,21 @@ If you are not already logged in, follow the instructions above to create and op
 
 In the RStudio server, go to *Tools* -> *Global Options* -> *Git/SVN*:
 
+<img src="https://sta379-s25.github.io/resources/deac_cluster_instruction_pictures/rstudio_tools_git_svn.png" width="50%"/>
+
 Under *Git executable* it should say `/usr/bin/git`, and it should be empty `(None)` under *SSH key*.
 
 Click the `Create SSH key` button. In the pop-up window, make sure SSH key type is ED25519. Do not change the file path for the SSH key, and you can ignore the passphrase boxes. Your key name will look something like `id_ed25519`.
+
+<img src="https://sta379-s25.github.io/resources/deac_cluster_instruction_pictures/rstudio_create_ssh_key.png" width="30%"/>
 
 Click `Create`.
 
 #### Step 3: Terminal
 
 Go to the *Terminal* tab in RStudio (should be right next to the *Console* tab):
+
+<img src="https://sta379-s25.github.io/resources/deac_cluster_instruction_pictures/deac_cluster_terminal_tab.png" width="70%"/>
 
 In the terminal, type the following and hit enter:
 
@@ -135,14 +151,16 @@ To clone a GitHub repository to your account on the RStudio Server, the steps wi
 
 First, you will use SSH rather than HTTPS to clone. Click on the SSH tab instead, and copy the resulting url to your clipboard:
 
+<img src="https://sta379-s25.github.io/resources/deac_cluster_instruction_pictures/github_clone_ssh.png" width="40%"/>
 
 On the RStudio Server, create a new project (*File* -> *New Project* -> *Version Control* -> *Git*). 
 
 * For the repository URL, paste the SSH url from GitHub.
 * Under "create project as a subdirectory of", choose your working directory for this course (`/deac/sta/classes/sta379/USERNAME`). If you need to change the file path here, click *Browse*, then click the `...` button that appears in the top right of the pop-up window and enter the desired working directory
 
+<img src="https://sta379-s25.github.io/resources/deac_cluster_instruction_pictures/deac_cluster_git_newproject.png" width="40%"/>
 
-Click *Create new project*
+Click *Create Project*
 
 ## Saving your work and finishing the session
 
