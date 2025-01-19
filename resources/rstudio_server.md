@@ -127,6 +127,8 @@ In RStudio, go back to *Tools* -> *Global Options* -> *Git/SVN*. Your SSH key sh
 
 Now add the public key to GitHub, following the instructions in [Chapter 10.5.3](https://happygitwithr.com/ssh-keys#on-github). Give it a name like "DEAC OnDemand server".
 
+You should now be able to interact remotely with GitHub, pulling and pushing like normal. The first time that you try to interact with GitHub using the key, you may get a message asking you to trust the GitHub host. You can type "yes" in that box and continue.
+
 ### Using the SSH method when cloning repositories
 
 To clone a GitHub repository to your account on the RStudio Server, the steps will be quite similar to the procedure described in the [GitHub instructions](https://sta379-s25.github.io/resources/github_instructions/#step-5-clone-the-repository-to-your-local-computer) on the course website. There are just a couple changes.
