@@ -13,6 +13,7 @@ description: >-
 
     * [R installation instructions](https://sta379-s25.github.io/resources/r_installation/)
     * [Git and GitHub assignment instructions](https://sta379-s25.github.io/resources/github_instructions/)
+    * [RStudio server instructions](https://sta379-s25.github.io/resources/rstudio_server/)
     * [Happy Git and GitHub for the useR](https://happygitwithr.com/) (excellent reference for setting up and using Git and GitHub with RStudio)
     * [R cheatsheets](https://posit.co/resources/cheatsheets/)
     * [Armadillo documentation](https://arma.sourceforge.net/docs.html) (for the Armadillo C++ library)
