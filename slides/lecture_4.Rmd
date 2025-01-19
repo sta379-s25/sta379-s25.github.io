@@ -256,6 +256,63 @@ bench::mark(
 * C++ needs a `;` at the end of each line
 * The Armadillo library provides many useful objects and functions that behave similarly to R counterparts
 
+## Example: Correlation
+
+Suppose we have a sample $(X_1, Y_1),...,(X_n, Y_n)$ of $n$ observations collected on two variables, $X$ and $Y$. The *sample correlation* is given by
+
+$$\dfrac{ \sum \limits_{i=1}^n (X_i - \bar{X})(Y_i - \bar{Y})}{\left( \sum \limits_{i=1}^n (X_i - \bar{X})^2 \right)^{1/2} \left( \sum \limits_{i=1}^n (Y_i - \bar{Y})^2 \right)^{1/2}}$$
+
+Suppose I want to write a function to calculate the sample correlation in C++.
+
+* What should the inputs be?
+* What should the output be?
+* What steps do I need to do inside the function?
+
+## Example: Correlation
+
+Beginning to define the function:
+
+```{Rcpp, eval=F}
+double cor_C(arma::vec x, arma::vec y) {
+  
+
+
+
+}
+```
+
+## Example: Correlation
+
+```{Rcpp, eval=F}
+double cor_C(arma::vec x, arma::vec y) {
+  arma::vec diffsx = x - mean(x);
+  arma::vec diffsy = y - mean(y);
+  return sum(diffsx % diffsy)/
+    (sqrt(sum(square(diffsx))) * 
+      sqrt(sum(square(diffsy))));
+}
+```
+
+## Get the function into R
+
+```{r}
+Rcpp::cppFunction('double cor_C(arma::vec x, arma::vec y){
+  arma::vec diffsx = x - mean(x);
+  arma::vec diffsy = y - mean(y);
+  return sum(diffsx % diffsy)/
+    (sqrt(sum(square(diffsx))) * 
+      sqrt(sum(square(diffsy))));
+}', depends = "RcppArmadillo")
+
+x <- rnorm(100)
+y <- rnorm(100)
+
+cor_C(x, y) # our version
+cor(x, y)   # existing R version
+```
+
+
+
 
 ## Your turn
 
