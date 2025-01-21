@@ -1,73 +1,57 @@
 ---
-title: "Lecture 5: Generating random variables -- transformations"
+title: "Lecture 5: Logistics of using C++ in R"
 author: "Ciaran Evans"
 output: beamer_presentation
 ---
 
 ## Previously
 
-Methods to generate $U \sim Uniform(0, 1)$:
+```{r}
+Rcpp::cppFunction('double sumC(arma::vec x) {
+  int n = x.n_elem;
+  double total = 0;
+  for(int i = 0; i < n; ++i) {
+    total += x[i];
+  }
+  return total;
+}', depends = "RcppArmadillo")
 
-* Linear congruential generator
-* Mersenne twister 
-* lots of other variants and alternatives
+x <- rnorm(10000)
+sumC(x)
+```
 
-Now we want to generate random variables with *other* distributions.
+`Rcpp` and `RcppArmadillo` allow us to write functions in R with C++ source code (and the Armadillo library)
 
-**Question:** If I have a uniform random variable, how can I get other random variables?
+## What does this require?
 
-## Inverse transform method
+* C++ installed on your computer
+
+* `Rcpp` and `RcppArmadillo` R packages installed
+
+**Challenge:** Getting `Rcpp`, and especially `RcppArmadillo`, to work on your personal computer can very difficult (particularly with Macs)
+
+**Solution:** we are going to use an RStudio Server provided by the DEAC cluster
+
+## Steps
+
+1. Log on to class DEAC OnDemand site: [https://sta379.deac.wfu.edu/](https://sta379.deac.wfu.edu/)
+
+2. Open RStudio app
+
+3. Request resources from DEAC cluster to initialize RStudio session
+
+4. Work in RStudio session through your browser
+
+5. Save work, commit and push to GitHub
+
+6. Quit RStudio session
+
+Full, detailed instructions provided on course website
 
 
-## Example
+## Homework 2
 
-Suppose we want to generate $X \sim Exponential(\theta)$
+* Practice writing functions with C++ source code
+* Accept the assignment through GitHub classroom
+* Work on RStudio server; clone the GitHub repo in your RStudio server session (see instructions on course website)
 
-\vspace{5cm}
-
-## Discrete case
-
-Suppose that we want to generate $X \sim Bernoulli(p)$
-
-\vspace{5cm}
-
-## Generating a Normal random variable
-
-Suppose we want to simulate $X \sim N(0, 1)$
-
-$$f_X(x) = \frac{1}{\sqrt{2 \pi}} \exp \left\lbrace -\frac{1}{2} x^2 \right\rbrace$$
-
-$$F_X(t) = \ ?$$
-
-\vspace{3cm}
-
-## Box-Muller Transformation
-
-## Other Normals
-
-Suppose that $Z \sim N(0, 1)$. How do I get $X \sim N(\mu, \sigma^2)$?
-
-\vspace{4cm}
-
-## A few other transformations
-
-* If $X \sim N(\mu, \sigma^2)$, then $e^X \sim Lognormal(\mu, \sigma^2)$
-
-* If $Z_1,...,Z_k \overset{iid}{\sim} N(0, 1)$, then 
-
-$$\sum \limits_{i=1}^k Z_i^2 \sim \ ?$$
-
-* If $V_1 \sim \chi^2_{d_1}$ and $V_2 \sim \chi^2_{d_2}$ are independent, then 
-
-$$\frac{V_1/d_1}{V_2/d_2} \sim \ ?$$
-
-## Your turn
-
-Practice questions on the course website:
-
-[https://sta379-s25.github.io/practice_questions/pq_5.html](https://sta379-s25.github.io/practice_questions/pq_5.html)
-
-* Practice generating random variables
-* Start in class. You are welcome to work with others
-* Practice questions are to help you practice. They are not submitted and not graded
-* Solutions are posted on the course website

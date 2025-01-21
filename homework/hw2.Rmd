@@ -1,0 +1,322 @@
+---
+title: "Homework 2"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+**Due:** Friday, January 31 at 10:00am
+
+**Submission:** For this assignment, you will submit two separate files:
+
+* A C++ script (`hw2_code.cpp` file) containing your C++ functions for questions 1, 2, and 4 (see below for more details on the C++ script)
+* An R script (`hw2_code.R`) containing your R function for question 3, sourcing your C++ file for questions 1, 2, 4, and running the unit tests of all functions
+
+**Mastery:** To master this assignment, you must satisfy the following requirements:
+
+* Your code must pass all specified unit tests (`hw2_tests.R`), *as written* (you may not modify the unit tests which I provide)
+* Your code must meet all requirements described in the questions below (matching the requested inputs and outputs)
+* You must comment your code
+* Your work must abide by the academic honesty requirements in the syllabus 
+
+If you make an honest effort to answer all questions, but you do not master all of the questions on your first submission, you will have one resubmission attempt after receiving feedback.
+
+**Resources:** 
+
+* [Git and GitHub assignment instructions](https://sta379-s25.github.io/resources/github_instructions/)
+* [RStudio server instructions](https://sta379-s25.github.io/resources/rstudio_server/)
+* [`Armadillo` documentation](https://arma.sourceforge.net/docs.html)
+
+# Instructions
+
+## Getting started
+
+1. Log in to the class [DEAC OnDemand site](https://sta379.deac.wfu.edu/) and initialize an RStudio server session; follow the [RStudio server instructions](https://sta379-s25.github.io/resources/rstudio_server/). Make sure to limit the resources you request!
+2. Go to Canvas -> Assignments -> HW 2. Open the GitHub Classroom assignment link.
+3. Accept the assignment and clone the repository through the **RStudio server session** (NOT your local computer, unless you are confident that you have C++, `Rcpp`, and `RcppArmadillo` correctly installed and working)
+4. The repository contains the files `hw2_code.R`, `hw2_code.cpp`, and `hw2_tests.R`. Write your code for questions 1, 2, and 4 in the `hw2_code.cpp` file. Write your code for question 3 in the `hw2_code.R` file. Commit and push to GitHub regularly.
+5. When you pause work, save, commit, and push to GitHub. Then quit the RStudio server session. 
+6. When your code is complete and passes all tests and requirements, commit and push the final version to GitHub. Then [request feedback](https://sta379-s25.github.io/resources/github_instructions/#step-10-request-feedback) from me on the "Feedback" pull request in your homework 2 repository
+
+## R functions with C++ source code
+
+In class, we saw this example of a C++ function, which we called in R:
+
+```{r}
+Rcpp::cppFunction('double sumC(arma::vec x) {
+  int n = x.n_elem;
+  double total = 0;
+  for(int i = 0; i < n; ++i) {
+    total += x[i];
+  }
+  return total;
+}', depends = "RcppArmadillo")
+
+sumC(1:4)
+```
+
+The function itself is written in C++, but is imported into R through `cppFunction`, which is part of the `Rcpp` package. The code for the function is contained in the string passed to `cppFunction`, and `depends = "RcppArmadillo"` means that we also need the Armadillo library.
+
+For short C++ functions, importing with `cppFunction` works fine. But for longer pieces of code, it isn't the best solution. In general, you will instead write your code in a C++ file (file extension `.cpp`); the entire contents of the file will then be imported into R.
+
+### Better approach: separate C++ file
+
+Open the `hw2_code.cpp` file in RStudio. At the top of this file, you will see the following:
+
+```{Rcpp, eval=F}
+#include <RcppArmadillo.h>
+using namespace Rcpp;
+
+// [[Rcpp::depends(RcppArmadillo)]]
+```
+
+This information is telling C++ that we'll be using Rcpp and RcppArmadillo. I will provide this header information for now; do not change this unless instructed.
+
+Next, you will see the code for the `sumC` example function. You don't need this function to do the questions below, but I am including it here so you can see how everything works. You will also see helper functions that you will need for Question 4 below; you can ignore those helper functions for now, but make sure you don't edit or delete them.
+
+Note that the `sumC` function has the tag `// [[Rcpp::export]]` directly above it. You will need to add this tag to any functions you want to export from C++ into R (functions without the tag can be called within your `.cpp` file, but will not be accessible in R).
+
+
+### Open the R file
+
+Next, open the `hw2_code.R` file. At the top of the file, you will see the following line:
+
+```{r, eval=F}
+Rcpp::sourceCpp("hw2_code.cpp")
+```
+
+This line exports the functions (that is, all functions tagged with `// [[Rcpp::export]]`) from C++ to R. You will then be able to call them in R!
+
+## Workflow
+
+1. Write code in C++; tag any functions to export
+2. Whenever you have new code you want to test: save the `.cpp` file, re-run `sourceCpp`, and test out the function in your R script or console
+3. Work question by question -- make sure that your code for one question runs and passes unit tests before moving on. Don't wait until the very end to test your code!
+
+
+# Function practice in C++
+
+## Pearson's chi-squared test
+
+In Homework 1, you wrote a `diehard_permtest` function which assessed whether all orderings of three consecutive numbers were equally likely in a "randomly" generated sequence. As part of this function, you used a chi-squared test to compare the observed counts of permutations to the expected counts (under the assumption that all are equally likely).
+
+Let's review what a chi-squared test is doing here. Suppose that we have a categorical variable, which has $k$ different levels (e.g., $1,...,k$). We are interested in testing whether this variable comes from some hypothesized distribution. The distribution of a categorical variable is defined by the probability for each category, so our hypothesized distribution is specified in terms of $k$ different probability values, $p_1,...,p_k$, such that $\sum \limits_{i=1}^{k} p_i = 1$. 
+
+Let $O_i$ be the observed count in each category, and $n = \sum_i O_i$ be the total count across all categories. Given these $n$ observations, if our hypothesized distribution were true, we would *expect* to see $n p_i$ observations in category $i$. The idea of the chi-squared test is then to compare the observed counts with these expected counts; if they are very different, we have evidence against the null hypothesis that the distribution follows the specified probabilities. 
+
+In particular, the test statistic for the chi-squared test is:
+
+$$X^2 = \sum \limits_{i=1}^k \frac{(O_i - E_i)^2}{E_i}$$
+
+Your task in this question is to write a function, in C++, which calculates this test statistic (you do not need to calculate a p-value here; C++ is good for some things, but in general R has better support for random variables (cdfs, pdfs, etc)).
+
+:::{.question}
+#### Question 1
+
+Write a function in C++ called `chisq_testC` which satisfies the following requirements:
+
+Inputs:
+
+* `x`: an `arma::vec` which contains the observed counts for the categorical variable
+* `p`: an `arma::vec`, of the same length as `x`, which contains the hypothesized probabilities for each category
+
+Output: a double, containing the chi-squared test statistic defined above.
+
+Additional requirements:
+
+* You may not use any existing chi-squared test implementations to write your function
+* You are not permitted to use a for loop (or similar iteration) in this function. Rather, I want you to leverage the Armadillo library here. R will let you do element-wise operations with vectors, matrices, etc., and Armadillo allows you to do the same sort of thing
+
+*Hints:* 
+
+* there are a few Armadillo functions that can be used with `arma::vec` objects which you will find useful: `sum` and `pow`. See the [Armadillo documentation](https://arma.sourceforge.net/docs.html) for more details, and also check out the [operators](https://arma.sourceforge.net/docs.html#operators) section for information on element-wise arithmetic and other operations.
+* Here is a template to get you started on this function (fill in the `...`):
+
+```{Rcpp, eval=F}
+double chisq_testC(...) {
+  ...
+}
+```
+
+
+**Test cases:** See the unit tests in `hw2_tests.R`
+
+:::
+
+## Empirical CDF revisited
+
+Recall the empirical cdf from HW 1:
+
+**Definition:** (Empirical CDF) Suppose that $X_1,...,X_n$ are a random sample from some distribution with cdf $F$. That is, $F(t) = P(X_i \leq t)$. An empirical estimate of $F$, called the *empirical cdf*, is given by
+
+$$\widehat{F}(t) = \frac{1}{n} \sum \limits_{i=1}^n {\bf 1}\{X_i \leq t\} = \frac{\#\{X_i \leq t\}}{n}$$
+
+On Homework 1, you wrote a couple different functions to calculate the empirical cdf. Here you will implement a function, in C++, which is similar to the `my_ecdf1` function from the first question of HW 1.
+
+:::{.question}
+#### Question 2
+
+Write a function in C++ called `my_ecdfC` which satisfies the following requirements:
+
+Inputs:
+
+* `x`: an `arma::vec`, containing the random sample for which to calculate the empirical cdf
+* `t`: an `arma::vec`, containing the points at which to evaluate the empirical cdf
+
+Output: an `arma::vec` containing the empirical cdf evaluated at each point in `t`, i.e. $\widehat{F}(t)$.
+
+*Hints:* 
+
+* Recall that the `n_elem` attribute of an Armadillo vector returns the length of that vector
+* In HW 1, I suggested you use the `sapply` function in R for cleaner code. In C++, you will need to use a loop instead
+* In R, you can do element-wise comparisons with a vector. For example:
+```{r}
+x <- 1:4
+x < 4
+```
+Armadillo vectors allow for basically the same thing. If `x` is an `arma::vec` object, then `x < 4` will produce an `arma::uvec` object. E.g.:
+```{Rcpp, eval=F}
+arma::uvec boolCompare = x < 4;
+```
+
+```
+     [,1]
+[1,]   1
+[2,]   1
+[3,]   1
+[4,]   0
+```
+
+* Integer division in C++ won't produce a decimal; rather, C++ will round down to the nearest whole number. So, e.g., `3/5` in C++ will result in 0, `6/5` will give 1, etc. As a result, taking the `mean` of an `arma::uvec` which contains 0s and 1s will always give you 0. However, you could consider taking the `sum` instead, converting to a double, and then dividing by the number of elements. Consider the following examples:
+
+```{r}
+Rcpp::cppFunction('double short_example1(arma::vec x) {
+  return sum(x < 3) / 4; // challenges with integers
+}', depends = "RcppArmadillo")
+
+Rcpp::cppFunction('double short_example2(arma::vec x) {
+  // multiplying by 1.0 first casts the integer as a double, 
+  // before we do the division
+  return 1.0*sum(x < 3) / 4;
+}', depends = "RcppArmadillo")
+
+short_example1(1:4)
+short_example2(1:4)
+```
+
+
+**Test cases:** See the unit tests in `hw2_tests.R`
+:::
+
+
+## Permutation test for a difference in means
+
+Suppose we have two samples: $X_1,...,X_n$ and $Y_1,...,Y_m$. We are interested in testing whether these two samples come from the same distribution. One possibile test is our old friend, the two-sample t-test for a different in means. Welch's two-sample t-test uses the test statistic 
+
+$$t = \frac{\bar{X} - \bar{Y}}{\sqrt{\frac{s_X^2}{n} + \frac{s_Y^2}{m}}},$$
+
+where $s_X^2 = \frac{1}{n-1} \sum \limits_{i=1}^n (X_i - \bar{X})^2$ and $s_Y^2 = \frac{1}{m-1} \sum \limits_{i=1}^m (Y_i - \bar{Y})^2$. 
+
+However, this two-sample t-test is not the only way to test for a difference in means between the two samples. Another option is a **permutation test**. The logic of the permutation test is this: if there is no difference in the underlying distributions for the two samples, then I should be able to mix them up (i.e., shuffle which values came from population 1, and which values came from population 2), and recalculate the test statistic. Every such shuffling yields a different value for the test statistic, and collectively all the permutations gives me a *distribution* for the test statistic, under the null hypothesis that the two populations are interchangeable. If my observed test statistic from the original data looks "consistent" with this permutation distribution, then we don't have evidence against the null hypothesis. On the other hand, if the observed test statistic looks "unusual" compared to the permutation values, then we do have evidence against the null hypothesis.
+
+Formally, our permutation test consists of the following steps:
+
+1. Calculate the observed test statistic, in this case $T_{obs} = \bar{X} - \bar{Y}$
+2. Combine the samples (which we can do under the null hypothesis of no difference): $Z = (X_1,...,X_n, Y_1,...,Y_m)$. Also, create a vector to label which sample corresponds to each entry of $Z$, e.g. $L = (0, 0,...,0, 1, 1, ..., 1)$ (first $n$ entries are 0, next $m$ entries are 1)
+3. Permute (shuffle) the labels (keeping the numbers of 0s and 1s fixed). Let $L^*$ be the permuted labels
+4. Calculate the test statistic for the permuted labels: $T^* = \frac{1}{n} \sum \limits_{i=1}^{n+m} Z_i(1 - L_i^*) - \frac{1}{m} \sum \limits_{i=1}^{n+m} Z_i L_i^*$
+5. Repeat steps 3-4 many, many times (call this number $n_{reps}$, say), producing permutation statistics $T_1^*,...,T_{n_{perms}}^*$
+6. Calculate the permutation test p-value:
+
+$$p = \frac{1}{n_{perms}} \sum \limits_{j=1}^{n_{perms}} {\bf 1}\{|T_j^*| \geq |T_{obs}|\}$$
+
+The ultimate goal will be to implement this permutation test in C++. However, it will be easier to implement in C++ if you first write it in R, to get a better feel for the algorithm. Then we can translate it to C++, in the process learning some of the C++ (and especially Armadillo) equivalents of R functionality.
+
+:::{.question}
+#### Question 3
+
+Write a function in R called `perm_test` which satisfies the following requirements:
+
+Inputs:
+
+* `x`: a vector, containing the first random sample
+* `y`: a vector, containing the second random sample
+* `nperms`: the number of permutations to run, with a default value of 1000
+
+Output: a list, containing the following named elements:
+
+* `obs`: the observed test statistic (difference in the sample means)
+* `perm_stats`: a vector of the permutation statistics $T_i^*$
+* `pval`: the permutation test p-value
+
+You may not use any existing permutation test implementations.
+
+*Hints:* 
+
+* Here is an example of creating a list in R with named entries:
+
+```{r}
+ex_list <- list("a" = c(1, 2, 3),
+                "b" = 0.5)
+
+ex_list$a
+ex_list$b
+```
+
+
+**Test cases:** See the unit tests in `hw2_tests.R`
+
+:::
+
+Now let's implement the permutation test in C++.
+
+:::{.question}
+#### Question 4
+
+Write a function in C++ called `perm_testC` which satisfies the following requirements:
+
+Inputs:
+
+* `x`: an `arma::vec`, containing the first random sample
+* `y`: an `arma::vec`, containing the second random sample
+* `nperms`: an int, the number of permutations to run, with a default value of 1000
+
+Output: a list, containing the following named elements:
+
+* `obs`: double, the observed test statistic (difference in the sample means)
+* `perm_stats`: `arma::vec`, the permutation statistics $T_i^*$
+* `pval`: double, the permutation test p-value
+
+
+*Hints:* 
+
+* General advice: start small, and build up. For example, start by making your function just return the observed test statistic. Then do a single permutation (no iteration), and check that you get the expected results. Then continue adding more to the function.
+* as part of the permutation test, you will need to be able to permute the entries of a vector in C++. This actually turns out to be a bit trickier than in R. I have provided a function for you (in the `hw2_code.cpp` file) called `random_shuffle`, which randomly shuffles the entries of an Armadillo vector and returns the shuffled vector. You will need to call this function in your C++ code.
+* you can combine Armadillo vectors with the [`join_cols` function](https://arma.sourceforge.net/docs.html#join)
+* see [here](https://gallery.rcpp.org/articles/armadillo-subsetting/) for examples of subsetting Armadillo vectors (note in particular `.elem()` and `find()`)
+* regarding subsetting, see also the documentation on [submatrix views](https://arma.sourceforge.net/docs.html#submat) (in particular `.subvec()`)
+* to return a list, we will use the `List` class from Rcpp, which allows us to return list objects when calling a C++ function in R. Here is an example of small function which creates and returns such a `List` object
+
+```{r}
+Rcpp::cppFunction('List list_example() {
+  List output = List::create(Named("a") = 1,
+                             Named("b") = 0.5);
+  
+  return output;
+}')
+
+ex_list <- list_example()
+ex_list$a
+ex_list$b
+```
+
+
+**Test cases:** 
+
+* See the unit tests in `hw2_tests.R`
+* The `hw2_code.R` file also benchmarks the speed of the R and C++ implementations. Unless you do a particularly nice job optimizing your R code, you should expect the C++ implementation to be quite a bit faster (the algorithm is, after all, essentially a for loop)
+
+:::
+

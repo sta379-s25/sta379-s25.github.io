@@ -8,4 +8,6 @@ photo: ciaran.jpg
 
 Office hours: 
 
-TBA
+Wednesday 12--1pm
+
+Thursday 3--4pm

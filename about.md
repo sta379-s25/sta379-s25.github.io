@@ -50,7 +50,9 @@ Keep in mind that debugging software issues can take time, so make sure to start
 
 **Office hours:** 
 
-TBA
+Wednesday 12--1pm
+
+Thursday 3--4pm
 
 ## Course policies
 

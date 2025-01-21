@@ -1,0 +1,22 @@
+---
+title: "C++ and Rcpp / RcppArmadillo practice questions: solutions"
+format: html
+---
+
+1. 
+
+```{r}
+Rcpp::cppFunction('double p_norm_C(arma::vec x, double p = 2) {
+  return pow(sum(pow(abs(x), p)), 1/p);
+}', depends = "RcppArmadillo")
+```
+
+2.
+
+```{r}
+Rcpp::cppFunction('double kurtosis_C(arma::vec x) {
+  arma::vec diffs = x - mean(x);
+  return mean(pow(abs(diffs), 4))/pow(mean(square(diffs)), 2) - 3;
+}', depends = "RcppArmadillo")
+```
+

@@ -1,0 +1,80 @@
+---
+title: "Practice Questions: C++ and Rcpp / RcppArmadillo"
+format: html
+---
+
+## Writing functions in C++ and calling them in R
+
+As a programming language, R is good at some things but not so good at others; for example, R is often slow when iteration is involved. Also, R does not really support some features (like unsigned integers) that are standard in many other languages. 
+
+In such cases, we could decide to switch over to a different language completely. However, this misses the benefits that R does bring; many statistical models and visualization tools have excellent, easily accessible implementations in R (and sometimes *only* in R). 
+
+A better option is often to write *part* of our code in a different language, and call this code from within R when we need it. Many R functions and packages are written partly in languages like FORTRAN, C, and C++.
+
+### Details
+
+The packages that we will need in R to interface with C++ are `Rcpp` and `RcppArmadillo` (which is specifically to allow us to use the `Armadillo` C++ library). For short C++ functions, we can wrap the C++ code in a string in the `cppFunction` function. For example, consider the following chunk in R:
+
+```{r}
+Rcpp::cppFunction('double sumC(arma::vec x) {
+  int n = x.n_elem;
+  double total = 0;
+  for(int i = 0; i < n; ++i) {
+    total += x[i];
+  }
+  return total;
+}', depends = "RcppArmadillo")
+
+x <- runif(10)
+sum(x) # take the sum using the native R function
+sumC(x) # take the sum using the C++ function written above
+```
+
+### The DEAC OnDemand Server
+
+While it is certainly possible to download and install the requisite software to get C++, `Rcpp`, and `RcppArmadillo` working on your personal computer, it can be a very tricky process -- particularly for Macs. For this reason, in this course we will avoid the problem altogether by using the RStudio Server provided by DEAC OnDemand. The DEAC cluster already has what we need installed, so you should be able to get going on the code right away.
+
+See the [RStudio server instructions](https://sta379-s25.github.io/resources/rstudio_server/) on the course website for instructions on getting started with DEAC OnDemand. Remember to limit the resources you request when initializing a session, and end your session when you are done!
+
+### Brief summary of some useful functions and attributes
+
+The `Armadillo` C++ library provides a lot of functionality that is similar to some things that we can do in R. Here is a brief (and by no means complete) list of some functions and operations that you may find useful as you are working through the practice questions and homework assignment. See the [`Armadillo` documentation](https://arma.sourceforge.net/docs.html) for full details.
+
+* `mean`
+* `pow`
+* `square`
+* `%`: for element-wise multiplication of conformal matrices/vectors
+* `abs`
+* `sum`
+
+## Questions
+
+The following questions will give you some practice writing short C++ functions. Note that in these cases, there isn't really much benefit to writing them in C++ instead of R (or just using existing R functions!), but we need to start with smaller examples before building up to more challenging ones.
+
+### p-norm
+
+The $\ell_p$ norm of a vector $x = (x_1,...,x_k)$ is given by
+
+$$||x||_p = \left( \sum \limits_{i=1}^k |x_i|^p \right)^{1/p}$$
+
+1. Write a function in C++ called `p_norm_C` which satisfies the following requirements:
+    * Inputs:
+        * `arma::vec x`
+        * `double p` (default: `p=2`)
+    * Output: the p-norm of `x` (a `double`)
+    
+### Kurtosis
+
+Suppose we have a sample $X_1,...,X_n$ from some population distribution. We know that the mean describes the "center" of the distribution, the standard deviation is a measure of variability, and skewness describes the shape of the distribution. 
+
+Another quantity we can calculate to describe a distribution is *kurtosis*, which describes how heavy the tails of the distribution are. The *sample (excess) kurtosis* is calculated by:
+
+$$\dfrac{\frac{1}{n} \sum \limits_{i=1}^n (X_i - \bar{X})^4}{\left( \frac{1}{n} \sum \limits_{i=1}^n (X_i - \bar{X})^2 \right)^2} \ \ - \ \ 3$$
+
+where $\bar{X}$ is the sample mean.
+
+2. Write a function in C++ called `kurtosis_C` which satisfies the following requirements:
+    * Inputs:
+        * `arma::vec x`, the sample
+    * Output: the sample excess kurtosis (a `double`)
+
