@@ -154,6 +154,39 @@ abline(v=0.9)
 
 Suppose we observe $Y = 0.9$. Are we likely to *accept* or *reject* 0.9 as a sample from $f$?
 
+
+## Illustration
+
+Now sample $Y \sim g$ and $U \sim Uniform(0, 1)$. *Accept* $Y$ if $U \leq \frac{f(Y)}{cg(Y)}$
+
+:::: {.columns}
+
+::: {.column width="60%"}
+
+```{r, echo=F, message=F, warning=F, fig.width = 6, fig.height=4, fig.align='left'}
+gridpts <- seq(0, 1, 0.01)
+x <- dbeta(gridpts, 2.7, 6.3)
+y <- dunif(gridpts)
+c = 2.68
+plot(gridpts,x,xlim=c(0,1),ylim=c(0,2.8),type="l",col="blue",main="",xlab="",ylab="",
+     lwd=1.5)
+lines(gridpts,c*y,col="red", lwd=1.5)
+abline(v=0.5)
+#legend(.6,2,c("Target density, f(t)","c * g(t)"),lty=c(1,1),col=c("blue","red"))
+```
+
+:::
+
+::: {.column width="40%"}
+
+:::
+
+::::
+
+Suppose we observe $Y = 0.5$. Are we likely to *accept* or *reject* 0.5 as a sample from $f$?
+
+
+
 ## Illustration
 
 * $Y \sim g$ and $U \sim Uniform(0, 1)$
