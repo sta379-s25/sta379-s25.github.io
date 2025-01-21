@@ -1,0 +1,46 @@
+---
+title: "Practice Questions: Inverse transform method"
+format: html
+---
+
+## The inverse transform method
+
+**Definition:** (inverse transform method) Let $U \sim Uniform(0, 1)$ be a uniform random variable, and let $F$ be the cdf of a distribution we would like to sample from (either continuous or discrete). Define
+$$F^{-1}(u) = \inf \{x: F(x) \geq u\}$$
+and let $X = F^{-1}(U)$. Then, $P(X \leq t) = F(t)$, i.e. $X$ has the desired cdf and is therefore a sample from the desired distribution.
+
+### Pareto distribution
+
+The $Pareto(a, b)$ distribution has cdf 
+$$F(x) = 1 - \left( \frac{b}{x} \right)^a$$
+where $x \geq b$, $a > 0$, and $b > 0$. 
+
+1. Derive the inverse transform for the $Pareto(a, b)$ distribution. That is, if $U \sim Uniform(0, 1)$, find $F^{-1}(U)$ as a function of $U$.
+
+2. Write an R function called `my_rpareto` to sample from the Pareto distribution using the inverse transform method, with the following requirements:
+    * Inputs:
+        * `n`: the number of samples to take
+        * `a`: the parameter $a$ of the Pareto defined above; $a > 0$
+        * `b`: the parameter $b$ of the Pareto defined above; $b > 0$
+    * Output: a vector of length $n$, containing the Pareto samples
+    * Use the `runif` function to generate your uniform sample
+    
+Here is an example of the function in action, generating 100 observations from a $Pareto(5, 0.5)$. The empirical cdf is plotted in black, and the true Pareto cdf is overlaid in blue:
+
+```{r, include=F}
+my_rpareto <- function(n, a, b){
+  u <- runif(n)
+  x <- b*(1 - u)^{-1/a}
+  return(x)
+}
+```
+
+```{r}
+x <- my_rpareto(100, 5, 0.5)
+grid_pts <- seq(0, 2, 0.01)
+
+plot(grid_pts, ecdf(x)(grid_pts), type="l", xlab="x", ylab="F(x)")
+lines(grid_pts, 1 - (0.5/grid_pts)^5, col="blue")
+```
+
+

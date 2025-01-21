@@ -43,6 +43,35 @@ $$F_X(t) = \ ?$$
 
 ## Box-Muller Transformation
 
+## Box-Muller in practice
+
+```{r}
+# generate 1000 samples
+u1 <- runif(1000)
+u2 <- runif(1000)
+y1 <- sqrt(-2*log(u1)) * cos(2*pi*u2)
+y2 <- sqrt(-2*log(u1)) * sin(2*pi*u2)
+```
+
+```{r, echo=F, message=F, fig.width=6, fig.height=4}
+gridpts <- seq(-3, 3, 0.01)
+plot(gridpts, ecdf(y1)(gridpts), type="l", lwd=1.5, xlab="x", ylab="cdf")
+lines(gridpts, pnorm(gridpts), col="orange", lwd=1.5)
+legend(0.5,0.5,c("Empirical cdf Y1","N(0, 1) cdf"),lty=c(1,1),col=c("black","orange"))
+```
+
+## Box-Muller in practice
+
+
+```{r, echo=F, message=F, fig.width=3, fig.height=3}
+library(tidyverse)
+data.frame(y1, y2) |>
+  ggplot(aes(x = y1, y = y2)) +
+  geom_point(size=0.5) +
+  theme_bw()
+```
+
+
 ## Other Normals
 
 Suppose that $Z \sim N(0, 1)$. How do I get $X \sim N(\mu, \sigma^2)$?
@@ -67,7 +96,7 @@ Practice questions on the course website:
 
 [https://sta379-s25.github.io/practice_questions/pq_6.html](https://sta379-s25.github.io/practice_questions/pq_6.html)
 
-* Practice generating random variables
+* Practice with inverse transform method
 * Start in class. You are welcome to work with others
 * Practice questions are to help you practice. They are not submitted and not graded
 * Solutions are posted on the course website

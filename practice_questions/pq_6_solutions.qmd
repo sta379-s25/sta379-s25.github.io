@@ -1,0 +1,23 @@
+---
+title: "Inverse transform practice questions: solutions"
+format: html
+---
+
+1. $F^{-1}(u) = b(1 - u)^{-1/a}$
+
+2. 
+
+```{r}
+my_rpareto <- function(n, a, b){
+  u <- runif(n)
+  x <- b*(1 - u)^{-1/a}
+  return(x)
+}
+
+x <- my_rpareto(100, 5, 0.5)
+grid_pts <- seq(0, 2, 0.01)
+
+plot(grid_pts, ecdf(x)(grid_pts), type="l", xlab="x", ylab="F(x)")
+lines(grid_pts, 1 - (0.5/grid_pts)^5, col="blue")
+```
+
