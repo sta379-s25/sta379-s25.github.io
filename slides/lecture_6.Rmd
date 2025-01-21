@@ -35,6 +35,20 @@ u <- runif(1000)
 x <- -log(u)
 ```
 
+**Question:** How can I check that the samples match the desired $Exponential(1)$ distribution?
+
+\vspace{3cm}
+
+## Example
+
+Generating $X \sim Exponential(1)$:
+
+```{r}
+# generate 1000 samples
+u <- runif(1000)
+x <- -log(u)
+```
+
 ```{r, echo=F, message=F, fig.width=6, fig.height=4}
 gridpts <- seq(0, 7, 0.01)
 plot(gridpts, ecdf(x)(gridpts), type="l", lwd=1.5, xlab="x", ylab="cdf")
