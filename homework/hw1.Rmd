@@ -141,7 +141,6 @@ Write a function in R called `my_ecdf2` which satisfies the following requiremen
 Inputs:
 
 * `x`: a vector, containing the random sample for which to calculate the empirical cdf
-* `t`: a vector, containing the points at which to evaluate the empirical cdf
 
 Output: 
 
