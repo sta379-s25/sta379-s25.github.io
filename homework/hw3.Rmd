@@ -1,0 +1,274 @@
+---
+title: "Homework 3"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+**Due:** 
+
+**Submission:** For this assignment, you will submit two files:
+
+* An R script containing your functions for questions 2, 4, 7, 10 and the corresponding unit tests 
+* A pdf containing your written answers to questions 1, 3, 5, 6, 8, 9
+
+**Mastery:** To master this assignment, you must satisfy the following requirements:
+
+* Your code must pass all specified unit tests, *as written* (you may not modify the unit tests which I provide)
+* Your code must meet all requirements described in the questions below (matching the requested inputs and outputs)
+* You must comment your code
+* Your written solutions must be complete and correct, with no missing steps or mistakes
+* Your work must abide by the academic honesty requirements in the syllabus 
+
+If you make an honest effort to answer all questions, but you do not master all of the questions on your first submission, you will have one resubmission attempt after receiving feedback.
+
+**Resources:** 
+
+
+## The inverse transform method
+
+In previous activities and assignments, you have worked on generating (pseudo-random) $Uniform(0, 1)$ samples. One method of generating other types of random variables is to use these uniform samples as a building block, and applying transformations to produce the distribution we want. When tractable, an attractive approach is the *inverse transform method*, in which we apply the inverse cdf to a uniform sample.
+
+**Definition:** (inverse transform method) Let $U \sim Uniform(0, 1)$ be a uniform random variable, and let $F$ be the cdf of a distribution we would like to sample from (either continuous or discrete). Define
+$$F^{-1}(u) = \inf \{x: F(x) \geq u\}$$
+and let $X = F^{-1}(U)$. Then, $P(X \leq t) = F(t)$, i.e. $X$ has the desired cdf and is therefore a sample from the desired distribution.
+
+In the following questions, you will use the inverse transform method to simulate from a specified distribution. You will submit one written question in which you derive the inverse cdf, and one code-based question in which you use the inverse cdf method to sample from the desired distribution.
+
+
+### Laplace distribution
+
+
+The $Laplace(\mu, b)$ distribution has pdf
+
+$$f(x) = \frac{1}{2b} \exp\left\lbrace - \frac{|x - \mu|}{b} \right\rbrace$$
+where $x, \mu \in \mathbb{R}$ and $b > 0$.
+
+
+:::{.question}
+#### Question 1 (written)
+
+Derive the inverse transform for the $Laplace(\mu, b)$ distribution. That is, if $U \sim Uniform(0, 1)$, find $F^{-1}(U)$ as a function of $U$. Show all work.
+
+:::
+
+
+Now let's implement a function to simulate from the Laplace distribution. Before we do, however, we should think about possible errors that could arise when calling our function. Note from the definition above that the parameter $b$ for the Laplace must both be positive. If someone tries to sample from the Laplace distribution with a bad parameter value, they should get an error message telling them that the inputs are wrong.
+
+In R, we can include error messages inside functions using the `stop()` function. Here is an example in which we write our own square root function:
+
+```{r, error=T}
+my_sqrt <- function(x){
+  if(x < 0){
+    stop("The square root of a negative number is complex")
+  }
+  
+  x^(1/2)
+}
+
+my_sqrt(4)
+my_sqrt(-4)
+```
+
+
+:::{.question}
+#### Question 2 (code)
+
+Write an R function called `my_rlaplace` to sample from the Laplace distribution using the inverse transform method, with the following requirements:
+
+Inputs:
+
+* `n`: the number of samples to take
+* `mu`: the parameter $\mu$ of the Laplace defined above
+* `b`: the parameter $b$ of the Laplace defined above; $b > 0$
+
+Output: a vector of length $n$, containing the Laplace samples
+
+Error handling: the function should throw an error and provide an informative error message if `b` is not strictly positive
+
+Additional requirements: 
+
+* You may not use any existing Laplace functions to write your code
+* You must use the inverse transform method
+* Use the `runif` function to generate your uniform sample
+
+**Test cases:** See the R template which has the unit tests. The unit tests will test your error handling, sampling, and will perform a KS test to compare the generated sample with the Laplace distribution.
+
+:::
+
+
+## Generating Poisson random variables
+
+There are a couple different ways in which we can generate Poisson random variables. One option is the discrete version of the inverse transform method, which is described in *Statistical Computing with R* in Section 3.2.2. 
+
+Another option uses the connection between exponential and Poisson random variables: if the time between events is exponential, then the number of events which happen in a fixed window follows a Poisson distribution. In particular, suppose that $Y_1, Y_2,... \overset{iid}{\sim} Exponential(\lambda)$, and let 
+
+$$J = \min \left\lbrace j: \sum \limits_{i=1}^j Y_i > 1\right\rbrace$$
+$$X= J - 1$$
+Then $X \sim Poisson(\lambda)$. 
+
+:::{.question}
+#### Question 3 (written)
+
+Prove that $X \sim Poisson(\lambda)$, as defined above.
+
+You may use the following without proof/derivation:
+
+* The cdfs and probability functions of the exponential, Poisson, and gamma distributions
+* If $Y_1,...,Y_n \overset{iid}{\sim} Exponential(\lambda)$, then $\sum \limits_{i=1}^n Y_i \sim Gamma(n, \lambda)$, with pdf $f(t) = \frac{\lambda^n }{\Gamma(n)} t^{n-1} e^{-\lambda t}$
+* $\Gamma(n) = (n-1)!$
+
+Show all other work.
+:::
+
+In practice, we often rely on uniform rather than exponential distributions. 
+
+:::{.question}
+#### Question 4 (written)
+
+Let $U_1, U_2, ... \overset{iid}{\sim} Uniform(0, 1)$. Let
+
+$$J = \min \left\lbrace j: \prod \limits_{i=1}^j U_i < e^{-\lambda}\right\rbrace$$
+$$X= J - 1$$
+
+Using the result from question 3, show that $X \sim Poisson(\lambda)$.
+
+:::
+
+
+:::{.question}
+#### Question 5 (code)
+
+Using the result from question 4, write an R function called `my_rpoisson` which satisfies the following requirements:
+
+Inputs:
+
+* `n`: the number of samples to take
+* `lambda`: the parameter $\lambda$ of the Poisson distribution; $\lambda \geq 0$
+
+Output: a vector of length $n$, containing the Poisson samples
+
+Error handling: the function should throw an error and provide an informative error message if $\lambda$ is negative
+
+Additional requirements: 
+
+* You may not use any existing Poisson functions to write your code
+* You must use the method described in question 4
+* Use the `runif` function to generate uniform samples
+
+**Test cases:** See the R template which has the unit tests. The unit tests will test your error handling and sampling.
+:::
+
+
+## The Box-Muller transform
+
+The inverse transform method is one way to generate samples from a particular distribution; however, the inverse transform method can be difficult to implement when there is no closed form solution for the inverse cdf. An important example of this scenario is the Normal distribution, which does not even have a closed form solution for the cdf, never mind the inverse cdf.
+
+Fortunately, other methods can be used to generate random variables. In some cases, other transformations will produce the desired distribution; for example, a chi-square distribution can be created by summing independent squared standard normals.
+
+In the case of the Normal distribution, one method is the **Box-Muller** transform.
+
+**Definition (Box-Muller transform):** Let $U_1, U_2$ be independent $Uniform(0, 1)$ random variables. Define
+
+$$X_1 = \sqrt{-2 \log(U_1)} \cos (2 \pi U_2)$$
+
+$$X_2 = \sqrt{-2 \log(U_1)} \sin (2 \pi U_2)$$
+
+Then, $X_1, X_2$ are independent $N(0, 1)$ random variables.
+
+The goal of this portion of the assignment is to show that the Box-Muller transform works. To do so, we will need to revisit transformations of multiple random variables.
+
+### Transformations of multiple random variables
+
+Let $(X_1,...,X_n)'$ be a continuous random vector with joint pdf $f_X(x_1,...,x_n)$. Let $(Y_1,...,Y_n)'$ be a continuous random vector defined by
+
+$$Y_1 = g_1(X_1,...,X_n) \hspace{1cm} Y_2 = g_2(X_1,...,X_n) \hspace{1cm} \text{etc.}$$
+Assume that the functions $g_1,...,g_n$ are such that for all $(y_1,...,y_n)$ there is exactly one $(x_1,...,x_n)$ such that $(y_1,...,y_n) = (g_1(x_1,...,x_n),...,g_n(x_1,...,x_n))$. That is, collectively the transformation is invertible, and we can define functions $h_1,...,h_n$ such that $x_1 = h_1(y_1,...,y_n)$, $x_2 = h_2(y_1,...,y_n)$, etc.
+
+Then, the joint pdf of $(Y_1,...,Y_n)'$ is given by
+
+$$f_Y(y_1,...,y_n) = f_X(h_1(y_1,...,y_n), ..., h_n(y_1,...,y_n)) \ |\det({\bf J})|$$
+
+where $|\det ({\bf J})|$ is the absolute value of the determinant of the matrix of partial derivatives:
+
+$$\det({\bf J}) = \begin{vmatrix} \frac{\partial x_1}{\partial y_1} & \frac{\partial x_1}{\partial y_2} & \cdots & \frac{\partial x_1}{\partial y_n} \\ \frac{\partial x_2}{\partial y_1} & \frac{\partial x_2}{\partial y_2} & \cdots & \frac{\partial x_2}{\partial y_n} \\ \vdots & \vdots & \cdots & \vdots \\ \frac{\partial x_n}{\partial y_1} & \frac{\partial x_n}{\partial y_2} & \cdots & \frac{\partial x_n}{\partial y_n} \end{vmatrix}$$
+
+and the partial derivatives are $\dfrac{\partial x_i}{\partial y_j} = \dfrac{\partial h_i(y_1,...,y_n)}{\partial y_j}$
+
+### Sidebar: partial derivatives
+
+Suppose you have a function of multiple variables. For example, consider
+
+$$f(x, y) = ax^2 + bxy + cy^2$$
+
+We'd like to understand how that function changes as we change $x$. To do this, we can take a derivative with respect to $x$. Similarly, if we want to understand how the function changes as we change $y$, then we need to take a derivative with respect to $y$. Because there are other variables in the function, these derivatives are called *partial* derivatives.
+
+To calculate a partial derivative, I just treat any other variables in the function as fixed when I calculate the derivative. For example,
+
+$$\frac{\partial f}{\partial x} = 2ax + by \hspace{0.5cm} \text{(treating y as a constant here!)}$$
+
+
+:::{.question}
+#### Question 6 (written)
+
+Suppose that $X_1, X_2$ are generated by the Box-Muller transform, as defined above. Prove that $X_1, X_2$ are independent, $N(0, 1)$ random variables.
+
+*Hints:*
+
+* Begin by inverting the transform to find $U_1$ and $U_2$ as functions of $X_1$ and $X_2$
+* You may wish to revisit facts about trigonometric functions, such as their derivatives. You may look these facts up as needed
+
+Show all work.
+:::
+
+
+## Acceptance-rejection sampling
+
+Another method for sampling from a distribution of interest is acceptance-rejection sampling. Suppose we wish to sample a random variable with probability function $f$, and we have the ability to sample from some other distribution with probability function $g$, such that for some $c > 0$,
+
+$$\frac{f(t)}{g(t)} \leq c \hspace{1cm} \text{for all } t \text{ where } f(t) > 0$$
+
+
+Acceptance-rejection sampling then generates a sample $x$ from $f$ as follows:
+
+1. Sample $y \sim g$
+2. Sample $u \sim Uniform(0, 1)$
+3. If $\dfrac{f(y)}{cg(y)} \leq u$, set $x = y$. Otherwise, return to step 1.
+
+### Rayleigh distribution
+
+The $Rayleigh(\sigma)$ distribution has density
+$$f(x) = \frac{x}{\sigma^2} e^{-\frac{x^2}{2 \sigma^2}}, \hspace{1cm} \text{ for } x \geq 0,$$
+where $\sigma>0$ is the scale parameter of the distribution.
+
+:::{.question}
+#### Question 7 (written)
+
+Propose a candidate distribution $g$ for acceptance-rejection sampling from the Rayleigh distribution. Explain your choice of $g$, and find the value $c$.
+:::
+
+:::{.question}
+#### Question 8 (code)
+
+Using your answer to question 9, write a function called `my_rrayleigh` to simulate from the Rayleigh distribution with acceptance-rejection sampling. Your function should satisfy the following requirements:
+
+Inputs:
+
+* `n`: the number of samples to take
+* `scale`: the scale parameter $\sigma$ of the Rayleigh distribution; $\sigma > 0$
+
+Output: a vector of length $n$, containing the Rayleigh samples
+
+Error handling: the function should throw an error and provide an informative error message if $\sigma \leq 0$
+
+Additional requirements: 
+
+* You may not use any existing Rayleigh functions to write your code
+* You must use acceptance-rejection sampling
+* You *may* (and should) use existing R functions to simulate from your candidate distribution $g$
+* Use the `runif` function to generate uniform samples
+
+**Test cases:** See the R template which has the unit tests. The unit tests will test your error handling and sampling.
+:::

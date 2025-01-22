@@ -1,10 +1,76 @@
 ---
-title: "Lecture 5: Logistics of using C++ in R"
+title: "Lecture 5: Using C++ in R"
 author: "Ciaran Evans"
 output: beamer_presentation
 ---
 
-## Previously
+## Previously 
+
+```{Rcpp, eval=F}
+arma::vec my_lcgC(int n, uint32_t x0, 
+                  uint64_t m = 4294967296, 
+                  uint32_t a = 1664525, 
+                  uint32_t c = 1013904223){
+  arma::uvec x(n);
+
+  x[0] = x0;
+  for(int i = 1; i < n; i++){
+    x[i] = (a*x[i-1] + c) % m;
+  }
+  
+  arma::vec u = arma::conv_to<arma::vec>::from(x);
+  return u/m;
+}
+```
+
+## Comparing R and C++ speed
+
+```{r, include=F}
+Rcpp::cppFunction('arma::vec my_lcgC(int n, uint32_t x0, 
+                  uint64_t m = 4294967296, 
+                  uint32_t a = 1664525, 
+                  uint32_t c = 1013904223){
+  arma::uvec x(n);
+
+  x[0] = x0;
+  for(int i = 1; i < n; i++){
+    x[i] = (a*x[i-1] + c) % m;
+  }
+  
+  arma::vec u = arma::conv_to<arma::vec>::from(x);
+  return u/m;
+}', depends = "RcppArmadillo")
+
+my_lcg <- function(n, x0, m = 2^32, 
+                   a = 1664525, c = 1013904223){
+  x <- rep(NA, n)
+  x[1] <- x0
+  for(i in 2:n){
+    x[i] <- (a * x[i-1] + c) %% m
+  }
+  return(x/m)
+}
+```
+
+```{r}
+bench::mark(
+  my_lcg(1000, 1),
+  my_lcgC(1000, 1),
+  check=F
+)
+```
+
+## Some key points
+
+* C++ can be faster than an equivalent implementation in R, especially loops/iteration
+* C++ can be more general-purpose, and provides a wider variety of certain data types
+* C++ *always* needs to know the type of an object
+    * This is true for inputs, outputs, *and* any variables you create
+* In C++, indexing begins at 0
+* C++ needs a `;` at the end of each line
+* The Armadillo library provides many useful objects and functions that behave similarly to R counterparts
+
+## Using C++ in R
 
 ```{r}
 Rcpp::cppFunction('double sumC(arma::vec x) {
@@ -49,7 +115,15 @@ sumC(x)
 Full, detailed instructions provided on course website
 
 
-## Homework 2
+## Practice questions and Homework 2
+
+Practice questions:
+
+[https://sta379-s25.github.io/practice_questions/pq_4.html](https://sta379-s25.github.io/practice_questions/pq_4.html)
+
+HW 2:
+
+[https://sta379-s25.github.io/homework/hw2.html](https://sta379-s25.github.io/homework/hw2.html)
 
 * Practice writing functions with C++ source code
 * Accept the assignment through GitHub classroom

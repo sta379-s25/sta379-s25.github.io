@@ -7,7 +7,7 @@
 
     
     
-    <title>Homework 2</title>
+    <title>Homework 3</title>
 
         <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -1641,28 +1641,19 @@ margin-left: 0 !important;
    <div class="book with-summary">
       <div class="book-summary">
         <ul>
-          <li class="title">Homework 2</li>
+          <li class="title">Homework 3</li>
           <li class="divider"></li>
         </ul>
         <nav role="navigation" id="toc">
           <ul>
-          <li><a href="#instructions" id="toc-instructions">Instructions</a>
-          <ul>
-          <li><a href="#getting-started" id="toc-getting-started">Getting started</a></li>
-          <li><a href="#r-functions-with-c-source-code" id="toc-r-functions-with-c-source-code">R functions with C++
-          source code</a></li>
-          <li><a href="#workflow" id="toc-workflow">Workflow</a></li>
-          </ul></li>
-          <li><a href="#function-practice-in-c" id="toc-function-practice-in-c">Function practice in C++</a>
-          <ul>
-          <li><a href="#example-correlation" id="toc-example-correlation">Example: Correlation</a></li>
-          <li><a href="#pearsons-chi-squared-test" id="toc-pearsons-chi-squared-test">Pearson’s chi-squared
-          test</a></li>
-          <li><a href="#empirical-cdf-revisited" id="toc-empirical-cdf-revisited">Empirical CDF
-          revisited</a></li>
-          <li><a href="#permutation-test-for-a-difference-in-means" id="toc-permutation-test-for-a-difference-in-means">Permutation
-          test for a difference in means</a></li>
-          </ul></li>
+          <li><a href="#the-inverse-transform-method" id="toc-the-inverse-transform-method">The inverse transform
+          method</a></li>
+          <li><a href="#generating-poisson-random-variables" id="toc-generating-poisson-random-variables">Generating
+          Poisson random variables</a></li>
+          <li><a href="#the-box-muller-transform" id="toc-the-box-muller-transform">The Box-Muller
+          transform</a></li>
+          <li><a href="#acceptance-rejection-sampling" id="toc-acceptance-rejection-sampling">Acceptance-rejection
+          sampling</a></li>
           </ul>
         </nav>
         <ul class="authors">
@@ -1679,7 +1670,7 @@ margin-left: 0 !important;
       
    
         
-      <h1 class="title">Homework 2</h1>
+      <h1 class="title">Homework 3</h1>
       
         
 
@@ -1687,26 +1678,25 @@ margin-left: 0 !important;
       
    
 <!-- Don't indent these lines or it will mess pre blocks indentation --> 
-<p><strong>Due:</strong> Friday, January 31 at 10:00am</p>
+<p><strong>Due:</strong></p>
 <p><strong>Submission:</strong> For this assignment, you will submit two
-separate files:</p>
+files:</p>
 <ul>
-<li>A C++ script (<code>hw2_code.cpp</code> file) containing your C++
-functions for questions 1, 2, and 4 (see below for more details on the
-C++ script)</li>
-<li>An R script (<code>hw2_code.R</code>) containing your R function for
-question 3, sourcing your C++ file for questions 1, 2, 4, and running
-the unit tests of all functions</li>
+<li>An R script containing your functions for questions 2, 4, 7, 10 and
+the corresponding unit tests</li>
+<li>A pdf containing your written answers to questions 1, 3, 5, 6, 8,
+9</li>
 </ul>
 <p><strong>Mastery:</strong> To master this assignment, you must satisfy
 the following requirements:</p>
 <ul>
-<li>Your code must pass all specified unit tests
-(<code>hw2_tests.R</code>), <em>as written</em> (you may not modify the
-unit tests which I provide)</li>
+<li>Your code must pass all specified unit tests, <em>as written</em>
+(you may not modify the unit tests which I provide)</li>
 <li>Your code must meet all requirements described in the questions
 below (matching the requested inputs and outputs)</li>
 <li>You must comment your code</li>
+<li>Your written solutions must be complete and correct, with no missing
+steps or mistakes</li>
 <li>Your work must abide by the academic honesty requirements in the
 syllabus</li>
 </ul>
@@ -1714,465 +1704,300 @@ syllabus</li>
 master all of the questions on your first submission, you will have one
 resubmission attempt after receiving feedback.</p>
 <p><strong>Resources:</strong></p>
-<ul>
-<li><a href="https://sta379-s25.github.io/resources/github_instructions/">Git
-and GitHub assignment instructions</a></li>
-<li><a href="https://sta379-s25.github.io/resources/rstudio_server/">RStudio
-server instructions</a></li>
-<li><a href="https://arma.sourceforge.net/docs.html"><code>Armadillo</code>
-documentation</a></li>
-</ul>
-<div id="instructions" class="section level1">
-<h1>Instructions</h1>
-<div id="getting-started" class="section level2">
-<h2>Getting started</h2>
-<ol style="list-style-type: decimal">
-<li>Log in to the class <a href="https://sta379.deac.wfu.edu/">DEAC
-OnDemand site</a> and initialize an RStudio server session; follow the
-<a href="https://sta379-s25.github.io/resources/rstudio_server/">RStudio
-server instructions</a>. Make sure to limit the resources you
-request!</li>
-<li>Go to Canvas -&gt; Assignments -&gt; HW 2. Open the GitHub Classroom
-assignment link.</li>
-<li>Accept the assignment and clone the repository through the
-<strong>RStudio server session</strong> (NOT your local computer, unless
-you are confident that you have C++, <code>Rcpp</code>, and
-<code>RcppArmadillo</code> correctly installed and working)</li>
-<li>The repository contains the files <code>hw2_code.R</code>,
-<code>hw2_code.cpp</code>, and <code>hw2_tests.R</code>. Write your code
-for questions 1, 2, and 4 in the <code>hw2_code.cpp</code> file. Write
-your code for question 3 in the <code>hw2_code.R</code> file. Commit and
-push to GitHub regularly.</li>
-<li>When you pause work, save, commit, and push to GitHub. Then quit the
-RStudio server session.</li>
-<li>When your code is complete and passes all tests and requirements,
-commit and push the final version to GitHub. Then <a href="https://sta379-s25.github.io/resources/github_instructions/#step-10-request-feedback">request
-feedback</a> from me on the “Feedback” pull request in your homework 2
-repository</li>
-</ol>
+<div id="the-inverse-transform-method" class="section level2">
+<h2>The inverse transform method</h2>
+<p>In previous activities and assignments, you have worked on generating
+(pseudo-random) <span class="math inline">\(Uniform(0, 1)\)</span>
+samples. One method of generating other types of random variables is to
+use these uniform samples as a building block, and applying
+transformations to produce the distribution we want. When tractable, an
+attractive approach is the <em>inverse transform method</em>, in which
+we apply the inverse cdf to a uniform sample.</p>
+<p><strong>Definition:</strong> (inverse transform method) Let <span class="math inline">\(U \sim Uniform(0, 1)\)</span> be a uniform random
+variable, and let <span class="math inline">\(F\)</span> be the cdf of a
+distribution we would like to sample from (either continuous or
+discrete). Define <span class="math display">\[F^{-1}(u) = \inf \{x:
+F(x) \geq u\}\]</span> and let <span class="math inline">\(X =
+F^{-1}(U)\)</span>. Then, <span class="math inline">\(P(X \leq t) =
+F(t)\)</span>, i.e. <span class="math inline">\(X\)</span> has the
+desired cdf and is therefore a sample from the desired distribution.</p>
+<p>In the following questions, you will use the inverse transform method
+to simulate from a specified distribution. You will submit one written
+question in which you derive the inverse cdf, and one code-based
+question in which you use the inverse cdf method to sample from the
+desired distribution.</p>
+<div id="laplace-distribution" class="section level3">
+<h3>Laplace distribution</h3>
+<p>The <span class="math inline">\(Laplace(\mu, b)\)</span> distribution
+has pdf</p>
+<p><span class="math display">\[f(x) = \frac{1}{2b} \exp\left\lbrace -
+\frac{|x - \mu|}{b} \right\rbrace\]</span> where <span class="math inline">\(x, \mu \in \mathbb{R}\)</span> and <span class="math inline">\(b &gt; 0\)</span>.</p>
+<div id="question-1-written" class="section level4 question">
+<h4>Question 1 (written)</h4>
+<p>Derive the inverse transform for the <span class="math inline">\(Laplace(\mu, b)\)</span> distribution. That is, if
+<span class="math inline">\(U \sim Uniform(0, 1)\)</span>, find <span class="math inline">\(F^{-1}(U)\)</span> as a function of <span class="math inline">\(U\)</span>. Show all work.</p>
 </div>
-<div id="r-functions-with-c-source-code" class="section level2">
-<h2>R functions with C++ source code</h2>
-<p>In class, we saw this example of a C++ function, which we called in
-R:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>Rcpp<span class="sc">::</span><span class="fu">cppFunction</span>(<span class="st">&#39;double sumC(arma::vec x) {</span></span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="st">  int n = x.n_elem;</span></span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="st">  double total = 0;</span></span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="st">  for(int i = 0; i &lt; n; ++i) {</span></span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="st">    total += x[i];</span></span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="st">  }</span></span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="st">  return total;</span></span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="st">}&#39;</span>, <span class="at">depends =</span> <span class="st">&quot;RcppArmadillo&quot;</span>)</span>
-<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="fu">sumC</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>)</span></code></pre></div>
-<pre><code>## [1] 10</code></pre>
-<p>The function itself is written in C++, but is imported into R through
-<code>cppFunction</code>, which is part of the <code>Rcpp</code>
-package. The code for the function is contained in the string passed to
-<code>cppFunction</code>, and <code>depends = &quot;RcppArmadillo&quot;</code>
-means that we also need the Armadillo library.</p>
-<p>For short C++ functions, importing with <code>cppFunction</code>
-works fine. But for longer pieces of code, it isn’t the best solution.
-In general, you will instead write your code in a C++ file (file
-extension <code>.cpp</code>); the entire contents of the file will then
-be imported into R.</p>
-<div id="better-approach-separate-c-file" class="section level3">
-<h3>Better approach: separate C++ file</h3>
-<p>Open the <code>hw2_code.cpp</code> file in RStudio. At the top of
-this file, you will see the following:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;RcppArmadillo.h&gt;</span></span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="kw">using</span> <span class="kw">namespace</span> Rcpp<span class="op">;</span></span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">// [[Rcpp::depends(RcppArmadillo)]]</span></span></code></pre></div>
-<p>This information is telling C++ that we’ll be using Rcpp and
-RcppArmadillo. I will provide this header information for now; do not
-change this unless instructed.</p>
-<p>Next, you will see the code for the <code>sumC</code> example
-function. You don’t need this function to do the questions below, but I
-am including it here so you can see how everything works. You will also
-see helper functions that you will need for Question 4 below; you can
-ignore those helper functions for now, but make sure you don’t edit or
-delete them.</p>
-<p>Note that the <code>sumC</code> function has the tag
-<code>// [[Rcpp::export]]</code> directly above it. You will need to add
-this tag to any functions you want to export from C++ into R (functions
-without the tag can be called within your <code>.cpp</code> file, but
-will not be accessible in R).</p>
-</div>
-<div id="open-the-r-file" class="section level3">
-<h3>Open the R file</h3>
-<p>Next, open the <code>hw2_code.R</code> file. At the top of the file,
-you will see the following line:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>Rcpp<span class="sc">::</span><span class="fu">sourceCpp</span>(<span class="st">&quot;hw2_code.cpp&quot;</span>)</span></code></pre></div>
-<p>This line exports the functions (that is, all functions tagged with
-<code>// [[Rcpp::export]]</code>) from C++ to R. You will then be able
-to call them in R!</p>
-</div>
-</div>
-<div id="workflow" class="section level2">
-<h2>Workflow</h2>
-<ol style="list-style-type: decimal">
-<li>Write code in C++; tag any functions to export</li>
-<li>Whenever you have new code you want to test: save the
-<code>.cpp</code> file, re-run <code>sourceCpp</code>, and test out the
-function in your R script or console</li>
-<li>Work question by question – make sure that your code for one
-question runs and passes unit tests before moving on. Don’t wait until
-the very end to test your code!</li>
-</ol>
-</div>
-</div>
-<div id="function-practice-in-c" class="section level1">
-<h1>Function practice in C++</h1>
-<div id="example-correlation" class="section level2">
-<h2>Example: Correlation</h2>
-<p>Before you get started writing your own functions, here is an example
-of another function written in C++, to calculate the correlation
-coefficient.</p>
-<p>Suppose we have a sample <span class="math inline">\((X_1,
-Y_1),...,(X_n, Y_n)\)</span> of <span class="math inline">\(n\)</span>
-observations collected on two variables, <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>. The <em>sample correlation</em> is
-given by</p>
-<p><span class="math display">\[\dfrac{ \sum \limits_{i=1}^n (X_i -
-\bar{X})(Y_i - \bar{Y})}{\left( \sum \limits_{i=1}^n (X_i - \bar{X})^2
-\right)^{1/2} \left( \sum \limits_{i=1}^n (Y_i - \bar{Y})^2
-\right)^{1/2}}\]</span></p>
-<p>In C++, our code might look like this:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="dt">double</span> cor_C<span class="op">(</span>arma<span class="op">::</span>vec x<span class="op">,</span> arma<span class="op">::</span>vec y<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  arma<span class="op">::</span>vec diffsx <span class="op">=</span> x <span class="op">-</span> mean<span class="op">(</span>x<span class="op">);</span></span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  arma<span class="op">::</span>vec diffsy <span class="op">=</span> y <span class="op">-</span> mean<span class="op">(</span>y<span class="op">);</span></span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="cf">return</span> sum<span class="op">(</span>diffsx <span class="op">%</span> diffsy<span class="op">)/</span></span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>    <span class="op">(</span>sqrt<span class="op">(</span>sum<span class="op">(</span>square<span class="op">(</span>diffsx<span class="op">)))</span> <span class="op">*</span> </span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>      sqrt<span class="op">(</span>sum<span class="op">(</span>square<span class="op">(</span>diffsy<span class="op">))));</span></span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<ul>
-<li>Our desired inputs are two vectors, <code>x</code> and
-<code>y</code>. We will use <code>arma::vec</code> objects here. (An
-implicit assumption is that <code>x</code> and <code>y</code> are the
-same length; we will discuss error handling in a future assignment, but
-for now I am fine making that assumption)</li>
-<li>Our desired output is the sample correlation, which is a
-<code>double</code></li>
-<li>Note the following C++ functions that behave similarly to R
-counterparts:
-<ul>
-<li><code>mean</code> calculates the mean of a vector</li>
-<li><code>sum</code> takes the sum of a vector</li>
-<li><code>sqrt</code> takes the square root</li>
-<li><code>square</code> squares each element of a vector</li>
-</ul></li>
-<li>Operators:
-<ul>
-<li><code>+</code> and <code>-</code> work the same in C++ and R</li>
-<li>Armadillo vectors allow us to add/subtract a single value to all
-elements of a vector (e.g., <code>x - mean(x)</code> subtracts the mean
-from each element of the vector <code>x</code>)</li>
-<li>In Armadillo, element-wise multiplication of vectors is done by
-<code>%</code></li>
-</ul></li>
-</ul>
-</div>
-<div id="pearsons-chi-squared-test" class="section level2">
-<h2>Pearson’s chi-squared test</h2>
-<p>In Homework 1, you wrote a <code>diehard_permtest</code> function
-which assessed whether all orderings of three consecutive numbers were
-equally likely in a “randomly” generated sequence. As part of this
-function, you used a chi-squared test to compare the observed counts of
-permutations to the expected counts (under the assumption that all are
-equally likely).</p>
-<p>Let’s review what a chi-squared test is doing here. Suppose that we
-have a categorical variable, which has <span class="math inline">\(k\)</span> different levels (e.g., <span class="math inline">\(1,...,k\)</span>). We are interested in testing
-whether this variable comes from some hypothesized distribution. The
-distribution of a categorical variable is defined by the probability for
-each category, so our hypothesized distribution is specified in terms of
-<span class="math inline">\(k\)</span> different probability values,
-<span class="math inline">\(p_1,...,p_k\)</span>, such that <span class="math inline">\(\sum \limits_{i=1}^{k} p_i = 1\)</span>.</p>
-<p>Let <span class="math inline">\(O_i\)</span> be the observed count in
-each category, and <span class="math inline">\(n = \sum_i O_i\)</span>
-be the total count across all categories. Given these <span class="math inline">\(n\)</span> observations, if our hypothesized
-distribution were true, we would <em>expect</em> to see <span class="math inline">\(n p_i\)</span> observations in category <span class="math inline">\(i\)</span>. The idea of the chi-squared test is
-then to compare the observed counts with these expected counts; if they
-are very different, we have evidence against the null hypothesis that
-the distribution follows the specified probabilities.</p>
-<p>In particular, the test statistic for the chi-squared test is:</p>
-<p><span class="math display">\[X^2 = \sum \limits_{i=1}^k \frac{(O_i -
-E_i)^2}{E_i}\]</span></p>
-<p>Your task in this question is to write a function, in C++, which
-calculates this test statistic (you do not need to calculate a p-value
-here; C++ is good for some things, but in general R has better support
-for random variables (cdfs, pdfs, etc)).</p>
-<div id="question-1" class="section level4 question">
-<h4>Question 1</h4>
-<p>Write a function in C++ called <code>chisq_testC</code> which
-satisfies the following requirements:</p>
+<p>Now let’s implement a function to simulate from the Laplace
+distribution. Before we do, however, we should think about possible
+errors that could arise when calling our function. Note from the
+definition above that the parameter <span class="math inline">\(b\)</span> for the Laplace must both be positive.
+If someone tries to sample from the Laplace distribution with a bad
+parameter value, they should get an error message telling them that the
+inputs are wrong.</p>
+<p>In R, we can include error messages inside functions using the
+<code>stop()</code> function. Here is an example in which we write our
+own square root function:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>my_sqrt <span class="ot">&lt;-</span> <span class="cf">function</span>(x){</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  <span class="cf">if</span>(x <span class="sc">&lt;</span> <span class="dv">0</span>){</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>    <span class="fu">stop</span>(<span class="st">&quot;The square root of a negative number is complex&quot;</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>  }</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>  </span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>  x<span class="sc">^</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">2</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>}</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="fu">my_sqrt</span>(<span class="dv">4</span>)</span></code></pre></div>
+<pre><code>## [1] 2</code></pre>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">my_sqrt</span>(<span class="sc">-</span><span class="dv">4</span>)</span></code></pre></div>
+<pre><code>## Error in my_sqrt(-4): The square root of a negative number is complex</code></pre>
+<div id="question-2-code" class="section level4 question">
+<h4>Question 2 (code)</h4>
+<p>Write an R function called <code>my_rlaplace</code> to sample from
+the Laplace distribution using the inverse transform method, with the
+following requirements:</p>
 <p>Inputs:</p>
 <ul>
-<li><code>x</code>: an <code>arma::vec</code> which contains the
-observed counts for the categorical variable</li>
-<li><code>p</code>: an <code>arma::vec</code>, of the same length as
-<code>x</code>, which contains the hypothesized probabilities for each
-category</li>
+<li><code>n</code>: the number of samples to take</li>
+<li><code>mu</code>: the parameter <span class="math inline">\(\mu\)</span> of the Laplace defined above</li>
+<li><code>b</code>: the parameter <span class="math inline">\(b\)</span>
+of the Laplace defined above; <span class="math inline">\(b &gt;
+0\)</span></li>
 </ul>
-<p>Output: a double, containing the chi-squared test statistic defined
-above.</p>
+<p>Output: a vector of length <span class="math inline">\(n\)</span>,
+containing the Laplace samples</p>
+<p>Error handling: the function should throw an error and provide an
+informative error message if <code>b</code> is not strictly positive</p>
 <p>Additional requirements:</p>
 <ul>
-<li>You may not use any existing chi-squared test implementations to
-write your function</li>
-<li>You are not permitted to use a for loop (or similar iteration) in
-this function. Rather, I want you to leverage the Armadillo library
-here. R will let you do element-wise operations with vectors, matrices,
-etc., and Armadillo allows you to do the same sort of thing</li>
+<li>You may not use any existing Laplace functions to write your
+code</li>
+<li>You must use the inverse transform method</li>
+<li>Use the <code>runif</code> function to generate your uniform
+sample</li>
 </ul>
-<p><em>Hints:</em></p>
+<p><strong>Test cases:</strong> See the R template which has the unit
+tests. The unit tests will test your error handling, sampling, and will
+perform a KS test to compare the generated sample with the Laplace
+distribution.</p>
+</div>
+</div>
+</div>
+<div id="generating-poisson-random-variables" class="section level2">
+<h2>Generating Poisson random variables</h2>
+<p>There are a couple different ways in which we can generate Poisson
+random variables. One option is the discrete version of the inverse
+transform method, which is described in <em>Statistical Computing with
+R</em> in Section 3.2.2.</p>
+<p>Another option uses the connection between exponential and Poisson
+random variables: if the time between events is exponential, then the
+number of events which happen in a fixed window follows a Poisson
+distribution. In particular, suppose that <span class="math inline">\(Y_1, Y_2,... \overset{iid}{\sim}
+Exponential(\lambda)\)</span>, and let</p>
+<p><span class="math display">\[J = \min \left\lbrace j: \sum
+\limits_{i=1}^j Y_i &gt; 1\right\rbrace\]</span> <span class="math display">\[X= J - 1\]</span> Then <span class="math inline">\(X \sim Poisson(\lambda)\)</span>.</p>
+<div id="question-3-written" class="section level4 question">
+<h4>Question 3 (written)</h4>
+<p>Prove that <span class="math inline">\(X \sim
+Poisson(\lambda)\)</span>, as defined above.</p>
+<p>You may use the following without proof/derivation:</p>
 <ul>
-<li>there are a few Armadillo functions that can be used with
-<code>arma::vec</code> objects which you will find useful:
-<code>sum</code> and <code>pow</code>. See the <a href="https://arma.sourceforge.net/docs.html">Armadillo
-documentation</a> for more details, and also check out the <a href="https://arma.sourceforge.net/docs.html#operators">operators</a>
-section for information on element-wise arithmetic and other
-operations.</li>
-<li>Here is a template to get you started on this function (fill in the
-<code>...</code>):</li>
+<li>The cdfs and probability functions of the exponential, Poisson, and
+gamma distributions</li>
+<li>If <span class="math inline">\(Y_1,...,Y_n \overset{iid}{\sim}
+Exponential(\lambda)\)</span>, then <span class="math inline">\(\sum
+\limits_{i=1}^n Y_i \sim Gamma(n, \lambda)\)</span>, with pdf <span class="math inline">\(f(t) = \frac{\lambda^n }{\Gamma(n)} t^{n-1}
+e^{-\lambda t}\)</span></li>
+<li><span class="math inline">\(\Gamma(n) = (n-1)!\)</span></li>
 </ul>
-<div class="sourceCode" id="cb6"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="dt">double</span> chisq_testC<span class="op">(...)</span> <span class="op">{</span></span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  <span class="op">...</span></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-<p><strong>Test cases:</strong> See the unit tests in
-<code>hw2_tests.R</code></p>
+<p>Show all other work.</p>
 </div>
+<p>In practice, we often rely on uniform rather than exponential
+distributions.</p>
+<div id="question-4-written" class="section level4 question">
+<h4>Question 4 (written)</h4>
+<p>Let <span class="math inline">\(U_1, U_2, ... \overset{iid}{\sim}
+Uniform(0, 1)\)</span>. Let</p>
+<p><span class="math display">\[J = \min \left\lbrace j: \prod
+\limits_{i=1}^j U_i &lt; e^{-\lambda}\right\rbrace\]</span> <span class="math display">\[X= J - 1\]</span></p>
+<p>Using the result from question 3, show that <span class="math inline">\(X \sim Poisson(\lambda)\)</span>.</p>
 </div>
-<div id="empirical-cdf-revisited" class="section level2">
-<h2>Empirical CDF revisited</h2>
-<p>Recall the empirical cdf from HW 1:</p>
-<p><strong>Definition:</strong> (Empirical CDF) Suppose that <span class="math inline">\(X_1,...,X_n\)</span> are a random sample from some
-distribution with cdf <span class="math inline">\(F\)</span>. That is,
-<span class="math inline">\(F(t) = P(X_i \leq t)\)</span>. An empirical
-estimate of <span class="math inline">\(F\)</span>, called the
-<em>empirical cdf</em>, is given by</p>
-<p><span class="math display">\[\widehat{F}(t) = \frac{1}{n} \sum
-\limits_{i=1}^n {\bf 1}\{X_i \leq t\} = \frac{\#\{X_i \leq
-t\}}{n}\]</span></p>
-<p>On Homework 1, you wrote a couple different functions to calculate
-the empirical cdf. Here you will implement a function, in C++, which is
-similar to the <code>my_ecdf1</code> function from the first question of
-HW 1.</p>
-<div id="question-2" class="section level4 question">
-<h4>Question 2</h4>
-<p>Write a function in C++ called <code>my_ecdfC</code> which satisfies
-the following requirements:</p>
+<div id="question-5-code" class="section level4 question">
+<h4>Question 5 (code)</h4>
+<p>Using the result from question 4, write an R function called
+<code>my_rpoisson</code> which satisfies the following requirements:</p>
 <p>Inputs:</p>
 <ul>
-<li><code>x</code>: an <code>arma::vec</code>, containing the random
-sample for which to calculate the empirical cdf</li>
-<li><code>t</code>: an <code>arma::vec</code>, containing the points at
-which to evaluate the empirical cdf</li>
+<li><code>n</code>: the number of samples to take</li>
+<li><code>lambda</code>: the parameter <span class="math inline">\(\lambda\)</span> of the Poisson distribution;
+<span class="math inline">\(\lambda \geq 0\)</span></li>
 </ul>
-<p>Output: an <code>arma::vec</code> containing the empirical cdf
-evaluated at each point in <code>t</code>, i.e. <span class="math inline">\(\widehat{F}(t)\)</span>.</p>
+<p>Output: a vector of length <span class="math inline">\(n\)</span>,
+containing the Poisson samples</p>
+<p>Error handling: the function should throw an error and provide an
+informative error message if <span class="math inline">\(\lambda\)</span> is negative</p>
+<p>Additional requirements:</p>
+<ul>
+<li>You may not use any existing Poisson functions to write your
+code</li>
+<li>You must use the method described in question 4</li>
+<li>Use the <code>runif</code> function to generate uniform samples</li>
+</ul>
+<p><strong>Test cases:</strong> See the R template which has the unit
+tests. The unit tests will test your error handling and sampling.</p>
+</div>
+</div>
+<div id="the-box-muller-transform" class="section level2">
+<h2>The Box-Muller transform</h2>
+<p>The inverse transform method is one way to generate samples from a
+particular distribution; however, the inverse transform method can be
+difficult to implement when there is no closed form solution for the
+inverse cdf. An important example of this scenario is the Normal
+distribution, which does not even have a closed form solution for the
+cdf, never mind the inverse cdf.</p>
+<p>Fortunately, other methods can be used to generate random variables.
+In some cases, other transformations will produce the desired
+distribution; for example, a chi-square distribution can be created by
+summing independent squared standard normals.</p>
+<p>In the case of the Normal distribution, one method is the
+<strong>Box-Muller</strong> transform.</p>
+<p><strong>Definition (Box-Muller transform):</strong> Let <span class="math inline">\(U_1, U_2\)</span> be independent <span class="math inline">\(Uniform(0, 1)\)</span> random variables.
+Define</p>
+<p><span class="math display">\[X_1 = \sqrt{-2 \log(U_1)} \cos (2 \pi
+U_2)\]</span></p>
+<p><span class="math display">\[X_2 = \sqrt{-2 \log(U_1)} \sin (2 \pi
+U_2)\]</span></p>
+<p>Then, <span class="math inline">\(X_1, X_2\)</span> are independent
+<span class="math inline">\(N(0, 1)\)</span> random variables.</p>
+<p>The goal of this portion of the assignment is to show that the
+Box-Muller transform works. To do so, we will need to revisit
+transformations of multiple random variables.</p>
+<div id="transformations-of-multiple-random-variables" class="section level3">
+<h3>Transformations of multiple random variables</h3>
+<p>Let <span class="math inline">\((X_1,...,X_n)&#39;\)</span> be a
+continuous random vector with joint pdf <span class="math inline">\(f_X(x_1,...,x_n)\)</span>. Let <span class="math inline">\((Y_1,...,Y_n)&#39;\)</span> be a continuous random
+vector defined by</p>
+<p><span class="math display">\[Y_1 = g_1(X_1,...,X_n) \hspace{1cm} Y_2
+= g_2(X_1,...,X_n) \hspace{1cm} \text{etc.}\]</span> Assume that the
+functions <span class="math inline">\(g_1,...,g_n\)</span> are such that
+for all <span class="math inline">\((y_1,...,y_n)\)</span> there is
+exactly one <span class="math inline">\((x_1,...,x_n)\)</span> such that
+<span class="math inline">\((y_1,...,y_n) =
+(g_1(x_1,...,x_n),...,g_n(x_1,...,x_n))\)</span>. That is, collectively
+the transformation is invertible, and we can define functions <span class="math inline">\(h_1,...,h_n\)</span> such that <span class="math inline">\(x_1 = h_1(y_1,...,y_n)\)</span>, <span class="math inline">\(x_2 = h_2(y_1,...,y_n)\)</span>, etc.</p>
+<p>Then, the joint pdf of <span class="math inline">\((Y_1,...,Y_n)&#39;\)</span> is given by</p>
+<p><span class="math display">\[f_Y(y_1,...,y_n) = f_X(h_1(y_1,...,y_n),
+..., h_n(y_1,...,y_n)) \ |\det({\bf J})|\]</span></p>
+<p>where <span class="math inline">\(|\det ({\bf J})|\)</span> is the
+absolute value of the determinant of the matrix of partial
+derivatives:</p>
+<p><span class="math display">\[\det({\bf J}) = \begin{vmatrix}
+\frac{\partial x_1}{\partial y_1} &amp; \frac{\partial x_1}{\partial
+y_2} &amp; \cdots &amp; \frac{\partial x_1}{\partial y_n} \\
+\frac{\partial x_2}{\partial y_1} &amp; \frac{\partial x_2}{\partial
+y_2} &amp; \cdots &amp; \frac{\partial x_2}{\partial y_n} \\ \vdots
+&amp; \vdots &amp; \cdots &amp; \vdots \\ \frac{\partial x_n}{\partial
+y_1} &amp; \frac{\partial x_n}{\partial y_2} &amp; \cdots &amp;
+\frac{\partial x_n}{\partial y_n} \end{vmatrix}\]</span></p>
+<p>and the partial derivatives are <span class="math inline">\(\dfrac{\partial x_i}{\partial y_j} =
+\dfrac{\partial h_i(y_1,...,y_n)}{\partial y_j}\)</span></p>
+</div>
+<div id="sidebar-partial-derivatives" class="section level3">
+<h3>Sidebar: partial derivatives</h3>
+<p>Suppose you have a function of multiple variables. For example,
+consider</p>
+<p><span class="math display">\[f(x, y) = ax^2 + bxy + cy^2\]</span></p>
+<p>We’d like to understand how that function changes as we change <span class="math inline">\(x\)</span>. To do this, we can take a derivative
+with respect to <span class="math inline">\(x\)</span>. Similarly, if we
+want to understand how the function changes as we change <span class="math inline">\(y\)</span>, then we need to take a derivative with
+respect to <span class="math inline">\(y\)</span>. Because there are
+other variables in the function, these derivatives are called
+<em>partial</em> derivatives.</p>
+<p>To calculate a partial derivative, I just treat any other variables
+in the function as fixed when I calculate the derivative. For
+example,</p>
+<p><span class="math display">\[\frac{\partial f}{\partial x} = 2ax + by
+\hspace{0.5cm} \text{(treating y as a constant here!)}\]</span></p>
+<div id="question-6-written" class="section level4 question">
+<h4>Question 6 (written)</h4>
+<p>Suppose that <span class="math inline">\(X_1, X_2\)</span> are
+generated by the Box-Muller transform, as defined above. Prove that
+<span class="math inline">\(X_1, X_2\)</span> are independent, <span class="math inline">\(N(0, 1)\)</span> random variables.</p>
 <p><em>Hints:</em></p>
 <ul>
-<li>Recall that the <code>n_elem</code> attribute of an Armadillo vector
-returns the length of that vector</li>
-<li>In HW 1, I suggested you use the <code>sapply</code> function in R
-for cleaner code. In C++, you will need to use a loop instead</li>
-<li>In R, you can do element-wise comparisons with a vector. For
-example:</li>
+<li>Begin by inverting the transform to find <span class="math inline">\(U_1\)</span> and <span class="math inline">\(U_2\)</span> as functions of <span class="math inline">\(X_1\)</span> and <span class="math inline">\(X_2\)</span></li>
+<li>You may wish to revisit facts about trigonometric functions, such as
+their derivatives. You may look these facts up as needed</li>
 </ul>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span></span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>x <span class="sc">&lt;</span> <span class="dv">4</span></span></code></pre></div>
-<pre><code>## [1]  TRUE  TRUE  TRUE FALSE</code></pre>
-<p>Armadillo vectors allow for basically the same thing. If
-<code>x</code> is an <code>arma::vec</code> object, then
-<code>x &lt; 4</code> will produce an <code>arma::uvec</code> object.
-E.g.:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>arma<span class="op">::</span>uvec boolCompare <span class="op">=</span> x <span class="op">&lt;</span> <span class="dv">4</span><span class="op">;</span></span></code></pre></div>
-<pre><code>     [,1]
-[1,]   1
-[2,]   1
-[3,]   1
-[4,]   0</code></pre>
-<ul>
-<li>Integer division in C++ won’t produce a decimal; rather, C++ will
-round down to the nearest whole number. So, e.g., <code>3/5</code> in
-C++ will result in 0, <code>6/5</code> will give 1, etc. As a result,
-taking the <code>mean</code> of an <code>arma::uvec</code> which
-contains 0s and 1s will always give you 0. However, you could consider
-taking the <code>sum</code> instead, converting to a double, and then
-dividing by the number of elements. Consider the following
-examples:</li>
-</ul>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>Rcpp<span class="sc">::</span><span class="fu">cppFunction</span>(<span class="st">&#39;double short_example1(arma::vec x) {</span></span>
-<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="st">  return sum(x &lt; 3) / 4; // challenges with integers</span></span>
-<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="st">}&#39;</span>, <span class="at">depends =</span> <span class="st">&quot;RcppArmadillo&quot;</span>)</span>
-<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a></span>
-<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>Rcpp<span class="sc">::</span><span class="fu">cppFunction</span>(<span class="st">&#39;double short_example2(arma::vec x) {</span></span>
-<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="st">  // multiplying by 1.0 first casts the integer as a double, </span></span>
-<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="st">  // before we do the division</span></span>
-<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="st">  return 1.0*sum(x &lt; 3) / 4;</span></span>
-<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a><span class="st">}&#39;</span>, <span class="at">depends =</span> <span class="st">&quot;RcppArmadillo&quot;</span>)</span>
-<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a></span>
-<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a><span class="fu">short_example1</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>)</span></code></pre></div>
-<pre><code>## [1] 0</code></pre>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="fu">short_example2</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>)</span></code></pre></div>
-<pre><code>## [1] 0.5</code></pre>
-<p><strong>Test cases:</strong> See the unit tests in
-<code>hw2_tests.R</code></p>
+<p>Show all work.</p>
 </div>
 </div>
-<div id="permutation-test-for-a-difference-in-means" class="section level2">
-<h2>Permutation test for a difference in means</h2>
-<p>Suppose we have two samples: <span class="math inline">\(X_1,...,X_n\)</span> and <span class="math inline">\(Y_1,...,Y_m\)</span>. We are interested in testing
-whether these two samples come from the same distribution. One possibile
-test is our old friend, the two-sample t-test for a different in means.
-Welch’s two-sample t-test uses the test statistic</p>
-<p><span class="math display">\[t = \frac{\bar{X} -
-\bar{Y}}{\sqrt{\frac{s_X^2}{n} + \frac{s_Y^2}{m}}},\]</span></p>
-<p>where <span class="math inline">\(s_X^2 = \frac{1}{n-1} \sum
-\limits_{i=1}^n (X_i - \bar{X})^2\)</span> and <span class="math inline">\(s_Y^2 = \frac{1}{m-1} \sum \limits_{i=1}^m (Y_i -
-\bar{Y})^2\)</span>.</p>
-<p>However, this two-sample t-test is not the only way to test for a
-difference in means between the two samples. Another option is a
-<strong>permutation test</strong>. The logic of the permutation test is
-this: if there is no difference in the underlying distributions for the
-two samples, then I should be able to mix them up (i.e., shuffle which
-values came from population 1, and which values came from population 2),
-and recalculate the test statistic. Every such shuffling yields a
-different value for the test statistic, and collectively all the
-permutations gives me a <em>distribution</em> for the test statistic,
-under the null hypothesis that the two populations are interchangeable.
-If my observed test statistic from the original data looks “consistent”
-with this permutation distribution, then we don’t have evidence against
-the null hypothesis. On the other hand, if the observed test statistic
-looks “unusual” compared to the permutation values, then we do have
-evidence against the null hypothesis.</p>
-<p>Formally, our permutation test consists of the following steps:</p>
+</div>
+<div id="acceptance-rejection-sampling" class="section level2">
+<h2>Acceptance-rejection sampling</h2>
+<p>Another method for sampling from a distribution of interest is
+acceptance-rejection sampling. Suppose we wish to sample a random
+variable with probability function <span class="math inline">\(f\)</span>, and we have the ability to sample from
+some other distribution with probability function <span class="math inline">\(g\)</span>, such that for some <span class="math inline">\(c &gt; 0\)</span>,</p>
+<p><span class="math display">\[\frac{f(t)}{g(t)} \leq c \hspace{1cm}
+\text{for all } t \text{ where } f(t) &gt; 0\]</span></p>
+<p>Acceptance-rejection sampling then generates a sample <span class="math inline">\(x\)</span> from <span class="math inline">\(f\)</span> as follows:</p>
 <ol style="list-style-type: decimal">
-<li>Calculate the observed test statistic, in this case <span class="math inline">\(T_{obs} = \bar{X} - \bar{Y}\)</span></li>
-<li>Combine the samples (which we can do under the null hypothesis of no
-difference): <span class="math inline">\(Z = (X_1,...,X_n,
-Y_1,...,Y_m)\)</span>. Also, create a vector to label which sample
-corresponds to each entry of <span class="math inline">\(Z\)</span>,
-e.g. <span class="math inline">\(L = (0, 0,...,0, 1, 1, ..., 1)\)</span>
-(first <span class="math inline">\(n\)</span> entries are 0, next <span class="math inline">\(m\)</span> entries are 1)</li>
-<li>Permute (shuffle) the labels (keeping the numbers of 0s and 1s
-fixed). Let <span class="math inline">\(L^*\)</span> be the permuted
-labels</li>
-<li>Calculate the test statistic for the permuted labels: <span class="math inline">\(T^* = \frac{1}{n} \sum \limits_{i=1}^{n+m} Z_i(1 -
-L_i^*) - \frac{1}{m} \sum \limits_{i=1}^{n+m} Z_i L_i^*\)</span></li>
-<li>Repeat steps 3-4 many, many times (call this number <span class="math inline">\(n_{reps}\)</span>, say), producing permutation
-statistics <span class="math inline">\(T_1^*,...,T_{n_{perms}}^*\)</span></li>
-<li>Calculate the permutation test p-value:</li>
+<li>Sample <span class="math inline">\(y \sim g\)</span></li>
+<li>Sample <span class="math inline">\(u \sim Uniform(0,
+1)\)</span></li>
+<li>If <span class="math inline">\(\dfrac{f(y)}{cg(y)} \leq u\)</span>,
+set <span class="math inline">\(x = y\)</span>. Otherwise, return to
+step 1.</li>
 </ol>
-<p><span class="math display">\[p = \frac{1}{n_{perms}} \sum
-\limits_{j=1}^{n_{perms}} {\bf 1}\{|T_j^*| \geq |T_{obs}|\}\]</span></p>
-<p>The ultimate goal will be to implement this permutation test in C++.
-However, it will be easier to implement in C++ if you first write it in
-R, to get a better feel for the algorithm. Then we can translate it to
-C++, in the process learning some of the C++ (and especially Armadillo)
-equivalents of R functionality.</p>
-<div id="question-3" class="section level4 question">
-<h4>Question 3</h4>
-<p>Write a function in R called <code>perm_test</code> which satisfies
-the following requirements:</p>
-<p>Inputs:</p>
-<ul>
-<li><code>x</code>: a vector, containing the first random sample</li>
-<li><code>y</code>: a vector, containing the second random sample</li>
-<li><code>nperms</code>: the number of permutations to run, with a
-default value of 1000</li>
-</ul>
-<p>Output: a list, containing the following named elements:</p>
-<ul>
-<li><code>obs</code>: the observed test statistic (difference in the
-sample means)</li>
-<li><code>perm_stats</code>: a vector of the permutation statistics
-<span class="math inline">\(T_i^*\)</span></li>
-<li><code>pval</code>: the permutation test p-value</li>
-</ul>
-<p>You may not use any existing permutation test implementations.</p>
-<p><em>Hints:</em></p>
-<ul>
-<li>Here is an example of creating a list in R with named entries:</li>
-</ul>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>ex_list <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="st">&quot;a&quot;</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>),</span>
-<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>                <span class="st">&quot;b&quot;</span> <span class="ot">=</span> <span class="fl">0.5</span>)</span>
-<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a></span>
-<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>ex_list<span class="sc">$</span>a</span></code></pre></div>
-<pre><code>## [1] 1 2 3</code></pre>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>ex_list<span class="sc">$</span>b</span></code></pre></div>
-<pre><code>## [1] 0.5</code></pre>
-<p><strong>Test cases:</strong> See the unit tests in
-<code>hw2_tests.R</code></p>
+<div id="rayleigh-distribution" class="section level3">
+<h3>Rayleigh distribution</h3>
+<p>The <span class="math inline">\(Rayleigh(\sigma)\)</span>
+distribution has density <span class="math display">\[f(x) =
+\frac{x}{\sigma^2} e^{-\frac{x^2}{2 \sigma^2}}, \hspace{1cm} \text{ for
+} x \geq 0,\]</span> where <span class="math inline">\(\sigma&gt;0\)</span> is the scale parameter of the
+distribution.</p>
+<div id="question-7-written" class="section level4 question">
+<h4>Question 7 (written)</h4>
+<p>Propose a candidate distribution <span class="math inline">\(g\)</span> for acceptance-rejection sampling from
+the Rayleigh distribution. Explain your choice of <span class="math inline">\(g\)</span>, and find the value <span class="math inline">\(c\)</span>.</p>
 </div>
-<p>Now let’s implement the permutation test in C++.</p>
-<div id="question-4" class="section level4 question">
-<h4>Question 4</h4>
-<p>Write a function in C++ called <code>perm_testC</code> which
-satisfies the following requirements:</p>
+<div id="question-8-code" class="section level4 question">
+<h4>Question 8 (code)</h4>
+<p>Using your answer to question 9, write a function called
+<code>my_rrayleigh</code> to simulate from the Rayleigh distribution
+with acceptance-rejection sampling. Your function should satisfy the
+following requirements:</p>
 <p>Inputs:</p>
 <ul>
-<li><code>x</code>: an <code>arma::vec</code>, containing the first
-random sample</li>
-<li><code>y</code>: an <code>arma::vec</code>, containing the second
-random sample</li>
-<li><code>nperms</code>: an int, the number of permutations to run, with
-a default value of 1000</li>
+<li><code>n</code>: the number of samples to take</li>
+<li><code>scale</code>: the scale parameter <span class="math inline">\(\sigma\)</span> of the Rayleigh distribution;
+<span class="math inline">\(\sigma &gt; 0\)</span></li>
 </ul>
-<p>Output: a list, containing the following named elements:</p>
+<p>Output: a vector of length <span class="math inline">\(n\)</span>,
+containing the Rayleigh samples</p>
+<p>Error handling: the function should throw an error and provide an
+informative error message if <span class="math inline">\(\sigma \leq
+0\)</span></p>
+<p>Additional requirements:</p>
 <ul>
-<li><code>obs</code>: double, the observed test statistic (difference in
-the sample means)</li>
-<li><code>perm_stats</code>: <code>arma::vec</code>, the permutation
-statistics <span class="math inline">\(T_i^*\)</span></li>
-<li><code>pval</code>: double, the permutation test p-value</li>
+<li>You may not use any existing Rayleigh functions to write your
+code</li>
+<li>You must use acceptance-rejection sampling</li>
+<li>You <em>may</em> (and should) use existing R functions to simulate
+from your candidate distribution <span class="math inline">\(g\)</span></li>
+<li>Use the <code>runif</code> function to generate uniform samples</li>
 </ul>
-<p><em>Hints:</em></p>
-<ul>
-<li>General advice: start small, and build up. For example, start by
-making your function just return the observed test statistic. Then do a
-single permutation (no iteration), and check that you get the expected
-results. Then continue adding more to the function.</li>
-<li>as part of the permutation test, you will need to be able to permute
-the entries of a vector in C++. This actually turns out to be a bit
-trickier than in R. I have provided a function for you (in the
-<code>hw2_code.cpp</code> file) called <code>random_shuffle</code>,
-which randomly shuffles the entries of an Armadillo vector and returns
-the shuffled vector. You will need to call this function in your C++
-code.</li>
-<li>you can combine Armadillo vectors with the <a href="https://arma.sourceforge.net/docs.html#join"><code>join_cols</code>
-function</a></li>
-<li>see <a href="https://gallery.rcpp.org/articles/armadillo-subsetting/">here</a>
-for examples of subsetting Armadillo vectors (note in particular
-<code>.elem()</code> and <code>find()</code>)</li>
-<li>regarding subsetting, see also the documentation on <a href="https://arma.sourceforge.net/docs.html#submat">submatrix views</a>
-(in particular <code>.subvec()</code>)</li>
-<li>to return a list, we will use the <code>List</code> class from Rcpp,
-which allows us to return list objects when calling a C++ function in R.
-Here is an example of small function which creates and returns such a
-<code>List</code> object</li>
-</ul>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>Rcpp<span class="sc">::</span><span class="fu">cppFunction</span>(<span class="st">&#39;List list_example() {</span></span>
-<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="st">  List output = List::create(Named(&quot;a&quot;) = 1,</span></span>
-<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a><span class="st">                             Named(&quot;b&quot;) = 0.5);</span></span>
-<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a><span class="st">  </span></span>
-<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a><span class="st">  return output;</span></span>
-<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a><span class="st">}&#39;</span>)</span>
-<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a></span>
-<span id="cb19-8"><a href="#cb19-8" tabindex="-1"></a>ex_list <span class="ot">&lt;-</span> <span class="fu">list_example</span>()</span>
-<span id="cb19-9"><a href="#cb19-9" tabindex="-1"></a>ex_list<span class="sc">$</span>a</span></code></pre></div>
-<pre><code>## [1] 1</code></pre>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a>ex_list<span class="sc">$</span>b</span></code></pre></div>
-<pre><code>## [1] 0.5</code></pre>
-<p><strong>Test cases:</strong></p>
-<ul>
-<li>See the unit tests in <code>hw2_tests.R</code></li>
-<li>The <code>hw2_code.R</code> file also benchmarks the speed of the R
-and C++ implementations. Unless you do a particularly nice job
-optimizing your R code, you should expect the C++ implementation to be
-quite a bit faster (the algorithm is, after all, essentially a for
-loop)</li>
-</ul>
+<p><strong>Test cases:</strong> See the R template which has the unit
+tests. The unit tests will test your error handling and sampling.</p>
 </div>
 </div>
 </div>

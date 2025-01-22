@@ -98,6 +98,38 @@ This line exports the functions (that is, all functions tagged with `// [[Rcpp::
 
 # Function practice in C++
 
+## Example: Correlation
+
+Before you get started writing your own functions, here is an example of another function written in C++, to calculate the correlation coefficient. 
+
+Suppose we have a sample $(X_1, Y_1),...,(X_n, Y_n)$ of $n$ observations collected on two variables, $X$ and $Y$. The *sample correlation* is given by
+
+$$\dfrac{ \sum \limits_{i=1}^n (X_i - \bar{X})(Y_i - \bar{Y})}{\left( \sum \limits_{i=1}^n (X_i - \bar{X})^2 \right)^{1/2} \left( \sum \limits_{i=1}^n (Y_i - \bar{Y})^2 \right)^{1/2}}$$
+
+In C++, our code might look like this:
+
+```{Rcpp, eval=F}
+double cor_C(arma::vec x, arma::vec y) {
+  arma::vec diffsx = x - mean(x);
+  arma::vec diffsy = y - mean(y);
+  return sum(diffsx % diffsy)/
+    (sqrt(sum(square(diffsx))) * 
+      sqrt(sum(square(diffsy))));
+}
+```
+
+* Our desired inputs are two vectors, `x` and `y`. We will use `arma::vec` objects here. (An implicit assumption is that `x` and `y` are the same length; we will discuss error handling in a future assignment, but for now I am fine making that assumption)
+* Our desired output is the sample correlation, which is a `double`
+* Note the following C++ functions that behave similarly to R counterparts:
+    * `mean` calculates the mean of a vector
+    * `sum` takes the sum of a vector
+    * `sqrt` takes the square root
+    * `square` squares each element of a vector
+* Operators:
+    * `+` and `-` work the same in C++ and R
+    * Armadillo vectors allow us to add/subtract a single value to all elements of a vector (e.g., `x - mean(x)` subtracts the mean from each element of the vector `x`)
+    * In Armadillo, element-wise multiplication of vectors is done by `%`
+
 ## Pearson's chi-squared test
 
 In Homework 1, you wrote a `diehard_permtest` function which assessed whether all orderings of three consecutive numbers were equally likely in a "randomly" generated sequence. As part of this function, you used a chi-squared test to compare the observed counts of permutations to the expected counts (under the assumption that all are equally likely).
