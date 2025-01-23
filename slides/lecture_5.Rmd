@@ -23,6 +23,48 @@ arma::vec my_lcgC(int n, uint32_t x0,
 }
 ```
 
+## Get the function into R
+
+```{r, warning=F, message=F, eval=F}
+Rcpp::cppFunction('arma::vec my_lcgC(int n, uint32_t x0, 
+                  uint64_t m = 4294967296, 
+                  uint32_t a = 1664525, 
+                  uint32_t c = 1013904223){
+  arma::uvec x(n);
+
+  x[0] = x0;
+  for(int i = 1; i < n; i++){
+    x[i] = (a*x[i-1] + c) % m;
+  }
+  
+  arma::vec u = arma::conv_to<arma::vec>::from(x);
+  return u/m;
+}', depends = "RcppArmadillo")
+
+my_lcgC(5, 1)
+```
+
+```{r, echo=F, warning=F,message=F}
+Rcpp::cppFunction('arma::vec my_lcgC(int n, uint32_t x0, 
+                  uint64_t m = 4294967296, 
+                  uint32_t a = 1664525, 
+                  uint32_t c = 1013904223){
+  arma::uvec x(n);
+
+  x[0] = x0;
+  for(int i = 1; i < n; i++){
+    x[i] = (a*x[i-1] + c) % m;
+  }
+  
+  arma::vec u = arma::conv_to<arma::vec>::from(x);
+  return u/m;
+}', depends = "RcppArmadillo")
+
+my_lcgC(5, 1) |> c()
+```
+
+
+
 ## Comparing R and C++ speed
 
 ```{r, include=F}
