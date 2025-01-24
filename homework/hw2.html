@@ -1890,10 +1890,12 @@ each category, so our hypothesized distribution is specified in terms of
 <p>Let <span class="math inline">\(O_i\)</span> be the observed count in
 each category, and <span class="math inline">\(n = \sum_i O_i\)</span>
 be the total count across all categories. Given these <span class="math inline">\(n\)</span> observations, if our hypothesized
-distribution were true, we would <em>expect</em> to see <span class="math inline">\(n p_i\)</span> observations in category <span class="math inline">\(i\)</span>. The idea of the chi-squared test is
-then to compare the observed counts with these expected counts; if they
-are very different, we have evidence against the null hypothesis that
-the distribution follows the specified probabilities.</p>
+distribution were true, we would <em>expect</em> to see <span class="math inline">\(n p_i\)</span> observations in category <span class="math inline">\(i\)</span>. Let <span class="math inline">\(E_i =
+n p_i\)</span> denote these expected counts.</p>
+<p>The idea of the chi-squared test is then to compare the observed
+counts with these expected counts; if they are very different, we have
+evidence against the null hypothesis that the distribution follows the
+specified probabilities.</p>
 <p>In particular, the test statistic for the chi-squared test is:</p>
 <p><span class="math display">\[X^2 = \sum \limits_{i=1}^k \frac{(O_i -
 E_i)^2}{E_i}\]</span></p>

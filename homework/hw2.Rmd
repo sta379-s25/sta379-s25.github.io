@@ -136,7 +136,9 @@ In Homework 1, you wrote a `diehard_permtest` function which assessed whether al
 
 Let's review what a chi-squared test is doing here. Suppose that we have a categorical variable, which has $k$ different levels (e.g., $1,...,k$). We are interested in testing whether this variable comes from some hypothesized distribution. The distribution of a categorical variable is defined by the probability for each category, so our hypothesized distribution is specified in terms of $k$ different probability values, $p_1,...,p_k$, such that $\sum \limits_{i=1}^{k} p_i = 1$. 
 
-Let $O_i$ be the observed count in each category, and $n = \sum_i O_i$ be the total count across all categories. Given these $n$ observations, if our hypothesized distribution were true, we would *expect* to see $n p_i$ observations in category $i$. The idea of the chi-squared test is then to compare the observed counts with these expected counts; if they are very different, we have evidence against the null hypothesis that the distribution follows the specified probabilities. 
+Let $O_i$ be the observed count in each category, and $n = \sum_i O_i$ be the total count across all categories. Given these $n$ observations, if our hypothesized distribution were true, we would *expect* to see $n p_i$ observations in category $i$. Let $E_i = n p_i$ denote these expected counts.
+
+The idea of the chi-squared test is then to compare the observed counts with these expected counts; if they are very different, we have evidence against the null hypothesis that the distribution follows the specified probabilities. 
 
 In particular, the test statistic for the chi-squared test is:
 
