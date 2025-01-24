@@ -261,7 +261,7 @@ Formally, our permutation test consists of the following steps:
 2. Combine the samples (which we can do under the null hypothesis of no difference): $Z = (X_1,...,X_n, Y_1,...,Y_m)$. Also, create a vector to label which sample corresponds to each entry of $Z$, e.g. $L = (0, 0,...,0, 1, 1, ..., 1)$ (first $n$ entries are 0, next $m$ entries are 1)
 3. Permute (shuffle) the labels (keeping the numbers of 0s and 1s fixed). Let $L^*$ be the permuted labels
 4. Calculate the test statistic for the permuted labels: $T^* = \frac{1}{n} \sum \limits_{i=1}^{n+m} Z_i(1 - L_i^*) - \frac{1}{m} \sum \limits_{i=1}^{n+m} Z_i L_i^*$
-5. Repeat steps 3-4 many, many times (call this number $n_{reps}$, say), producing permutation statistics $T_1^*,...,T_{n_{perms}}^*$
+5. Repeat steps 3-4 many, many times (call this number $n_{perms}$, say), producing permutation statistics $T_1^*,...,T_{n_{perms}}^*$
 6. Calculate the permutation test p-value:
 
 $$p = \frac{1}{n_{perms}} \sum \limits_{j=1}^{n_{perms}} {\bf 1}\{|T_j^*| \geq |T_{obs}|\}$$
