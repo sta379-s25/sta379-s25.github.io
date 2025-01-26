@@ -10,7 +10,7 @@ format: html
 ```{r}
 my_rpareto <- function(n, a, b){
   u <- runif(n)
-  x <- b*(1 - u)^{-1/a}
+  x <- b*(1 - u)^(-1/a)
   return(x)
 }
 
