@@ -14,6 +14,8 @@ TBA
 ## Challenges
 
 * [Challenge 1](https://sta379-s25.github.io/challenges/challenge_1.html)
+* [Challenge 2](https://sta379-s25.github.io/challenges/challenge_2.html)
+* [Challenge 3](https://sta379-s25.github.io/challenges/challenge_3.html)
 
 ## Homework
 

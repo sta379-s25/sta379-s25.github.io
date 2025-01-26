@@ -6,17 +6,23 @@ January 27
 : Transformation methods
   : [slides (pdf)](https://sta379-s25.github.io/slides/lecture_6.pdf), [practice questions](https://sta379-s25.github.io/practice_questions/pq_6.html), [practice question solutions](https://sta379-s25.github.io/practice_questions/pq_6_solutions.html)
   
-: *Statistical Computing with R* (Risso) Chapter 3
+: *Statistical Computing with R* (Rizzo) Chapter 3
 : *Computational Statistics* (Givens and Hoeting) Chapter 6.2.1-6.2.2
+
+: **Challenge 2 released**{: .label .label-blue }
+  : [Challenge 2](https://sta379-s25.github.io/challenges/challenge_2.html)
+  
+: **Challenge 3 released**{: .label .label-blue }
+  : [Challenge 3](https://sta379-s25.github.io/challenges/challenge_3.html)
 
 January 29
 : Acceptance-rejection sampling
 
-: *Statistical Computing with R* (Risso) Chapter 3
+: *Statistical Computing with R* (Rizzo) Chapter 3
 : *Computational Statistics* (Givens and Hoeting) Chapter 6.2.3
 
 January 31
 : Acceptance-rejection sampling
 
-: *Statistical Computing with R* (Risso) Chapter 3
+: *Statistical Computing with R* (Rizzo) Chapter 3
 : *Computational Statistics* (Givens and Hoeting) Chapter 6.2.3

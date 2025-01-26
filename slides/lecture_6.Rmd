@@ -4,6 +4,19 @@ author: "Ciaran Evans"
 output: beamer_presentation
 ---
 
+## Logistics
+
+* Nice work on HW 1!
+* Extra office hours today, 12pm - 1pm and 2pm - 4pm
+* Upcoming due dates:
+    * HW 2: Friday 10am
+    * HW 1 resubmissions: next Monday (February 3)
+    * Challenge 1 (command line): next Friday (Feb 7) 10am
+* New challenges released:
+    * Challenge 2: Mersenne Twister (due Feb 28)
+    * Challenge 3: Generating Poisson random variables (due Feb 28)
+* Remember: you do not have to do all challenges! Pick and choose ones of interest
+
 ## Previously
 
 Methods to generate $U \sim Uniform(0, 1)$:
