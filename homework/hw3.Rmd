@@ -7,12 +7,12 @@ output:
 link-citations: yes
 ---
 
-**Due:** 
+**Due:** Friday February 7, 10:00am
 
 **Submission:** For this assignment, you will submit two files:
 
-* An R script containing your functions for questions 2, 4, 7, 10 and the corresponding unit tests 
-* A pdf containing your written answers to questions 1, 3, 5, 6, 8, 9
+* An R script (`hw3_code.R`) containing your functions for questions 1, 3, and 6
+* A pdf containing your written answers to questions 2, 4, and 5
 
 **Mastery:** To master this assignment, you must satisfy the following requirements:
 
@@ -25,6 +25,105 @@ link-citations: yes
 If you make an honest effort to answer all questions, but you do not master all of the questions on your first submission, you will have one resubmission attempt after receiving feedback.
 
 **Resources:** 
+
+* *Statistical Computing with R* (Risso), Chapter 3
+* *Computational Statistics* (Givens and Hoeting), Chapter 6.2
+
+Both books are available electronically through the ZSR library
+
+## Preliminaries: assessing generated random variables
+
+In class, we have talked about several different methods for generating random variables. A crucial step when simulating a random variable is checking that it does actually follow the desired distribution!
+
+One way we did this in class was to use the empirical cdf, and compare the empirical cdf to the true cdf (which should be known if we are trying to simulate from a specific distribution). While visually comparing cdfs is a valuable approach, we might wonder whether we can formalize this comparison. That is, can we conduct a hypothesis test that would detect significant differences between the empirical cdf and the true cdf?
+
+The answer is yes, and comes in the form of the **Kolmogorov-Smirnov** (KS) test. In the first part of this assignment you will implement the KS test, to get a better feel for what the test is doing. In the remainder of the assignment, the KS test will be used in our unit tests to help assess the random variables we generate.
+
+### The Kolmogorov-Smirnov test
+
+Suppose we observe a univariate random sample $X_1,...,X_n$ of size $n$, from some population. We are interested in testing whether the generating distribution for this sample is some specified distribution; for example, we may wish to know whether the data come from a $Uniform(0, 1)$ distribution, or a $N(0, 1)$ distribution.
+
+Formally, let $F$ be the (unknown) distribution function (cdf) for the sample, i.e. $X_1,...,X_n \overset{iid}{\sim} F$. Let $F_0$ be the *hypothesized* distribution function (e.g., a particular uniform, or standard normal, or something else). We wish to test the following hypotheses:
+
+$$H_0: F = F_0$$
+$$H_A: F \neq F_0$$
+
+Note that this is a very strong null hypothesis. Often when testing hypotheses, we ask something about a single parameter, like the mean. Here, however, we are asking whether we know the entire *distribution*. In certain cases, however, this is the right kind of null hypothesis; when generating random numbers, for example, we really do want them to be $Uniform(0, 1)$.
+
+How does one test such hypotheses? One option, called the *Kolmogorov-Smirnov* (KS) test, utilizes our old friend the empirical cdf. In particular, the KS test is built by examining the maximal distance between the empirical cdf $\widehat{F}$, and the hypothesized cdf $F_0$:
+
+$$D = \sup \limits_t |\widehat{F}(t) - F_0(t)|$$
+
+Now, you may be wondering, how does one compute a supremum like this, if it is over uncountably many points? Fortunately, properties of the cdf mean that we really only need to consider the $n$ observed points. 
+
+Let $X_{(1)},...,X_{(n)}$ denote the *ordered* sample (from smallest to largest). Then, it turns out that 
+
+$$D = \max \limits_{1 \leq i \leq n} \left \lbrace F_0(X_{(i)}) - \frac{i-1}{n}, \frac{i}{n} - F_0(X_{(i)})\right\rbrace$$
+
+We then reject the null hypothesis that $F = F_0$ when our empirical cdf $\widehat{F}$ (i.e., our best estimate of the true cdf $F$) is far from the hypothesized cdf $F_0$. That is, we reject when $D$ is large!
+
+Here is an example of the KS test in action, using the `ks.test` function in R. First, we generate 100 samples from a $Uniform(0, 1)$ distribution, then test if they come from a $Uniform(0, 1)$:
+
+```{r}
+set.seed(27)
+x <- runif(100)
+ks.test(x, punif)
+```
+Here the test statistic is $D = 0.084932$, and the p-value is 0.4664. That's quite a high p-value, so we fail to reject. Since the data really did come from a $Uniform(0, 1)$ distribution, that's good news!
+
+On the other hand, if we sample from a standard normal, but hypothesize that our data comes from a uniform distribution, we would hope to *reject* the null:
+
+```{r}
+set.seed(27)
+x <- rnorm(100)
+ks.test(x, punif)
+```
+
+### Computing the p-value
+
+The `ks.test` function in R provides a p-value, but it is not immediately clear where that p-value comes from. What distribution should this maximal difference $D$ follow?
+
+The math is a bit beyond the scope of this course, but it turns out that asymptotically (that is, for a sufficiently large sample size),
+
+$$P(\sqrt{n} D \leq t) \approx \frac{\sqrt{2 \pi}}{t} \sum \limits_{k=1}^\infty e^{-(2k - 1)^2 \pi^2 / (8t^2)}$$
+
+Now, an infinite sum here seems tricky to calculate, but fortunately it converges quickly; you probably don't need more than about 30 terms to get a good approximation of the cdf, so 
+
+$$P(\sqrt{n} D \leq t) \approx \frac{\sqrt{2 \pi}}{t} \sum \limits_{k=1}^{30} e^{-(2k - 1)^2 \pi^2 / (8t^2)}$$
+
+### Summary
+
+To summarize, the KS test works like this: given a sample $X_1,...,X_n$, the test statistic is
+
+$$D = \max \limits_{1 \leq i \leq n} \left \lbrace F_0(X_{(i)}) - \frac{i-1}{n}, \frac{i}{n} - F_0(X_{(i)})\right\rbrace$$
+
+and the approximate p-value is
+
+$$\text{p-value} \approx 1 - \frac{\sqrt{2 \pi}}{\sqrt{n} D} \sum \limits_{k=1}^{30} e^{-(2k - 1)^2 \pi^2 / (8 n D^2)}$$
+
+:::{.question}
+#### Question 1
+
+Write a function in R called `my_kstest`, which satisfies the following requirements:
+
+Inputs:
+
+* `x`: a vector, containing the random sample
+* `cdf`: a function (such as `pnorm`, `punif`, etc.) specifying the distribution function $F_0$ under the null hypothesis
+
+Output: a list, containing the following named elements:
+
+* `D`: the test statistic $D$
+* `pval`: the p-value for the test
+
+Additional requirements:
+
+* You may not use any existing KS test implementations to write your function
+* You must implement the p-value approximation using the cdf defined above; you may not use any R packages that provide functions for the Kolmogorov distribution
+
+**Test cases:** See the unit tests in `hw3_tests.R`
+
+:::
 
 
 ## The inverse transform method
@@ -48,7 +147,7 @@ where $x, \mu \in \mathbb{R}$ and $b > 0$.
 
 
 :::{.question}
-#### Question 1 (written)
+#### Question 2 (written)
 
 Derive the inverse transform for the $Laplace(\mu, b)$ distribution. That is, if $U \sim Uniform(0, 1)$, find $F^{-1}(U)$ as a function of $U$. Show all work.
 
@@ -74,7 +173,7 @@ my_sqrt(-4)
 
 
 :::{.question}
-#### Question 2 (code)
+#### Question 3 (code)
 
 Write an R function called `my_rlaplace` to sample from the Laplace distribution using the inverse transform method, with the following requirements:
 
@@ -94,71 +193,8 @@ Additional requirements:
 * You must use the inverse transform method
 * Use the `runif` function to generate your uniform sample
 
-**Test cases:** See the R template which has the unit tests. The unit tests will test your error handling, sampling, and will perform a KS test to compare the generated sample with the Laplace distribution.
+**Test cases:** See the unit tests in `hw3_tests.R`. The unit tests will test your error handling, sampling, and will perform a KS test to compare the generated sample with the Laplace distribution.
 
-:::
-
-
-## Generating Poisson random variables
-
-There are a couple different ways in which we can generate Poisson random variables. One option is the discrete version of the inverse transform method, which is described in *Statistical Computing with R* in Section 3.2.2. 
-
-Another option uses the connection between exponential and Poisson random variables: if the time between events is exponential, then the number of events which happen in a fixed window follows a Poisson distribution. In particular, suppose that $Y_1, Y_2,... \overset{iid}{\sim} Exponential(\lambda)$, and let 
-
-$$J = \min \left\lbrace j: \sum \limits_{i=1}^j Y_i > 1\right\rbrace$$
-$$X= J - 1$$
-Then $X \sim Poisson(\lambda)$. 
-
-:::{.question}
-#### Question 3 (written)
-
-Prove that $X \sim Poisson(\lambda)$, as defined above.
-
-You may use the following without proof/derivation:
-
-* The cdfs and probability functions of the exponential, Poisson, and gamma distributions
-* If $Y_1,...,Y_n \overset{iid}{\sim} Exponential(\lambda)$, then $\sum \limits_{i=1}^n Y_i \sim Gamma(n, \lambda)$, with pdf $f(t) = \frac{\lambda^n }{\Gamma(n)} t^{n-1} e^{-\lambda t}$
-* $\Gamma(n) = (n-1)!$
-
-Show all other work.
-:::
-
-In practice, we often rely on uniform rather than exponential distributions. 
-
-:::{.question}
-#### Question 4 (written)
-
-Let $U_1, U_2, ... \overset{iid}{\sim} Uniform(0, 1)$. Let
-
-$$J = \min \left\lbrace j: \prod \limits_{i=1}^j U_i < e^{-\lambda}\right\rbrace$$
-$$X= J - 1$$
-
-Using the result from question 3, show that $X \sim Poisson(\lambda)$.
-
-:::
-
-
-:::{.question}
-#### Question 5 (code)
-
-Using the result from question 4, write an R function called `my_rpoisson` which satisfies the following requirements:
-
-Inputs:
-
-* `n`: the number of samples to take
-* `lambda`: the parameter $\lambda$ of the Poisson distribution; $\lambda \geq 0$
-
-Output: a vector of length $n$, containing the Poisson samples
-
-Error handling: the function should throw an error and provide an informative error message if $\lambda$ is negative
-
-Additional requirements: 
-
-* You may not use any existing Poisson functions to write your code
-* You must use the method described in question 4
-* Use the `runif` function to generate uniform samples
-
-**Test cases:** See the R template which has the unit tests. The unit tests will test your error handling and sampling.
 :::
 
 
@@ -211,7 +247,7 @@ $$\frac{\partial f}{\partial x} = 2ax + by \hspace{0.5cm} \text{(treating y as a
 
 
 :::{.question}
-#### Question 6 (written)
+#### Question 4 (written)
 
 Suppose that $X_1, X_2$ are generated by the Box-Muller transform, as defined above. Prove that $X_1, X_2$ are independent, $N(0, 1)$ random variables.
 
@@ -244,15 +280,17 @@ $$f(x) = \frac{x}{\sigma^2} e^{-\frac{x^2}{2 \sigma^2}}, \hspace{1cm} \text{ for
 where $\sigma>0$ is the scale parameter of the distribution.
 
 :::{.question}
-#### Question 7 (written)
+#### Question 5 (written)
 
 Propose a candidate distribution $g$ for acceptance-rejection sampling from the Rayleigh distribution. Explain your choice of $g$, and find the value $c$.
+
+*Hint:* The Rayleigh distribution is supported on $[0, \infty)$. Think about other continuous distributions supported on $[0, \infty)$ which also involve $x^{\text{something}}e^{-\text{something else} \cdot x}$
 :::
 
 :::{.question}
-#### Question 8 (code)
+#### Question 6 (code)
 
-Using your answer to question 9, write a function called `my_rrayleigh` to simulate from the Rayleigh distribution with acceptance-rejection sampling. Your function should satisfy the following requirements:
+Using your answer to question 5, write a function called `my_rrayleigh` to simulate from the Rayleigh distribution with acceptance-rejection sampling. Your function should satisfy the following requirements:
 
 Inputs:
 
@@ -270,5 +308,5 @@ Additional requirements:
 * You *may* (and should) use existing R functions to simulate from your candidate distribution $g$
 * Use the `runif` function to generate uniform samples
 
-**Test cases:** See the R template which has the unit tests. The unit tests will test your error handling and sampling.
+**Test cases:** See the unit tests in `hw3_tests.R`. The unit tests will test your error handling and sampling.
 :::

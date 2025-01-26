@@ -7,7 +7,7 @@
 
     
     
-    <title>Homework 3</title>
+    <title>Challenge 3: Generating Poisson random variables</title>
 
         <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -1356,72 +1356,6 @@ src: url(data:font/ttf;base64,AAEAAAARAQAABAAQR0RFRgs+Cz8AAjwQAAAAQEdQT1MXWeoAAA
 </script>
     
     
-        <style type="text/css">code{white-space: pre;}</style>
-    <style type="text/css">
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-{ counter-reset: source-line 0; }
-pre.numberSource code > span
-{ position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-{ content: counter(source-line);
-position: relative; left: -1em; text-align: right; vertical-align: baseline;
-border: none; display: inline-block;
--webkit-touch-callout: none; -webkit-user-select: none;
--khtml-user-select: none; -moz-user-select: none;
--ms-user-select: none; user-select: none;
-padding: 0 4px; width: 4em;
-color: #aaaaaa;
-}
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
-div.sourceCode
-{ }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
-code span.al { color: #ff0000; font-weight: bold; } 
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
-code span.at { color: #7d9029; } 
-code span.bn { color: #40a070; } 
-code span.bu { color: #008000; } 
-code span.cf { color: #007020; font-weight: bold; } 
-code span.ch { color: #4070a0; } 
-code span.cn { color: #880000; } 
-code span.co { color: #60a0b0; font-style: italic; } 
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
-code span.do { color: #ba2121; font-style: italic; } 
-code span.dt { color: #902000; } 
-code span.dv { color: #40a070; } 
-code span.er { color: #ff0000; font-weight: bold; } 
-code span.ex { } 
-code span.fl { color: #40a070; } 
-code span.fu { color: #06287e; } 
-code span.im { color: #008000; font-weight: bold; } 
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
-code span.kw { color: #007020; font-weight: bold; } 
-code span.op { color: #666666; } 
-code span.ot { color: #007020; } 
-code span.pp { color: #bc7a00; } 
-code span.sc { color: #4070a0; } 
-code span.ss { color: #bb6688; } 
-code span.st { color: #4070a0; } 
-code span.va { color: #19177c; } 
-code span.vs { color: #4070a0; } 
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
-</style>
     
         <style type="text/css">
 @font-face {
@@ -1641,19 +1575,14 @@ margin-left: 0 !important;
    <div class="book with-summary">
       <div class="book-summary">
         <ul>
-          <li class="title">Homework 3</li>
+          <li class="title">Challenge 3: Generating Poisson random
+variables</li>
           <li class="divider"></li>
         </ul>
         <nav role="navigation" id="toc">
           <ul>
-          <li><a href="#preliminaries-assessing-generated-random-variables" id="toc-preliminaries-assessing-generated-random-variables">Preliminaries:
-          assessing generated random variables</a></li>
-          <li><a href="#the-inverse-transform-method" id="toc-the-inverse-transform-method">The inverse transform
-          method</a></li>
-          <li><a href="#the-box-muller-transform" id="toc-the-box-muller-transform">The Box-Muller
-          transform</a></li>
-          <li><a href="#acceptance-rejection-sampling" id="toc-acceptance-rejection-sampling">Acceptance-rejection
-          sampling</a></li>
+          <li><a href="#generating-poisson-random-variables" id="toc-generating-poisson-random-variables">Generating
+          Poisson random variables</a></li>
           </ul>
         </nav>
         <ul class="authors">
@@ -1670,7 +1599,8 @@ margin-left: 0 !important;
       
    
         
-      <h1 class="title">Homework 3</h1>
+      <h1 class="title">Challenge 3: Generating Poisson random
+variables</h1>
       
         
 
@@ -1678,13 +1608,13 @@ margin-left: 0 !important;
       
    
 <!-- Don't indent these lines or it will mess pre blocks indentation --> 
-<p><strong>Due:</strong> Friday February 7, 10:00am</p>
+<p><strong>Due:</strong> Friday February 28, 10:00am</p>
 <p><strong>Submission:</strong> For this assignment, you will submit two
 files:</p>
 <ul>
-<li>An R script (<code>hw3_code.R</code>) containing your functions for
-questions 1, 3, and 6</li>
-<li>A pdf containing your written answers to questions 2, 4, and 5</li>
+<li>An R script (<code>challenge3_code.R</code>) containing your R
+function for question 3</li>
+<li>A pdf containing your written answers to questions 1 and 2</li>
 </ul>
 <p><strong>Mastery:</strong> To master this assignment, you must satisfy
 the following requirements:</p>
@@ -1702,398 +1632,70 @@ syllabus</li>
 <p>If you make an honest effort to answer all questions, but you do not
 master all of the questions on your first submission, you will have one
 resubmission attempt after receiving feedback.</p>
-<p><strong>Resources:</strong></p>
+<div id="generating-poisson-random-variables" class="section level2">
+<h2>Generating Poisson random variables</h2>
+<p>There are a couple different ways in which we can generate Poisson
+random variables. One option is the discrete version of the inverse
+transform method, which is described in <em>Statistical Computing with
+R</em> in Section 3.2.2.</p>
+<p>Another option uses the connection between exponential and Poisson
+random variables: if the time between events is exponential, then the
+number of events which happen in a fixed window follows a Poisson
+distribution. In particular, suppose that <span class="math inline">\(Y_1, Y_2,... \overset{iid}{\sim}
+Exponential(\lambda)\)</span>, and let</p>
+<p><span class="math display">\[J = \min \left\lbrace j: \sum
+\limits_{i=1}^j Y_i &gt; 1\right\rbrace\]</span> <span class="math display">\[X= J - 1\]</span> Then <span class="math inline">\(X \sim Poisson(\lambda)\)</span>.</p>
+<div id="question-1-written" class="section level4 question">
+<h4>Question 1 (written)</h4>
+<p>Prove that <span class="math inline">\(X \sim
+Poisson(\lambda)\)</span>, as defined above.</p>
+<p>You may use the following without proof/derivation:</p>
 <ul>
-<li><em>Statistical Computing with R</em> (Risso), Chapter 3</li>
-<li><em>Computational Statistics</em> (Givens and Hoeting), Chapter
-6.2</li>
+<li>The cdfs and probability functions of the exponential, Poisson, and
+gamma distributions</li>
+<li>If <span class="math inline">\(Y_1,...,Y_n \overset{iid}{\sim}
+Exponential(\lambda)\)</span>, then <span class="math inline">\(\sum
+\limits_{i=1}^n Y_i \sim Gamma(n, \lambda)\)</span>, with pdf <span class="math inline">\(f(t) = \frac{\lambda^n }{\Gamma(n)} t^{n-1}
+e^{-\lambda t}\)</span></li>
+<li><span class="math inline">\(\Gamma(n) = (n-1)!\)</span></li>
 </ul>
-<p>Both books are available electronically through the ZSR library</p>
-<div id="preliminaries-assessing-generated-random-variables" class="section level2">
-<h2>Preliminaries: assessing generated random variables</h2>
-<p>In class, we have talked about several different methods for
-generating random variables. A crucial step when simulating a random
-variable is checking that it does actually follow the desired
-distribution!</p>
-<p>One way we did this in class was to use the empirical cdf, and
-compare the empirical cdf to the true cdf (which should be known if we
-are trying to simulate from a specific distribution). While visually
-comparing cdfs is a valuable approach, we might wonder whether we can
-formalize this comparison. That is, can we conduct a hypothesis test
-that would detect significant differences between the empirical cdf and
-the true cdf?</p>
-<p>The answer is yes, and comes in the form of the
-<strong>Kolmogorov-Smirnov</strong> (KS) test. In the first part of this
-assignment you will implement the KS test, to get a better feel for what
-the test is doing. In the remainder of the assignment, the KS test will
-be used in our unit tests to help assess the random variables we
-generate.</p>
-<div id="the-kolmogorov-smirnov-test" class="section level3">
-<h3>The Kolmogorov-Smirnov test</h3>
-<p>Suppose we observe a univariate random sample <span class="math inline">\(X_1,...,X_n\)</span> of size <span class="math inline">\(n\)</span>, from some population. We are
-interested in testing whether the generating distribution for this
-sample is some specified distribution; for example, we may wish to know
-whether the data come from a <span class="math inline">\(Uniform(0,
-1)\)</span> distribution, or a <span class="math inline">\(N(0,
-1)\)</span> distribution.</p>
-<p>Formally, let <span class="math inline">\(F\)</span> be the (unknown)
-distribution function (cdf) for the sample, i.e. <span class="math inline">\(X_1,...,X_n \overset{iid}{\sim} F\)</span>. Let
-<span class="math inline">\(F_0\)</span> be the <em>hypothesized</em>
-distribution function (e.g., a particular uniform, or standard normal,
-or something else). We wish to test the following hypotheses:</p>
-<p><span class="math display">\[H_0: F = F_0\]</span> <span class="math display">\[H_A: F \neq F_0\]</span></p>
-<p>Note that this is a very strong null hypothesis. Often when testing
-hypotheses, we ask something about a single parameter, like the mean.
-Here, however, we are asking whether we know the entire
-<em>distribution</em>. In certain cases, however, this is the right kind
-of null hypothesis; when generating random numbers, for example, we
-really do want them to be <span class="math inline">\(Uniform(0,
-1)\)</span>.</p>
-<p>How does one test such hypotheses? One option, called the
-<em>Kolmogorov-Smirnov</em> (KS) test, utilizes our old friend the
-empirical cdf. In particular, the KS test is built by examining the
-maximal distance between the empirical cdf <span class="math inline">\(\widehat{F}\)</span>, and the hypothesized cdf
-<span class="math inline">\(F_0\)</span>:</p>
-<p><span class="math display">\[D = \sup \limits_t |\widehat{F}(t) -
-F_0(t)|\]</span></p>
-<p>Now, you may be wondering, how does one compute a supremum like this,
-if it is over uncountably many points? Fortunately, properties of the
-cdf mean that we really only need to consider the <span class="math inline">\(n\)</span> observed points.</p>
-<p>Let <span class="math inline">\(X_{(1)},...,X_{(n)}\)</span> denote
-the <em>ordered</em> sample (from smallest to largest). Then, it turns
-out that</p>
-<p><span class="math display">\[D = \max \limits_{1 \leq i \leq n} \left
-\lbrace F_0(X_{(i)}) - \frac{i-1}{n}, \frac{i}{n} -
-F_0(X_{(i)})\right\rbrace\]</span></p>
-<p>We then reject the null hypothesis that <span class="math inline">\(F
-= F_0\)</span> when our empirical cdf <span class="math inline">\(\widehat{F}\)</span> (i.e., our best estimate of
-the true cdf <span class="math inline">\(F\)</span>) is far from the
-hypothesized cdf <span class="math inline">\(F_0\)</span>. That is, we
-reject when <span class="math inline">\(D\)</span> is large!</p>
-<p>Here is an example of the KS test in action, using the
-<code>ks.test</code> function in R. First, we generate 100 samples from
-a <span class="math inline">\(Uniform(0, 1)\)</span> distribution, then
-test if they come from a <span class="math inline">\(Uniform(0,
-1)\)</span>:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">27</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">100</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">ks.test</span>(x, punif)</span></code></pre></div>
-<pre><code>## 
-##  Asymptotic one-sample Kolmogorov-Smirnov test
-## 
-## data:  x
-## D = 0.084932, p-value = 0.4664
-## alternative hypothesis: two-sided</code></pre>
-<p>Here the test statistic is <span class="math inline">\(D =
-0.084932\)</span>, and the p-value is 0.4664. That’s quite a high
-p-value, so we fail to reject. Since the data really did come from a
-<span class="math inline">\(Uniform(0, 1)\)</span> distribution, that’s
-good news!</p>
-<p>On the other hand, if we sample from a standard normal, but
-hypothesize that our data comes from a uniform distribution, we would
-hope to <em>reject</em> the null:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">27</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>)</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="fu">ks.test</span>(x, punif)</span></code></pre></div>
-<pre><code>## 
-##  Asymptotic one-sample Kolmogorov-Smirnov test
-## 
-## data:  x
-## D = 0.50311, p-value &lt; 2.2e-16
-## alternative hypothesis: two-sided</code></pre>
+<p>Show all other work.</p>
 </div>
-<div id="computing-the-p-value" class="section level3">
-<h3>Computing the p-value</h3>
-<p>The <code>ks.test</code> function in R provides a p-value, but it is
-not immediately clear where that p-value comes from. What distribution
-should this maximal difference <span class="math inline">\(D\)</span>
-follow?</p>
-<p>The math is a bit beyond the scope of this course, but it turns out
-that asymptotically (that is, for a sufficiently large sample size),</p>
-<p><span class="math display">\[P(\sqrt{n} D \leq t) \approx
-\frac{\sqrt{2 \pi}}{t} \sum \limits_{k=1}^\infty e^{-(2k - 1)^2 \pi^2 /
-(8t^2)}\]</span></p>
-<p>Now, an infinite sum here seems tricky to calculate, but fortunately
-it converges quickly; you probably don’t need more than about 30 terms
-to get a good approximation of the cdf, so</p>
-<p><span class="math display">\[P(\sqrt{n} D \leq t) \approx
-\frac{\sqrt{2 \pi}}{t} \sum \limits_{k=1}^{30} e^{-(2k - 1)^2 \pi^2 /
-(8t^2)}\]</span></p>
-</div>
-<div id="summary" class="section level3">
-<h3>Summary</h3>
-<p>To summarize, the KS test works like this: given a sample <span class="math inline">\(X_1,...,X_n\)</span>, the test statistic is</p>
-<p><span class="math display">\[D = \max \limits_{1 \leq i \leq n} \left
-\lbrace F_0(X_{(i)}) - \frac{i-1}{n}, \frac{i}{n} -
-F_0(X_{(i)})\right\rbrace\]</span></p>
-<p>and the approximate p-value is</p>
-<p><span class="math display">\[\text{p-value} \approx 1 - \frac{\sqrt{2
-\pi}}{\sqrt{n} D} \sum \limits_{k=1}^{30} e^{-(2k - 1)^2 \pi^2 / (8 n
-D^2)}\]</span></p>
-<div id="question-1" class="section level4 question">
-<h4>Question 1</h4>
-<p>Write a function in R called <code>my_kstest</code>, which satisfies
-the following requirements:</p>
-<p>Inputs:</p>
-<ul>
-<li><code>x</code>: a vector, containing the random sample</li>
-<li><code>cdf</code>: a function (such as <code>pnorm</code>,
-<code>punif</code>, etc.) specifying the distribution function <span class="math inline">\(F_0\)</span> under the null hypothesis</li>
-</ul>
-<p>Output: a list, containing the following named elements:</p>
-<ul>
-<li><code>D</code>: the test statistic <span class="math inline">\(D\)</span></li>
-<li><code>pval</code>: the p-value for the test</li>
-</ul>
-<p>Additional requirements:</p>
-<ul>
-<li>You may not use any existing KS test implementations to write your
-function</li>
-<li>You must implement the p-value approximation using the cdf defined
-above; you may not use any R packages that provide functions for the
-Kolmogorov distribution</li>
-</ul>
-<p><strong>Test cases:</strong> See the unit tests in
-<code>hw3_tests.R</code></p>
-</div>
-</div>
-</div>
-<div id="the-inverse-transform-method" class="section level2">
-<h2>The inverse transform method</h2>
-<p>In previous activities and assignments, you have worked on generating
-(pseudo-random) <span class="math inline">\(Uniform(0, 1)\)</span>
-samples. One method of generating other types of random variables is to
-use these uniform samples as a building block, and applying
-transformations to produce the distribution we want. When tractable, an
-attractive approach is the <em>inverse transform method</em>, in which
-we apply the inverse cdf to a uniform sample.</p>
-<p><strong>Definition:</strong> (inverse transform method) Let <span class="math inline">\(U \sim Uniform(0, 1)\)</span> be a uniform random
-variable, and let <span class="math inline">\(F\)</span> be the cdf of a
-distribution we would like to sample from (either continuous or
-discrete). Define <span class="math display">\[F^{-1}(u) = \inf \{x:
-F(x) \geq u\}\]</span> and let <span class="math inline">\(X =
-F^{-1}(U)\)</span>. Then, <span class="math inline">\(P(X \leq t) =
-F(t)\)</span>, i.e. <span class="math inline">\(X\)</span> has the
-desired cdf and is therefore a sample from the desired distribution.</p>
-<p>In the following questions, you will use the inverse transform method
-to simulate from a specified distribution. You will submit one written
-question in which you derive the inverse cdf, and one code-based
-question in which you use the inverse cdf method to sample from the
-desired distribution.</p>
-<div id="laplace-distribution" class="section level3">
-<h3>Laplace distribution</h3>
-<p>The <span class="math inline">\(Laplace(\mu, b)\)</span> distribution
-has pdf</p>
-<p><span class="math display">\[f(x) = \frac{1}{2b} \exp\left\lbrace -
-\frac{|x - \mu|}{b} \right\rbrace\]</span> where <span class="math inline">\(x, \mu \in \mathbb{R}\)</span> and <span class="math inline">\(b &gt; 0\)</span>.</p>
+<p>In practice, we often rely on uniform rather than exponential
+distributions, to avoid the additional step of transforming a uniform
+into an exponential.</p>
 <div id="question-2-written" class="section level4 question">
 <h4>Question 2 (written)</h4>
-<p>Derive the inverse transform for the <span class="math inline">\(Laplace(\mu, b)\)</span> distribution. That is, if
-<span class="math inline">\(U \sim Uniform(0, 1)\)</span>, find <span class="math inline">\(F^{-1}(U)\)</span> as a function of <span class="math inline">\(U\)</span>. Show all work.</p>
+<p>Let <span class="math inline">\(U_1, U_2, ... \overset{iid}{\sim}
+Uniform(0, 1)\)</span>. Let</p>
+<p><span class="math display">\[J = \min \left\lbrace j: \prod
+\limits_{i=1}^j U_i &lt; e^{-\lambda}\right\rbrace\]</span> <span class="math display">\[X= J - 1\]</span></p>
+<p>Using the result from question 1, show that <span class="math inline">\(X \sim Poisson(\lambda)\)</span>.</p>
 </div>
-<p>Now let’s implement a function to simulate from the Laplace
-distribution. Before we do, however, we should think about possible
-errors that could arise when calling our function. Note from the
-definition above that the parameter <span class="math inline">\(b\)</span> for the Laplace must both be positive.
-If someone tries to sample from the Laplace distribution with a bad
-parameter value, they should get an error message telling them that the
-inputs are wrong.</p>
-<p>In R, we can include error messages inside functions using the
-<code>stop()</code> function. Here is an example in which we write our
-own square root function:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>my_sqrt <span class="ot">&lt;-</span> <span class="cf">function</span>(x){</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="cf">if</span>(x <span class="sc">&lt;</span> <span class="dv">0</span>){</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>    <span class="fu">stop</span>(<span class="st">&quot;The square root of a negative number is complex&quot;</span>)</span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  }</span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  </span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>  x<span class="sc">^</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">2</span>)</span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>}</span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a></span>
-<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="fu">my_sqrt</span>(<span class="dv">4</span>)</span></code></pre></div>
-<pre><code>## [1] 2</code></pre>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">my_sqrt</span>(<span class="sc">-</span><span class="dv">4</span>)</span></code></pre></div>
-<pre><code>## Error in my_sqrt(-4): The square root of a negative number is complex</code></pre>
 <div id="question-3-code" class="section level4 question">
 <h4>Question 3 (code)</h4>
-<p>Write an R function called <code>my_rlaplace</code> to sample from
-the Laplace distribution using the inverse transform method, with the
-following requirements:</p>
+<p>Using the result from question 2, write an R function called
+<code>my_rpoisson</code> which satisfies the following requirements:</p>
 <p>Inputs:</p>
 <ul>
 <li><code>n</code>: the number of samples to take</li>
-<li><code>mu</code>: the parameter <span class="math inline">\(\mu\)</span> of the Laplace defined above</li>
-<li><code>b</code>: the parameter <span class="math inline">\(b\)</span>
-of the Laplace defined above; <span class="math inline">\(b &gt;
-0\)</span></li>
+<li><code>lambda</code>: the parameter <span class="math inline">\(\lambda\)</span> of the Poisson distribution;
+<span class="math inline">\(\lambda \geq 0\)</span></li>
 </ul>
 <p>Output: a vector of length <span class="math inline">\(n\)</span>,
-containing the Laplace samples</p>
+containing the Poisson samples</p>
 <p>Error handling: the function should throw an error and provide an
-informative error message if <code>b</code> is not strictly positive</p>
+informative error message if <span class="math inline">\(\lambda\)</span> is negative</p>
 <p>Additional requirements:</p>
 <ul>
-<li>You may not use any existing Laplace functions to write your
+<li>You may not use any existing Poisson functions to write your
 code</li>
-<li>You must use the inverse transform method</li>
-<li>Use the <code>runif</code> function to generate your uniform
-sample</li>
-</ul>
-<p><strong>Test cases:</strong> See the unit tests in
-<code>hw3_tests.R</code>. The unit tests will test your error handling,
-sampling, and will perform a KS test to compare the generated sample
-with the Laplace distribution.</p>
-</div>
-</div>
-</div>
-<div id="the-box-muller-transform" class="section level2">
-<h2>The Box-Muller transform</h2>
-<p>The inverse transform method is one way to generate samples from a
-particular distribution; however, the inverse transform method can be
-difficult to implement when there is no closed form solution for the
-inverse cdf. An important example of this scenario is the Normal
-distribution, which does not even have a closed form solution for the
-cdf, never mind the inverse cdf.</p>
-<p>Fortunately, other methods can be used to generate random variables.
-In some cases, other transformations will produce the desired
-distribution; for example, a chi-square distribution can be created by
-summing independent squared standard normals.</p>
-<p>In the case of the Normal distribution, one method is the
-<strong>Box-Muller</strong> transform.</p>
-<p><strong>Definition (Box-Muller transform):</strong> Let <span class="math inline">\(U_1, U_2\)</span> be independent <span class="math inline">\(Uniform(0, 1)\)</span> random variables.
-Define</p>
-<p><span class="math display">\[X_1 = \sqrt{-2 \log(U_1)} \cos (2 \pi
-U_2)\]</span></p>
-<p><span class="math display">\[X_2 = \sqrt{-2 \log(U_1)} \sin (2 \pi
-U_2)\]</span></p>
-<p>Then, <span class="math inline">\(X_1, X_2\)</span> are independent
-<span class="math inline">\(N(0, 1)\)</span> random variables.</p>
-<p>The goal of this portion of the assignment is to show that the
-Box-Muller transform works. To do so, we will need to revisit
-transformations of multiple random variables.</p>
-<div id="transformations-of-multiple-random-variables" class="section level3">
-<h3>Transformations of multiple random variables</h3>
-<p>Let <span class="math inline">\((X_1,...,X_n)&#39;\)</span> be a
-continuous random vector with joint pdf <span class="math inline">\(f_X(x_1,...,x_n)\)</span>. Let <span class="math inline">\((Y_1,...,Y_n)&#39;\)</span> be a continuous random
-vector defined by</p>
-<p><span class="math display">\[Y_1 = g_1(X_1,...,X_n) \hspace{1cm} Y_2
-= g_2(X_1,...,X_n) \hspace{1cm} \text{etc.}\]</span> Assume that the
-functions <span class="math inline">\(g_1,...,g_n\)</span> are such that
-for all <span class="math inline">\((y_1,...,y_n)\)</span> there is
-exactly one <span class="math inline">\((x_1,...,x_n)\)</span> such that
-<span class="math inline">\((y_1,...,y_n) =
-(g_1(x_1,...,x_n),...,g_n(x_1,...,x_n))\)</span>. That is, collectively
-the transformation is invertible, and we can define functions <span class="math inline">\(h_1,...,h_n\)</span> such that <span class="math inline">\(x_1 = h_1(y_1,...,y_n)\)</span>, <span class="math inline">\(x_2 = h_2(y_1,...,y_n)\)</span>, etc.</p>
-<p>Then, the joint pdf of <span class="math inline">\((Y_1,...,Y_n)&#39;\)</span> is given by</p>
-<p><span class="math display">\[f_Y(y_1,...,y_n) = f_X(h_1(y_1,...,y_n),
-..., h_n(y_1,...,y_n)) \ |\det({\bf J})|\]</span></p>
-<p>where <span class="math inline">\(|\det ({\bf J})|\)</span> is the
-absolute value of the determinant of the matrix of partial
-derivatives:</p>
-<p><span class="math display">\[\det({\bf J}) = \begin{vmatrix}
-\frac{\partial x_1}{\partial y_1} &amp; \frac{\partial x_1}{\partial
-y_2} &amp; \cdots &amp; \frac{\partial x_1}{\partial y_n} \\
-\frac{\partial x_2}{\partial y_1} &amp; \frac{\partial x_2}{\partial
-y_2} &amp; \cdots &amp; \frac{\partial x_2}{\partial y_n} \\ \vdots
-&amp; \vdots &amp; \cdots &amp; \vdots \\ \frac{\partial x_n}{\partial
-y_1} &amp; \frac{\partial x_n}{\partial y_2} &amp; \cdots &amp;
-\frac{\partial x_n}{\partial y_n} \end{vmatrix}\]</span></p>
-<p>and the partial derivatives are <span class="math inline">\(\dfrac{\partial x_i}{\partial y_j} =
-\dfrac{\partial h_i(y_1,...,y_n)}{\partial y_j}\)</span></p>
-</div>
-<div id="sidebar-partial-derivatives" class="section level3">
-<h3>Sidebar: partial derivatives</h3>
-<p>Suppose you have a function of multiple variables. For example,
-consider</p>
-<p><span class="math display">\[f(x, y) = ax^2 + bxy + cy^2\]</span></p>
-<p>We’d like to understand how that function changes as we change <span class="math inline">\(x\)</span>. To do this, we can take a derivative
-with respect to <span class="math inline">\(x\)</span>. Similarly, if we
-want to understand how the function changes as we change <span class="math inline">\(y\)</span>, then we need to take a derivative with
-respect to <span class="math inline">\(y\)</span>. Because there are
-other variables in the function, these derivatives are called
-<em>partial</em> derivatives.</p>
-<p>To calculate a partial derivative, I just treat any other variables
-in the function as fixed when I calculate the derivative. For
-example,</p>
-<p><span class="math display">\[\frac{\partial f}{\partial x} = 2ax + by
-\hspace{0.5cm} \text{(treating y as a constant here!)}\]</span></p>
-<div id="question-4-written" class="section level4 question">
-<h4>Question 4 (written)</h4>
-<p>Suppose that <span class="math inline">\(X_1, X_2\)</span> are
-generated by the Box-Muller transform, as defined above. Prove that
-<span class="math inline">\(X_1, X_2\)</span> are independent, <span class="math inline">\(N(0, 1)\)</span> random variables.</p>
-<p><em>Hints:</em></p>
-<ul>
-<li>Begin by inverting the transform to find <span class="math inline">\(U_1\)</span> and <span class="math inline">\(U_2\)</span> as functions of <span class="math inline">\(X_1\)</span> and <span class="math inline">\(X_2\)</span></li>
-<li>You may wish to revisit facts about trigonometric functions, such as
-their derivatives. You may look these facts up as needed</li>
-</ul>
-<p>Show all work.</p>
-</div>
-</div>
-</div>
-<div id="acceptance-rejection-sampling" class="section level2">
-<h2>Acceptance-rejection sampling</h2>
-<p>Another method for sampling from a distribution of interest is
-acceptance-rejection sampling. Suppose we wish to sample a random
-variable with probability function <span class="math inline">\(f\)</span>, and we have the ability to sample from
-some other distribution with probability function <span class="math inline">\(g\)</span>, such that for some <span class="math inline">\(c &gt; 0\)</span>,</p>
-<p><span class="math display">\[\frac{f(t)}{g(t)} \leq c \hspace{1cm}
-\text{for all } t \text{ where } f(t) &gt; 0\]</span></p>
-<p>Acceptance-rejection sampling then generates a sample <span class="math inline">\(x\)</span> from <span class="math inline">\(f\)</span> as follows:</p>
-<ol style="list-style-type: decimal">
-<li>Sample <span class="math inline">\(y \sim g\)</span></li>
-<li>Sample <span class="math inline">\(u \sim Uniform(0,
-1)\)</span></li>
-<li>If <span class="math inline">\(\dfrac{f(y)}{cg(y)} \leq u\)</span>,
-set <span class="math inline">\(x = y\)</span>. Otherwise, return to
-step 1.</li>
-</ol>
-<div id="rayleigh-distribution" class="section level3">
-<h3>Rayleigh distribution</h3>
-<p>The <span class="math inline">\(Rayleigh(\sigma)\)</span>
-distribution has density <span class="math display">\[f(x) =
-\frac{x}{\sigma^2} e^{-\frac{x^2}{2 \sigma^2}}, \hspace{1cm} \text{ for
-} x \geq 0,\]</span> where <span class="math inline">\(\sigma&gt;0\)</span> is the scale parameter of the
-distribution.</p>
-<div id="question-5-written" class="section level4 question">
-<h4>Question 5 (written)</h4>
-<p>Propose a candidate distribution <span class="math inline">\(g\)</span> for acceptance-rejection sampling from
-the Rayleigh distribution. Explain your choice of <span class="math inline">\(g\)</span>, and find the value <span class="math inline">\(c\)</span>.</p>
-<p><em>Hint:</em> The Rayleigh distribution is supported on <span class="math inline">\([0, \infty)\)</span>. Think about other continuous
-distributions supported on <span class="math inline">\([0,
-\infty)\)</span> which also involve <span class="math inline">\(x^{\text{something}}e^{-\text{something else}
-\cdot x}\)</span></p>
-</div>
-<div id="question-6-code" class="section level4 question">
-<h4>Question 6 (code)</h4>
-<p>Using your answer to question 5, write a function called
-<code>my_rrayleigh</code> to simulate from the Rayleigh distribution
-with acceptance-rejection sampling. Your function should satisfy the
-following requirements:</p>
-<p>Inputs:</p>
-<ul>
-<li><code>n</code>: the number of samples to take</li>
-<li><code>scale</code>: the scale parameter <span class="math inline">\(\sigma\)</span> of the Rayleigh distribution;
-<span class="math inline">\(\sigma &gt; 0\)</span></li>
-</ul>
-<p>Output: a vector of length <span class="math inline">\(n\)</span>,
-containing the Rayleigh samples</p>
-<p>Error handling: the function should throw an error and provide an
-informative error message if <span class="math inline">\(\sigma \leq
-0\)</span></p>
-<p>Additional requirements:</p>
-<ul>
-<li>You may not use any existing Rayleigh functions to write your
-code</li>
-<li>You must use acceptance-rejection sampling</li>
-<li>You <em>may</em> (and should) use existing R functions to simulate
-from your candidate distribution <span class="math inline">\(g\)</span></li>
+<li>You must use the method described in question 2</li>
 <li>Use the <code>runif</code> function to generate uniform samples</li>
 </ul>
 <p><strong>Test cases:</strong> See the unit tests in
-<code>hw3_tests.R</code>. The unit tests will test your error handling
-and sampling.</p>
-</div>
+<code>challenge3_tests.R</code>. The unit tests will test your error
+handling and sampling.</p>
 </div>
 </div>
 

@@ -1,0 +1,93 @@
+---
+title: "Challenge 3: Generating Poisson random variables"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+**Due:** Friday February 28, 10:00am
+
+**Submission:** For this assignment, you will submit two files:
+
+* An R script (`challenge3_code.R`) containing your R function for question 3
+* A pdf containing your written answers to questions 1 and 2
+
+**Mastery:** To master this assignment, you must satisfy the following requirements:
+
+* Your code must pass all specified unit tests, *as written* (you may not modify the unit tests which I provide)
+* Your code must meet all requirements described in the questions below (matching the requested inputs and outputs)
+* You must comment your code
+* Your written solutions must be complete and correct, with no missing steps or mistakes
+* Your work must abide by the academic honesty requirements in the syllabus 
+
+If you make an honest effort to answer all questions, but you do not master all of the questions on your first submission, you will have one resubmission attempt after receiving feedback.
+
+
+## Generating Poisson random variables
+
+There are a couple different ways in which we can generate Poisson random variables. One option is the discrete version of the inverse transform method, which is described in *Statistical Computing with R* in Section 3.2.2. 
+
+Another option uses the connection between exponential and Poisson random variables: if the time between events is exponential, then the number of events which happen in a fixed window follows a Poisson distribution. In particular, suppose that $Y_1, Y_2,... \overset{iid}{\sim} Exponential(\lambda)$, and let 
+
+$$J = \min \left\lbrace j: \sum \limits_{i=1}^j Y_i > 1\right\rbrace$$
+$$X= J - 1$$
+Then $X \sim Poisson(\lambda)$. 
+
+:::{.question}
+#### Question 1 (written)
+
+Prove that $X \sim Poisson(\lambda)$, as defined above.
+
+You may use the following without proof/derivation:
+
+* The cdfs and probability functions of the exponential, Poisson, and gamma distributions
+* If $Y_1,...,Y_n \overset{iid}{\sim} Exponential(\lambda)$, then $\sum \limits_{i=1}^n Y_i \sim Gamma(n, \lambda)$, with pdf $f(t) = \frac{\lambda^n }{\Gamma(n)} t^{n-1} e^{-\lambda t}$
+* $\Gamma(n) = (n-1)!$
+
+Show all other work.
+:::
+
+In practice, we often rely on uniform rather than exponential distributions, to avoid the additional step of transforming a uniform into an exponential. 
+
+:::{.question}
+#### Question 2 (written)
+
+Let $U_1, U_2, ... \overset{iid}{\sim} Uniform(0, 1)$. Let
+
+$$J = \min \left\lbrace j: \prod \limits_{i=1}^j U_i < e^{-\lambda}\right\rbrace$$
+$$X= J - 1$$
+
+Using the result from question 1, show that $X \sim Poisson(\lambda)$.
+
+:::
+
+
+:::{.question}
+#### Question 3 (code)
+
+Using the result from question 2, write an R function called `my_rpoisson` which satisfies the following requirements:
+
+Inputs:
+
+* `n`: the number of samples to take
+* `lambda`: the parameter $\lambda$ of the Poisson distribution; $\lambda \geq 0$
+
+Output: a vector of length $n$, containing the Poisson samples
+
+Error handling: the function should throw an error and provide an informative error message if $\lambda$ is negative
+
+Additional requirements: 
+
+* You may not use any existing Poisson functions to write your code
+* You must use the method described in question 2
+* Use the `runif` function to generate uniform samples
+
+**Test cases:** See the unit tests in `challenge3_tests.R`. The unit tests will test your error handling and sampling.
+:::
+
+
+
+
+

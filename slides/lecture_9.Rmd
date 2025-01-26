@@ -1,0 +1,79 @@
+---
+title: "Lecture 9: Linear regression"
+author: "Ciaran Evans"
+output: beamer_presentation
+---
+
+## Previously: hypothesis testing and power
+
+Suppose we have a sample $X_1,...,X_n \overset{iid}{\sim} N(\mu, 1)$, and we want to test the hypotheses
+
+$$H_0: \mu = 0 \hspace{0.5cm} H_A: \mu \neq 0$$
+
+Calculate $p$-value, reject when $p < \alpha$ for pre-specified $\alpha$.
+
+**Power function:**
+
+$$Power(\mu) = P(\text{reject } H_0 | \mu)$$
+
+
+**Question:** How does power change as a function of $\mu$ and $n$?
+
+\vspace{2cm}
+
+## Previously: hypothesis testing and power
+
+Suppose we have a sample $X_1,...,X_n \overset{iid}{\sim} N(\mu, 1)$, and we want to test the hypotheses
+
+$$H_0: \mu = 0 \hspace{0.5cm} H_A: \mu \neq 0$$
+$$Power(\mu) = P(\text{reject } H_0 | \mu)$$
+
+```{r, echo=F, message=F, fig.align='center', fig.width=4, fig.height=2}
+library(tidyverse)
+set.seed(379)
+
+nsim <- 1000
+n_values <- c(10, 20, 50)
+mu_x_values <- seq(-2, 2, 0.5)
+sim_settings <- expand.grid("mu" = mu_x_values, "n" = n_values)
+
+power_res <- rep(NA, nrow(sim_settings))
+for(j in 1:nrow(sim_settings)){
+  n <- sim_settings$n[j] # sample size
+  mu_x <- sim_settings$mu[j] # true mean
+  test_results <- rep(NA, nsim)  # vector to store the test results
+  
+  for(i in 1:nsim){
+    x <- rnorm(n, mean=mu_x, sd=1)
+    test_results[i] <- t.test(x, alternative="two.sided", mu=0)$p.value
+  }
+  
+  power_res[j] <- mean(test_results < 0.05)
+}
+
+cbind(sim_settings, power_res) |>
+  mutate(n = paste0("n = ", n)) |>
+  ggplot(aes(x = mu, y = power_res)) +
+  geom_point() +
+  geom_line() +
+  geom_hline(yintercept = 0.05, lty = 2) +
+  facet_wrap(~n) +
+  labs(x= "mu", y = "Power") +
+  theme_bw()
+```
+
+## Another hypothesis test
+
+Suppose we observe data $(X_1, Y_1),...,(X_n, Y_n)$ where
+
+$$Y_i = \beta_0 + \beta_1 X_{i} +  \varepsilon_i \hspace{1cm} \varepsilon_i \overset{iid}{\sim} N(0, \sigma^2)$$
+We want to test the hypotheses $H_0: \beta_1 = 0$ vs. $H_A: \beta_1 \neq 0$. 
+
+How do you think $Power(\beta_1)$ will change as
+
+* we change $\beta_1$?
+* we change $n$?
+* we change $\sigma^2$?
+
+
+

@@ -1,0 +1,342 @@
+---
+title: "Challenge 2: Mersenne Twister"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+**Due:** Friday February 28, 10:00am
+
+**Submission:** For this assignment, you will submit two files:
+
+* An R script (`challenge2_code.R`) containing your R functions for questions 1--3, sourcing your C++ file for questions 4 and 5, and sourcing the unit tests file (`challenge2_tests.R`) for all functions
+* A C++ script (`challenge2_code.cpp`) containing your C++ functions for questions 4 and 5
+
+**Mastery:** To master this assignment, you must satisfy the following requirements:
+
+* Your code must pass all specified unit tests, *as written* (you may not modify the unit tests which I provide)
+* Your code must meet all requirements described in the questions below (matching the requested inputs and outputs)
+* You must comment your code
+* Your work must abide by the academic honesty requirements in the syllabus 
+
+If you make an honest effort to answer all questions, but you do not master all of the questions on your first submission, you will have one resubmission attempt after receiving feedback.
+
+**Resources:** 
+
+* Wikipedia article on [diehard tests](https://en.wikipedia.org/wiki/Diehard_tests)
+* [Documentation](https://en.cppreference.com/w/cpp/language/operator_arithmetic) on operators (including bitwise operators) in C++
+
+# Random number generation, diehard tests, and the Mersenne Twister
+
+In class, we have discussed approaches to generating random numbers, in particular the linear congruential generator (LCG). However, most modern software (including R) uses a different (and somewhat more complex) random number generator, called the Mersenne Twister. We have also discussed the challenge of assessing whether pseudo-random numbers "behave randomly". So far, you have made use of empirical cdfs, and one of the [diehard tests](https://en.wikipedia.org/wiki/Diehard_tests). 
+
+The goal of this challenge assignment is to further explore random number generation and the diehard tests. Ultimately, you will implement the Mersenne Twister algorithm in C++ (remember our discussion from class that R is not a suitable language for implementing this algorithm -- indeed, the Mersenne Twister that R uses is written in C). Before you do that, however, you will implement another diehard test, which involves the *Kolmogorov-Smirnov* test from homework 3. Because the Mersenne Twister is built on bitwise manipulation of binary integers, you will also review binary numbers and bitwise operations.
+
+## Tests for random number generators
+
+On homework 3, we defined the Kolmogorov-Smirnov (KS) test, a hypothesis test that tests whether two distributions are equal by comparing an empirical cdf with the true theoretical cdf of a distribution.
+
+Now that we've seen the KS test, we'll put it to work! The KS test is commonly used as a tool for testing the output of random number generators, and several of the diehard tests involve a KS test for a particular distribution. In this section, you will write several functions that test hypotheses about a sample from a random number generator. If we fail to reject the null hypothesis, the generator "passes" the test. If we reject the null hypothesis, the generator "fails" the test. Passing tests does not prove that the numbers are random, but failing the tests suggests that the numbers may not be random.
+
+### Test 1: testing for uniformity
+
+As we discussed on HW 1, the most basic property a random number generator should satisfy is that the marginal distribution of the numbers is uniform. Here we will test that distribution with the KS test.
+
+Let $X_1,...,X_n$ be our sample from a random number generator. Our hypotheses are:
+
+$$H_0: X_1,...,X_n \sim Uniform(0, 1)$$
+
+$$H_A: X_1,...,X_n \not \sim Uniform(0, 1)$$
+
+:::{.question}
+#### Question 1
+
+Write a function in R called `rng_test1`, which satisfies the following requirements:
+
+Inputs:
+
+* `x`: a vector, containing the random sample
+
+Output: the p-value for the KS test which tests whether the sample `x` comes from a $Uniform(0,1)$ distribution
+
+Additional requirements:
+
+* You may use either the `ks.test` function in R, or your `my_kstest` function from homework 3
+
+**Test cases:** See the unit tests in `challenge2_tests.R`
+
+:::
+
+
+### Test 2: diehard minimum distance test
+
+Randomly sample 8000 points in a square of side length 10000. (To do this, sample 8000 numbers between (0, 1) for the x-coordinate, then sample 8000 numbers between (0, 1) for the y-coordinate, then multiply each coordinate by 10000). Calculate the distance between all pairs of points, and let $d^2$ be the squared minimum distance. 
+
+Repeat the process 100 times, resulting in 100 different squared minimum distances ($d_1^2,...,d_{100}^2$). If the points were truly random, then we would expect the distribution of $d^2$ to be approximately exponential:
+
+$$d^2 \approx Exponential(1/0.995)$$
+(i.e. a mean of 0.995). Using the 100 squared minimum distances $d_1^2,...,d_{100}^2$, perform a KS test for this exponential distribution.
+
+
+:::{.question}
+#### Question 2
+
+Write a function in R called `rng_test2`, which satisfies the following requirements:
+
+Inputs:
+
+* `x`: an $800000 \times 2$ matrix containing the points in the square (100 different samples, of 8000 rows each; the two columns are the two coordinates)
+
+Output: the p-value for the KS test which performs the minimum distance test described above
+
+Additional requirements:
+
+* You may use either the `ks.test` function in R, or your `my_kstest` function from homework 3
+* You may not use any existing implementations of this test
+
+*Hint:* The `dist` function in R may be useful for calculating pairwise distances
+
+**Test cases:** See the unit tests in `challenge2_tests.R`
+
+:::
+
+
+
+## Binary representations and bitwise operations
+
+### Representing numbers in base 2
+
+We are all used to representing our numbers in decimal (i.e., base 10). Each position in a number written in base 10 represents a power of 10. For example, 
+
+$$121 = 1 \times 100 + 2 \times 10 + 1 \times 1$$
+
+But really, this is a somewhat arbitrary choice. We could use any other base if we wanted. In computing, a very common base is 2, with each place representing a power of 2. For example, for 4-bit integers:
+
+| Decimal | Binary | expansion
+| ---- | ---- | --- |
+| 0 | 0000 | $0 \times 8 + 0 \times 4 + 0 \times 2 + 0 \times 1$ |
+| 1 | 0001 | $0 \times 8 + 0 \times 4 + 0 \times 2 + 1 \times 1$ |
+| $\vdots$ | $\vdots$ | $\vdots$ |
+
+Before moving on to discuss bitwise operations with binary numbers, let's practice this base-2 representation by writing a function to convert from binary to decimal.
+
+:::{.question}
+#### Question 3
+
+Write a function in R called `binary_to_decimal`, which satisfies the following requirements:
+
+Inputs:
+
+* `b`: a string, containing a binary representation of a number (e.g., `"0010"`, `"011"`, etc.)
+
+Output: a numeric value for the equivalent number in decimal
+
+Additional requirements:
+
+* You may not assume that the input string is of a particular length
+* You may not use any existing functions that convert between binary and decimal
+
+*Hint:* The `strsplit` function in R may be useful
+
+**Test cases:** See the unit tests in `challenge2_tests.R`
+
+:::
+
+
+
+### Bitwise operations
+
+There are many operations which can be performed on binary numbers by manipulating their bits. Here are a few common ones:
+
+**Bitwise right shift:** Shift the bits to the right the specified number of places; the lower bits (at the right end) drop off, and pad with 0s on the left.
+
+$$1010 \gg 1 = 0101$$
+
+$$1010 \gg 2 = 0010$$
+
+$$1010 \gg 3 = 0001$$
+
+**Bitwise left shift:** Shift the bits to the left the specified number of places; the higher bits (at the left end) drop off, and pad with 0s on the right. Note: the results will depend on how many bits are used to represent the integer. For example, for a 4-bit integer:
+
+$$1010 \ll 1 = 0100$$
+
+$$1010 \ll 2 = 1000$$
+
+while for an 8-bit integer
+
+$$00001010 \ll 2 = 00101000$$
+
+**Bitwise AND:** 
+
+|A | B | A & B|
+| --- | --- | --- |
+| 0 | 0 | 0 |
+| 0 | 1 | 0 |
+| 1 | 0 | 0 |
+| 1 | 1 | 1 |
+
+When applied to two binary numbers, the AND is performed bitwise. E.g.
+
+```
+  0 0 1 1
+& 1 0 1 0
+= 0 0 1 0
+```
+
+**Bitwise OR:** (sometimes written $|$)
+
+|A | B | A `|` B|
+| --- | --- | --- |
+| 0 | 0 | 0 |
+| 0 | 1 | 1 |
+| 1 | 0 | 1 |
+| 1 | 1 | 1 |
+
+When applied to two binary numbers, the AND is performed bitwise. E.g.
+
+```
+   0 0 1 1
+OR 1 0 1 0
+ = 1 0 1 1
+```
+
+**Bitwise XOR:** (sometimes written $\oplus$)
+
+|A | B | A $\oplus$ B|
+| --- | --- | --- |
+| 0 | 0 | 0 |
+| 0 | 1 | 1 |
+| 1 | 0 | 1 |
+| 1 | 1 | 0 |
+
+When applied to two binary numbers, the AND is performed bitwise. E.g.
+
+```
+    0 0 1 1
+XOR 1 0 1 0
+ =  1 0 0 1
+```
+
+
+
+## The Mersenne Twister
+
+The Mersenne Twister is an algorithm for generating a sequence of pseudo-random integers. The algorithm depends on several different parameters, which could in principal be specified by the user; however, here we will restrict ourselves to a set of commonly used values.
+
+
+Define the following quantities:
+
+* $x_0$ (the initial seed)
+* $n = 624$ 
+* $m = 397$ 
+* $w = 32$
+* $g = 2147483648$
+* $h = 2147483647$
+* $a = 2567483615$
+* $f = 1812433253$
+* $u = 11$
+* $l = 18$
+* $s = 7$
+* $t = 15$
+* $b = 2636928640$
+* $c = 4022730752$
+
+
+### Initialization
+
+Given the initial seed $x_0$, the Mersenne Twister initializes $n$ 32-bit integers $x_0,...,x_{n-1}$ by
+
+$$x_i = f \cdot (x_{i-1} \oplus (x_{i-1} \gg (w-2))) + i \hspace{1cm} i = 1,...,n-1$$
+
+where $\oplus$ is the bitwise XOR and $\gg$ is the bitwise right shift.
+
+### Recurrence
+
+Given $n$ initial values $x_0,...,x_{n-1}$, the Mersenne Twister then generates a sequence of pseudo-random integers $x_n, x_{n+1}, x_{n+2},...$. For $k = n, n+1, n+2,...$, the sequence is defined by
+
+$$x_{k} = x_{k - (n-m)} \oplus (((x_{k-n} \ \& \ g) \ | \ (x_{k-(n-1)} \ \& \ h)) A)$$
+
+where $\oplus$ is the bitwise XOR, $\&$ is the bitwise AND, $|$ is the bitwise OR, $\gg$ is the bitwise right shift, and
+
+$$x A = \begin{cases} x \gg 1 & x_{[0]} = 0 \ \ (x \text{ is even}) \\
+(x \gg 1) \oplus a & x_{[0]} = 1 \ \ (x \text{ is odd}) \end{cases}$$
+
+### Tempering
+
+The output of the Mersenne Twister is not the sequence $x_k$, however. Instead, additional modifications of the $x_k$ are performed in the following sequence.
+
+For $i = 1, 2, 3, ...$:
+
+$$y_i = x_{i+n-1} \oplus (x_{i + n - 1} \gg u)$$
+
+$$y_i = y_i \oplus ((y_i \ll s) \ \& \ b)$$
+
+$$y_i = y_i \oplus ((y_i \ll t) \ \& \ c)$$
+
+$$z_i = y_i \oplus (y_i \gg l)$$
+
+### Output
+
+The output of the Mersenne Twister is the sequence $z_1/2^w, z_2/2^w,...$
+
+
+### Implementation in C++
+
+Now that we have described the Mersenne Twister, it will be your task to implement it. I will first have you write a helper function to perform the initialization for the algorithm. You will then write the main function for the twister.
+
+The [documentation](https://en.cppreference.com/w/cpp/language/operator_arithmetic) on bitwise operators in C++ will be useful.
+
+:::{.question}
+#### Question 4
+
+Write a function in C++ called `twister_initialize` which produces the 624 initial values for the Mersenne Twister, given some initial seed $x_0$. Your function should satisfy the following requirements:
+
+Inputs:
+
+* `seed`: a `uint32_t`, the initial seed ($x_0$)
+
+Output: an `arma::uvec` containing the 624 initialized values ($x_0,...,x_{n-1}$), as described above
+
+Additional requirements:
+
+* You may not use or read any existing implementations
+
+**Test cases:** See the unit tests in `challenge2_tests.R`
+
+:::
+
+
+:::{.question}
+#### Question 5
+
+Write a function in C++ called `twister_generate` which produces a specified number of pseudo-random numbers between 0 and 1. Your function should satisfy the following requirements:
+
+Inputs:
+
+* `num_sample`: an int, the number of samples to generate (the 624 numbers generated in the initialization step are not included here)
+* `seed`: a `uint32_t`, the initial seed ($x_0$)
+
+Output: an `arma::vec` containing the `num_samples` values between 0 and 1
+
+Additional requirements:
+
+* You may not use or read any existing implementations
+* You should call the `twister_initialize` function from the previous question
+
+*Hint*: At some point you will likely need to convert your output from unsigned integers to doubles, in order to divide by $2^{32}$ to get numbers between 0 and 1.
+
+**Note:** You may get a warning message saying "non-integer value qualified with L; using numeric value". As far as I can tell, that warning can be safely ignored.
+
+**Test cases:** See the unit tests in `challenge2_tests.R`
+
+:::
+
+
+
+
+
+
+
+
