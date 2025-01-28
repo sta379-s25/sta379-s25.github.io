@@ -1,0 +1,105 @@
+---
+title: "Practice Questions: Acceptance-rejection sampling"
+format: html
+---
+
+## Acceptance-rejection sampling
+
+Previously, we discussed transformation methods for sampling from a variety of distributions. These transformations, however, require us to either invert the cdf, or find a different tranformation (e.g. the Box-Muller Transformation for the Normal distribution).
+
+Another method for sampling from a continuous distribution of interest is acceptance-rejection sampling. Suppose we wish to sample a continuous random variable with density $f$ (the *target density*), and we have the ability to sample from some other distribution with probability function $g$ (the *candidate density*), such that for some $c > 0$,
+
+$$\frac{f(t)}{g(t)} \leq c \hspace{1cm} \text{for all } t \text{ where } f(t) > 0$$
+
+
+Acceptance-rejection sampling then generates $X \sim f$ as follows:
+
+1. Sample $Y \sim g$
+2. Sample $U \sim Uniform(0, 1)$
+3. If $U \leq \dfrac{f(Y)}{cg(Y)}$, set $X = Y$. Otherwise, return to step 1.
+
+In this activity, you will implement acceptance-rejection sampling for the Beta example discussed in class.
+
+### Beta distribution
+
+Suppose we wish to sample $X \sim Beta(\alpha, \beta)$, with density $f(x) = \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)} x^{\alpha - 1} (1 - x)^{\beta - 1}$. Furthermore, we will suppose we are interested in a Beta distribution for which $\alpha, \beta > 1$.
+
+The Beta distribution is supported on $(0, 1)$, so a possible candidate distribution is $Y \sim Uniform(0, 1)$ (i.e., $g(t) = 1$ for all $t \in (0, 1)$).
+
+#### Finding $c$
+
+If $f$ is a $Beta(\alpha, \beta)$ pdf with $\alpha, \beta > 1$, and $g = 1$ is the $Uniform(0, 1)$ pdf, then a bit of calculus gives us that the maximum value of $f(t)/g(t)$ occurs at 
+
+$$t_{\max} = \frac{\alpha - 1}{\alpha + \beta - 2},$$
+
+and
+
+$$c = \frac{f(t_{\max})}{g(t_{\max})}$$
+
+**In R:** We can use R's `dbeta` function to calculate the pdf of a beta distribution, and thereby calculate $c$ given $\alpha$ and $\beta$. For example, suppose $alpha = 2.7$ and $\beta = 6.3$. Then, 
+
+$$t_{\max} = \dfrac{2.7 - 1}{2.7 + 6.3 - 2} = 0.2428571$$
+and $c \approx 2.70$
+
+```{r}
+tmax <- (2.7 - 1)/(2.7 + 6.3 - 2)
+dbeta(tmax, 2.7, 6.3)
+```
+
+#### Your task
+
+Write a function in R called `my_rbeta`, which simulates from a beta distribution using acceptance-rejection sampling. Your function should satisfy the following requirements:
+
+* Inputs:
+    * `n`: the number of samples to take
+    * `a`: the parameter $\alpha$ of the Beta distribution
+    * `b`: the parameter $\beta$ of the Beta distribution
+* Output: a vector, containing the sample of size `n` from the specified Beta distribution
+* For acceptance-rejection sampling to work, we will want both `a` and `b` to be $> 1$
+
+**Hints:**
+
+* In the function, begin by calculating $c$, using the information provided above and the input parameters `a` and `b`
+* Use a while loop to iterate until you have reached the desired number of samples
+
+**Examples:**
+
+```{r, echo=F, message=F}
+my_rbeta <- function(n, a, b){
+  tmax <- (a - 1)/(a + b - 2)
+  c <- dbeta(tmax, a, b)
+  
+  x <- rep(NA, n)
+  k <- 0 # number of acceptances
+  while(k < n){
+    y <- runif(1)
+    u <- runif(1)
+    if(u < dbeta(y, a, b)/c){
+      k <- k + 1
+      x[k] <- y
+    }
+  }
+  return(x)
+}
+```
+
+```{r}
+gridpts <- seq(0, 1, 0.01)
+
+x <- my_rbeta(300, 2.7, 6.3)
+plot(gridpts, ecdf(x)(gridpts), type="l", xlab="x", ylab="cdf")
+lines(gridpts, pbeta(gridpts, 2.7, 6.3), type="l", col="orange")
+```
+
+```{r}
+gridpts <- seq(0, 1, 0.01)
+
+x <- my_rbeta(300, 3, 3)
+plot(gridpts, ecdf(x)(gridpts), type="l", xlab="x", ylab="cdf")
+lines(gridpts, pbeta(gridpts, 3, 3), type="l", col="orange")
+```
+
+
+
+
+

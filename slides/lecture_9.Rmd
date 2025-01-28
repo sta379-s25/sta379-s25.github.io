@@ -1,79 +1,115 @@
 ---
-title: "Lecture 9: Linear regression"
+title: "Lecture 9: Generating random variables -- transformations and wrap-up"
 author: "Ciaran Evans"
 output: beamer_presentation
 ---
 
-## Previously: hypothesis testing and power
+## Previously
 
-Suppose we have a sample $X_1,...,X_n \overset{iid}{\sim} N(\mu, 1)$, and we want to test the hypotheses
+* Methods to generate $U \sim Uniform(0, 1)$:
 
-$$H_0: \mu = 0 \hspace{0.5cm} H_A: \mu \neq 0$$
+    * Linear congruential generator
+    * Mersenne twister 
+    * lots of other variants and alternatives
 
-Calculate $p$-value, reject when $p < \alpha$ for pre-specified $\alpha$.
+* Methods to generate other random variables:
 
-**Power function:**
+    * inverse transform method
+        * Pros: easy and efficient if the inverse cdf is easy to find
+        * Cons: requires the inverse cdf to be tractable
+    * Acceptance-rejection sampling:
+        * Pros: works for any continuous distribution if you can find a good candidate $g$
+        * Cons: can be slow/inefficient if we don't choose a good candidate density
+        * Project 1: Making acceptance-rejection sampling more efficient with an *adaptive* candidate density
+        
+**Today:** How else can we generate random variables?
 
-$$Power(\mu) = P(\text{reject } H_0 | \mu)$$
+## Generating a Normal random variable
+
+Suppose we want to simulate $X \sim N(0, 1)$
+
+$$f_X(x) = \frac{1}{\sqrt{2 \pi}} \exp \left\lbrace -\frac{1}{2} x^2 \right\rbrace$$
+
+$$F_X(t) = \ ?$$
+
+## Box-Muller Transformation
+
+## Box-Muller in practice
+
+```{r}
+# generate 1000 samples
+u1 <- runif(1000)
+u2 <- runif(1000)
+x1 <- sqrt(-2*log(u1)) * cos(2*pi*u2)
+x2 <- sqrt(-2*log(u1)) * sin(2*pi*u2)
+```
+
+**Question:** How can I check that the samples match the desired $N(0, 1)$ distribution?
+
+## Box-Muller in practice
+
+```{r}
+# generate 1000 samples
+u1 <- runif(1000)
+u2 <- runif(1000)
+x1 <- sqrt(-2*log(u1)) * cos(2*pi*u2)
+x2 <- sqrt(-2*log(u1)) * sin(2*pi*u2)
+```
+
+```{r, echo=F, message=F, fig.width=6, fig.height=4}
+gridpts <- seq(-3, 3, 0.01)
+plot(gridpts, ecdf(x1)(gridpts), type="l", lwd=1.5, xlab="x", ylab="cdf")
+lines(gridpts, pnorm(gridpts), col="orange", lwd=1.5)
+legend(0.5,0.5,c("Empirical cdf X1","N(0, 1) cdf"),lty=c(1,1),col=c("black","orange"))
+```
+
+## Box-Muller in practice
 
 
-**Question:** How does power change as a function of $\mu$ and $n$?
-
-\vspace{2cm}
-
-## Previously: hypothesis testing and power
-
-Suppose we have a sample $X_1,...,X_n \overset{iid}{\sim} N(\mu, 1)$, and we want to test the hypotheses
-
-$$H_0: \mu = 0 \hspace{0.5cm} H_A: \mu \neq 0$$
-$$Power(\mu) = P(\text{reject } H_0 | \mu)$$
-
-```{r, echo=F, message=F, fig.align='center', fig.width=4, fig.height=2}
+```{r, echo=F, message=F, fig.width=3, fig.height=3}
 library(tidyverse)
-set.seed(379)
-
-nsim <- 1000
-n_values <- c(10, 20, 50)
-mu_x_values <- seq(-2, 2, 0.5)
-sim_settings <- expand.grid("mu" = mu_x_values, "n" = n_values)
-
-power_res <- rep(NA, nrow(sim_settings))
-for(j in 1:nrow(sim_settings)){
-  n <- sim_settings$n[j] # sample size
-  mu_x <- sim_settings$mu[j] # true mean
-  test_results <- rep(NA, nsim)  # vector to store the test results
-  
-  for(i in 1:nsim){
-    x <- rnorm(n, mean=mu_x, sd=1)
-    test_results[i] <- t.test(x, alternative="two.sided", mu=0)$p.value
-  }
-  
-  power_res[j] <- mean(test_results < 0.05)
-}
-
-cbind(sim_settings, power_res) |>
-  mutate(n = paste0("n = ", n)) |>
-  ggplot(aes(x = mu, y = power_res)) +
-  geom_point() +
-  geom_line() +
-  geom_hline(yintercept = 0.05, lty = 2) +
-  facet_wrap(~n) +
-  labs(x= "mu", y = "Power") +
+data.frame(x1, x2) |>
+  ggplot(aes(x = x1, y = x2)) +
+  geom_point(size=0.5) +
   theme_bw()
 ```
 
-## Another hypothesis test
 
-Suppose we observe data $(X_1, Y_1),...,(X_n, Y_n)$ where
+## Other Normals
 
-$$Y_i = \beta_0 + \beta_1 X_{i} +  \varepsilon_i \hspace{1cm} \varepsilon_i \overset{iid}{\sim} N(0, \sigma^2)$$
-We want to test the hypotheses $H_0: \beta_1 = 0$ vs. $H_A: \beta_1 \neq 0$. 
+Suppose that $Z \sim N(0, 1)$. How do I get $X \sim N(\mu, \sigma^2)$?
 
-How do you think $Power(\beta_1)$ will change as
+\vspace{4cm}
 
-* we change $\beta_1$?
-* we change $n$?
-* we change $\sigma^2$?
+## A few other transformations
 
+* If $X \sim N(\mu, \sigma^2)$, then $e^X \sim Lognormal(\mu, \sigma^2)$
 
+* If $Z_1,...,Z_k \overset{iid}{\sim} N(0, 1)$, then 
 
+$$\sum \limits_{i=1}^k Z_i^2 \sim \ ?$$
+
+* If $V_1 \sim \chi^2_{d_1}$ and $V_2 \sim \chi^2_{d_2}$ are independent, then 
+
+$$\frac{V_1/d_1}{V_2/d_2} \sim \ ?$$
+
+* If $Y_1 \sim Gamma(\alpha, \theta)$ and $Y_2 \sim Gamma(\beta, \theta)$ are independent, then
+
+$$\frac{Y_1}{Y_1 + Y_2} \sim ?$$
+
+## Summary (so far)
+
+Methods to generate random variables, in rough order of preference:
+
+1. Use inverse transform method (if inverse cdf is tractable)
+2. Find a different transformation (if possible)
+3. Acceptance-rejection sampling
+
+## Homework 3
+
+[https://sta379-s25.github.io/homework/hw3.html](https://sta379-s25.github.io/homework/hw3.html)
+
+* Practice generating random variables
+* Accept and submit coding portion of assignment on GitHub Classroom
+* Collaboration encouraged on homework, but everyone must submit their own work and acknowledge collaborators
+    

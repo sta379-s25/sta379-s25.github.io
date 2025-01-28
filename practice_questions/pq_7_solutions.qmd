@@ -4,39 +4,27 @@ format: html
 ---
 
 ```{r}
-my_rbeta <- function(n, a, b){
-  # calculate the mode and the max value c 
-  # (recall we are using a uniform distribution as our candidate g)
-  tmax <- (a - 1)/(a + b - 2)
-  c <- dbeta(tmax, a, b)
-  
-  x <- rep(NA, n) # vector to store the samples we take
-  k <- 0 # number of acceptances
-  while(k < n){
-    y <- runif(1)
-    u <- runif(1)
-    # if u < f(y)/(cg(y)), keep y and update count
-    if(u < dbeta(y, a, b)/c){
-      k <- k + 1
-      x[k] <- y
-    }
+n <- 1000 # desired sample size
+c <- 2.7
+x <- rep(NA, n)
+k <- 0 # number of acceptances
+
+while(k < n){
+  y <- runif(1)
+  u <- runif(1)
+  if(u < dbeta(y, 2.7, 6.3)/c){
+    k <- k + 1
+    x[k] <- y
   }
-  return(x)
 }
 ```
+
 
 ```{r}
 gridpts <- seq(0, 1, 0.01)
 
-x <- my_rbeta(300, 2.7, 6.3)
 plot(gridpts, ecdf(x)(gridpts), type="l", xlab="x", ylab="cdf")
 lines(gridpts, pbeta(gridpts, 2.7, 6.3), type="l", col="orange")
 ```
 
-```{r}
-gridpts <- seq(0, 1, 0.01)
 
-x <- my_rbeta(300, 3, 3)
-plot(gridpts, ecdf(x)(gridpts), type="l", xlab="x", ylab="cdf")
-lines(gridpts, pbeta(gridpts, 3, 3), type="l", col="orange")
-```
