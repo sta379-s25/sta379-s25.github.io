@@ -266,6 +266,9 @@ Formally, our permutation test consists of the following steps:
 
 $$p = \frac{1}{n_{perms}} \sum \limits_{j=1}^{n_{perms}} {\bf 1}\{|T_j^*| \geq |T_{obs}|\}$$
 
+**Visualization:** A great intuitive explanation and visualization of the permutation test (with llamas!) is provided [here](https://www.jwilber.me/permutationtest/).
+
+
 The ultimate goal will be to implement this permutation test in C++. However, it will be easier to implement in C++ if you first write it in R, to get a better feel for the algorithm. Then we can translate it to C++, in the process learning some of the C++ (and especially Armadillo) equivalents of R functionality.
 
 :::{.question}
@@ -327,6 +330,7 @@ Output: a list, containing the following named elements:
 *Hints:* 
 
 * General advice: start small, and build up. For example, start by making your function just return the observed test statistic. Then do a single permutation (no iteration), and check that you get the expected results. Then continue adding more to the function.
+* The `abs` function in C++ is overloaded. You may encounter the issue that `abs(t)` returns an `int` even if `t` is a `double`. As a general rule, use `std::abs` when you want to take the absolute value of a floating point number. (Do not use `std::abs` for `arma::vec` objects, however; you should use `arma::abs`)
 * as part of the permutation test, you will need to be able to permute the entries of a vector in C++. This actually turns out to be a bit trickier than in R. I have provided a function for you (in the `hw2_code.cpp` file) called `random_shuffle`, which randomly shuffles the entries of an Armadillo vector and returns the shuffled vector. You will need to call this function in your C++ code.
 * you can combine Armadillo vectors with the [`join_cols` function](https://arma.sourceforge.net/docs.html#join)
 * see [here](https://gallery.rcpp.org/articles/armadillo-subsetting/) for examples of subsetting Armadillo vectors (note in particular `.elem()` and `find()`)

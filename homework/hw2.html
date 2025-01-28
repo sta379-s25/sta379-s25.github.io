@@ -2068,6 +2068,8 @@ statistics <span class="math inline">\(T_1^*,...,T_{n_{perms}}^*\)</span></li>
 </ol>
 <p><span class="math display">\[p = \frac{1}{n_{perms}} \sum
 \limits_{j=1}^{n_{perms}} {\bf 1}\{|T_j^*| \geq |T_{obs}|\}\]</span></p>
+<p><strong>Visualization:</strong> A great intuitive explanation and
+visualization of the permutation test (with llamas!) is provided <a href="https://www.jwilber.me/permutationtest/">here</a>.</p>
 <p>The ultimate goal will be to implement this permutation test in C++.
 However, it will be easier to implement in C++ if you first write it in
 R, to get a better feel for the algorithm. Then we can translate it to
@@ -2135,6 +2137,13 @@ statistics <span class="math inline">\(T_i^*\)</span></li>
 making your function just return the observed test statistic. Then do a
 single permutation (no iteration), and check that you get the expected
 results. Then continue adding more to the function.</li>
+<li>The <code>abs</code> function in C++ is overloaded. You may
+encounter the issue that <code>abs(t)</code> returns an <code>int</code>
+even if <code>t</code> is a <code>double</code>. As a general rule, use
+<code>std::abs</code> when you want to take the absolute value of a
+floating point number. (Do not use <code>std::abs</code> for
+<code>arma::vec</code> objects, however; you should use
+<code>arma::abs</code>)</li>
 <li>as part of the permutation test, you will need to be able to permute
 the entries of a vector in C++. This actually turns out to be a bit
 trickier than in R. I have provided a function for you (in the
