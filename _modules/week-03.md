@@ -17,6 +17,7 @@ January 27
 
 January 29
 : Acceptance-rejection sampling
+  : [slides (pdf)](https://sta379-s25.github.io/slides/lecture_7.pdf), [practice questions](https://sta379-s25.github.io/practice_questions/pq_7.html), [practice question solutions](https://sta379-s25.github.io/practice_questions/pq_7_solutions.html)
 
 : *Statistical Computing with R* (Rizzo) Chapter 3
 : *Computational Statistics* (Givens and Hoeting) Chapter 6.2.3
