@@ -137,12 +137,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>k <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="co"># number of acceptances</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span>(k <span class="sc">&lt;</span> n){</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># sample y ~ g</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># sample u ~ U(0, 1)</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># check if u &lt;= f(y)/(cg(y))</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="co">#   if yes, accept y</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="co">#   if no, reject y</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  ...</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ol start="2" type="1">
 <li>We can then compare the output to the true distribution using the empirical cdf:</li>
@@ -156,6 +152,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><img src="pq_7_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<ol start="3" type="1">
+<li>We choose a candidate <span class="math inline">\(g\)</span> such that <span class="math inline">\(f(t)/g(t) \leq c\)</span> for some value <span class="math inline">\(c &gt; 0\)</span>. This means that <span class="math display">\[c = \max_t \frac{f(t)}{g(t)}\]</span> Find the value of <span class="math inline">\(c\)</span> as a function of <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span> when <span class="math inline">\(f(t) = \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)} t^{\alpha - 1} (1 - t)^{\beta - 1}\)</span> and <span class="math inline">\(g(t) = 1\)</span> for <span class="math inline">\(t \in (0, 1)\)</span>.</li>
+</ol>
 </section>
 </section>
 

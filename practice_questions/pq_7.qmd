@@ -57,11 +57,7 @@ x <- rep(NA, n)
 k <- 0 # number of acceptances
 
 while(k < n){
-  # sample y ~ g
-  # sample u ~ U(0, 1)
-  # check if u <= f(y)/(cg(y))
-  #   if yes, accept y
-  #   if no, reject y
+  ...
 }
 ```
 
@@ -91,4 +87,6 @@ plot(gridpts, ecdf(x)(gridpts), type="l", xlab="x", ylab="cdf")
 lines(gridpts, pbeta(gridpts, 2.7, 6.3), type="l", col="orange")
 ```
 
-
+3. We choose a candidate $g$ such that $f(t)/g(t) \leq c$ for some value $c > 0$. This means that 
+$$c = \max_t \frac{f(t)}{g(t)}$$
+Find the value of $c$ as a function of $\alpha$ and $\beta$ when $f(t) = \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)} t^{\alpha - 1} (1 - t)^{\beta - 1}$ and $g(t) = 1$ for $t \in (0, 1)$.
