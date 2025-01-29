@@ -1894,8 +1894,8 @@ has pdf</p>
 <p>Now let’s implement a function to simulate from the Laplace
 distribution. Before we do, however, we should think about possible
 errors that could arise when calling our function. Note from the
-definition above that the parameter <span class="math inline">\(b\)</span> for the Laplace must both be positive.
-If someone tries to sample from the Laplace distribution with a bad
+definition above that the parameter <span class="math inline">\(b\)</span> for the Laplace must be positive. If
+someone tries to sample from the Laplace distribution with a bad
 parameter value, they should get an error message telling them that the
 inputs are wrong.</p>
 <p>In R, we can include error messages inside functions using the
@@ -2039,13 +2039,13 @@ variable with probability function <span class="math inline">\(f\)</span>, and w
 some other distribution with probability function <span class="math inline">\(g\)</span>, such that for some <span class="math inline">\(c &gt; 0\)</span>,</p>
 <p><span class="math display">\[\frac{f(t)}{g(t)} \leq c \hspace{1cm}
 \text{for all } t \text{ where } f(t) &gt; 0\]</span></p>
-<p>Acceptance-rejection sampling then generates a sample <span class="math inline">\(x\)</span> from <span class="math inline">\(f\)</span> as follows:</p>
+<p>Acceptance-rejection sampling then generates <span class="math inline">\(X \sim f\)</span> as follows:</p>
 <ol style="list-style-type: decimal">
-<li>Sample <span class="math inline">\(y \sim g\)</span></li>
-<li>Sample <span class="math inline">\(u \sim Uniform(0,
+<li>Sample <span class="math inline">\(Y \sim g\)</span></li>
+<li>Sample <span class="math inline">\(U \sim Uniform(0,
 1)\)</span></li>
-<li>If <span class="math inline">\(\dfrac{f(y)}{cg(y)} \leq u\)</span>,
-set <span class="math inline">\(x = y\)</span>. Otherwise, return to
+<li>If <span class="math inline">\(U \leq \dfrac{f(Y)}{cg(Y)}\)</span>,
+set <span class="math inline">\(X = Y\)</span>. Otherwise, return to
 step 1.</li>
 </ol>
 <div id="rayleigh-distribution" class="section level3">
@@ -2059,10 +2059,15 @@ distribution.</p>
 <h4>Question 5 (written)</h4>
 <p>Propose a candidate distribution <span class="math inline">\(g\)</span> for acceptance-rejection sampling from
 the Rayleigh distribution. Explain your choice of <span class="math inline">\(g\)</span>, and find the value <span class="math inline">\(c\)</span>.</p>
-<p><em>Hint:</em> The Rayleigh distribution is supported on <span class="math inline">\([0, \infty)\)</span>. Think about other continuous
+<p><em>Hints:</em></p>
+<ul>
+<li>In this problem, <span class="math inline">\(g\)</span> should
+<em>not</em> be a uniform density</li>
+<li>The Rayleigh distribution is supported on <span class="math inline">\([0, \infty)\)</span>. Think about other continuous
 distributions supported on <span class="math inline">\([0,
-\infty)\)</span> which also involve <span class="math inline">\(x^{\text{something}}e^{-\text{something else}
-\cdot x}\)</span></p>
+\infty)\)</span> which have a pdf which looks kind of similar to the
+Rayleigh pdf</li>
+</ul>
 </div>
 <div id="question-6-code" class="section level4 question">
 <h4>Question 6 (code)</h4>
@@ -2085,7 +2090,8 @@ informative error message if <span class="math inline">\(\sigma \leq
 <ul>
 <li>You may not use any existing Rayleigh functions to write your
 code</li>
-<li>You must use acceptance-rejection sampling</li>
+<li>You must use acceptance-rejection sampling, which you implement
+yourself</li>
 <li>You <em>may</em> (and should) use existing R functions to simulate
 from your candidate distribution <span class="math inline">\(g\)</span></li>
 <li>Use the <code>runif</code> function to generate uniform samples</li>

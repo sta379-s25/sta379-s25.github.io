@@ -154,7 +154,7 @@ Derive the inverse transform for the $Laplace(\mu, b)$ distribution. That is, if
 :::
 
 
-Now let's implement a function to simulate from the Laplace distribution. Before we do, however, we should think about possible errors that could arise when calling our function. Note from the definition above that the parameter $b$ for the Laplace must both be positive. If someone tries to sample from the Laplace distribution with a bad parameter value, they should get an error message telling them that the inputs are wrong.
+Now let's implement a function to simulate from the Laplace distribution. Before we do, however, we should think about possible errors that could arise when calling our function. Note from the definition above that the parameter $b$ for the Laplace must be positive. If someone tries to sample from the Laplace distribution with a bad parameter value, they should get an error message telling them that the inputs are wrong.
 
 In R, we can include error messages inside functions using the `stop()` function. Here is an example in which we write our own square root function:
 
@@ -267,11 +267,11 @@ Another method for sampling from a distribution of interest is acceptance-reject
 $$\frac{f(t)}{g(t)} \leq c \hspace{1cm} \text{for all } t \text{ where } f(t) > 0$$
 
 
-Acceptance-rejection sampling then generates a sample $x$ from $f$ as follows:
+Acceptance-rejection sampling then generates $X \sim f$ as follows:
 
-1. Sample $y \sim g$
-2. Sample $u \sim Uniform(0, 1)$
-3. If $\dfrac{f(y)}{cg(y)} \leq u$, set $x = y$. Otherwise, return to step 1.
+1. Sample $Y \sim g$
+2. Sample $U \sim Uniform(0, 1)$
+3. If $U \leq \dfrac{f(Y)}{cg(Y)}$, set $X = Y$. Otherwise, return to step 1.
 
 ### Rayleigh distribution
 
@@ -284,7 +284,10 @@ where $\sigma>0$ is the scale parameter of the distribution.
 
 Propose a candidate distribution $g$ for acceptance-rejection sampling from the Rayleigh distribution. Explain your choice of $g$, and find the value $c$.
 
-*Hint:* The Rayleigh distribution is supported on $[0, \infty)$. Think about other continuous distributions supported on $[0, \infty)$ which also involve $x^{\text{something}}e^{-\text{something else} \cdot x}$
+*Hints:* 
+
+* In this problem, $g$ should *not* be a uniform density
+* The Rayleigh distribution is supported on $[0, \infty)$. Think about other continuous distributions supported on $[0, \infty)$ which have a pdf which looks kind of similar to the Rayleigh pdf
 :::
 
 :::{.question}
@@ -304,7 +307,7 @@ Error handling: the function should throw an error and provide an informative er
 Additional requirements: 
 
 * You may not use any existing Rayleigh functions to write your code
-* You must use acceptance-rejection sampling
+* You must use acceptance-rejection sampling, which you implement yourself
 * You *may* (and should) use existing R functions to simulate from your candidate distribution $g$
 * Use the `runif` function to generate uniform samples
 
