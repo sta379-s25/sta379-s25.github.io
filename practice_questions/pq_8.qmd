@@ -5,9 +5,7 @@ format: html
 
 ## Acceptance-rejection sampling
 
-Previously, we discussed transformation methods for sampling from a variety of distributions. These transformations, however, require us to either invert the cdf, or find a different tranformation (e.g. the Box-Muller Transformation for the Normal distribution).
-
-Another method for sampling from a continuous distribution of interest is acceptance-rejection sampling. Suppose we wish to sample a continuous random variable with density $f$ (the *target density*), and we have the ability to sample from some other distribution with probability function $g$ (the *candidate density*), such that for some $c > 0$,
+Suppose we wish to sample a continuous random variable with density $f$ (the *target density*), and we have the ability to sample from some other distribution with probability function $g$ (the *candidate density*), such that for some $c > 0$,
 
 $$\frac{f(t)}{g(t)} \leq c \hspace{1cm} \text{for all } t \text{ where } f(t) > 0$$
 
@@ -36,7 +34,7 @@ and
 
 $$c = \frac{f(t_{\max})}{g(t_{\max})}$$
 
-**In R:** We can use R's `dbeta` function to calculate the pdf of a beta distribution, and thereby calculate $c$ given $\alpha$ and $\beta$. For example, suppose $alpha = 2.7$ and $\beta = 6.3$. Then, 
+**In R:** We can use R's `dbeta` function to calculate the pdf of a beta distribution, and thereby calculate $c$ given $\alpha$ and $\beta$. For example, suppose $\alpha = 2.7$ and $\beta = 6.3$. Then, 
 
 $$t_{\max} = \dfrac{2.7 - 1}{2.7 + 6.3 - 2} = 0.2428571$$
 and $c \approx 2.70$
@@ -66,6 +64,11 @@ Write a function in R called `my_rbeta`, which simulates from a beta distributio
 
 ```{r, echo=F, message=F}
 my_rbeta <- function(n, a, b){
+  
+  if(a <= 1 || b <= 1){
+    stop("Acceptance-rejection sampling for the beta distribution requires a,b > 1")
+  }
+  
   tmax <- (a - 1)/(a + b - 2)
   c <- dbeta(tmax, a, b)
   
@@ -99,7 +102,29 @@ plot(gridpts, ecdf(x)(gridpts), type="l", xlab="x", ylab="cdf")
 lines(gridpts, pbeta(gridpts, 3, 3), type="l", col="orange")
 ```
 
+#### Error handling
 
+When writing our function, we should think about possible errors that could arise when we call it. Note that for acceptance-rejection sampling to work with our Beta distribution, we want $\alpha, \beta > 1$. (In general, $\alpha, \beta > 0$ for a Beta distribution, but we acceptance-rejection sampling doesn't work for all those values). If someone tries to sample from the Beta distribution with a bad parameter value, they should get an error message telling them that the inputs are wrong.
 
+In R, we can include error messages inside functions using the `stop()` function. Here is an example in which we write our own square root function:
 
+```{r, error=T}
+my_sqrt <- function(x){
+  if(x < 0){
+    stop("The square root of a negative number is complex")
+  }
+  
+  x^(1/2)
+}
 
+my_sqrt(4)
+my_sqrt(-4)
+```
+
+**Task:** Update your `my_rbeta` function above to include an error message if the inputs `a` or `b` do not take values that allow acceptance-rejection sampling.
+
+Example:
+
+```{r, error=T}
+x <- my_rbeta(10, 0.5, 2)
+```

@@ -94,8 +94,9 @@ Practice questions on the course website:
 * Start in class. You are welcome to work with others
 * Practice questions are to help you practice. They are not submitted and not graded
 * Solutions are posted on the course website
+* If done early, start on HW 3
 
 **Next time:**
 
-* Wrap up: discuss other transformations for generating random variables
-* Time to work on HW 3
+* Challenges with acceptance-rejection sampling
+* Other transformation methods to generate random variables

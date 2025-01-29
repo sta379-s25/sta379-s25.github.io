@@ -98,8 +98,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="acceptance-rejection-sampling" class="level2">
 <h2 class="anchored" data-anchor-id="acceptance-rejection-sampling">Acceptance-rejection sampling</h2>
-<p>Previously, we discussed transformation methods for sampling from a variety of distributions. These transformations, however, require us to either invert the cdf, or find a different tranformation (e.g.&nbsp;the Box-Muller Transformation for the Normal distribution).</p>
-<p>Another method for sampling from a continuous distribution of interest is acceptance-rejection sampling. Suppose we wish to sample a continuous random variable with density <span class="math inline">\(f\)</span> (the <em>target density</em>), and we have the ability to sample from some other distribution with probability function <span class="math inline">\(g\)</span> (the <em>candidate density</em>), such that for some <span class="math inline">\(c &gt; 0\)</span>,</p>
+<p>Suppose we wish to sample a continuous random variable with density <span class="math inline">\(f\)</span> (the <em>target density</em>), and we have the ability to sample from some other distribution with probability function <span class="math inline">\(g\)</span> (the <em>candidate density</em>), such that for some <span class="math inline">\(c &gt; 0\)</span>,</p>
 <p><span class="math display">\[\frac{f(t)}{g(t)} \leq c \hspace{1cm} \text{for all } t \text{ where } f(t) &gt; 0\]</span></p>
 <p>Acceptance-rejection sampling then generates <span class="math inline">\(X \sim f\)</span> as follows:</p>
 <ol type="1">
@@ -118,7 +117,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><span class="math display">\[t_{\max} = \frac{\alpha - 1}{\alpha + \beta - 2},\]</span></p>
 <p>and</p>
 <p><span class="math display">\[c = \frac{f(t_{\max})}{g(t_{\max})}\]</span></p>
-<p><strong>In R:</strong> We can use R’s <code>dbeta</code> function to calculate the pdf of a beta distribution, and thereby calculate <span class="math inline">\(c\)</span> given <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span>. For example, suppose <span class="math inline">\(alpha = 2.7\)</span> and <span class="math inline">\(\beta = 6.3\)</span>. Then,</p>
+<p><strong>In R:</strong> We can use R’s <code>dbeta</code> function to calculate the pdf of a beta distribution, and thereby calculate <span class="math inline">\(c\)</span> given <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span>. For example, suppose <span class="math inline">\(\alpha = 2.7\)</span> and <span class="math inline">\(\beta = 6.3\)</span>. Then,</p>
 <p><span class="math display">\[t_{\max} = \dfrac{2.7 - 1}{2.7 + 6.3 - 2} = 0.2428571\]</span> and <span class="math inline">\(c \approx 2.70\)</span></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>tmax <span class="ot">&lt;-</span> (<span class="fl">2.7</span> <span class="sc">-</span> <span class="dv">1</span>)<span class="sc">/</span>(<span class="fl">2.7</span> <span class="sc">+</span> <span class="fl">6.3</span> <span class="sc">-</span> <span class="dv">2</span>)</span>
@@ -165,6 +164,37 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(gridpts, <span class="fu">pbeta</span>(gridpts, <span class="dv">3</span>, <span class="dv">3</span>), <span class="at">type=</span><span class="st">"l"</span>, <span class="at">col=</span><span class="st">"orange"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="pq_8_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="error-handling" class="level4">
+<h4 class="anchored" data-anchor-id="error-handling">Error handling</h4>
+<p>When writing our function, we should think about possible errors that could arise when we call it. Note that for acceptance-rejection sampling to work with our Beta distribution, we want <span class="math inline">\(\alpha, \beta &gt; 1\)</span>. (In general, <span class="math inline">\(\alpha, \beta &gt; 0\)</span> for a Beta distribution, but we acceptance-rejection sampling doesn’t work for all those values). If someone tries to sample from the Beta distribution with a bad parameter value, they should get an error message telling them that the inputs are wrong.</p>
+<p>In R, we can include error messages inside functions using the <code>stop()</code> function. Here is an example in which we write our own square root function:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>my_sqrt <span class="ot">&lt;-</span> <span class="cf">function</span>(x){</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(x <span class="sc">&lt;</span> <span class="dv">0</span>){</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stop</span>(<span class="st">"The square root of a negative number is complex"</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  x<span class="sc">^</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">2</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="fu">my_sqrt</span>(<span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">my_sqrt</span>(<span class="sc">-</span><span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-error">
+<pre><code>Error in my_sqrt(-4): The square root of a negative number is complex</code></pre>
+</div>
+</div>
+<p><strong>Task:</strong> Update your <code>my_rbeta</code> function above to include an error message if the inputs <code>a</code> or <code>b</code> do not take values that allow acceptance-rejection sampling.</p>
+<p>Example:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">my_rbeta</span>(<span class="dv">10</span>, <span class="fl">0.5</span>, <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-error">
+<pre><code>Error in my_rbeta(10, 0.5, 2): Acceptance-rejection sampling for the beta distribution requires a,b &gt; 1</code></pre>
 </div>
 </div>
 </section>
