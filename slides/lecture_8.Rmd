@@ -4,7 +4,75 @@ author: "Ciaran Evans"
 output: beamer_presentation
 ---
 
-## Recap
+## Acceptance-rejection sampling
+
+:::: {.columns}
+
+
+
+::: {.column width="50%"}
+
+Suppose we want to simulate from this Beta distribution:
+
+```{r, echo=F, message=F, warning=F, fig.width = 3, fig.height=3, fig.align='left'}
+gridpts <- seq(0, 1, 0.01)
+x <- dbeta(gridpts, 2.7, 6.3)
+y <- dunif(gridpts)
+c = 2.68
+plot(gridpts,x,xlim=c(0,1),ylim=c(0,2.8),type="l",col="blue",main="",xlab="",ylab="",
+     lwd=1.5)
+#lines(gridpts,c*y,col="red", lwd=1.5)
+#legend(.6,2,c("Target density, f(t)","c * g(t)"),lty=c(1,1),col=c("blue","red"))
+```
+
+:::
+
+::: {.column width="50%"}
+
+We can *get* samples from this uniform distribution:
+
+```{r, echo=F, message=F, warning=F, fig.width = 3, fig.height=3, fig.align='left'}
+gridpts <- seq(0, 1, 0.01)
+x <- dbeta(gridpts, 2.7, 6.3)
+y <- dunif(gridpts)
+c = 2.68
+# plot(gridpts,x,xlim=c(0,1),ylim=c(0,2.8),type="l",col="blue",main="",xlab="",ylab="",
+#      lwd=1.5)
+plot(gridpts,y,col="red", lwd=1.5, type="l", xlim = c(0, 1), ylim = c(0, 1.1),
+     xlab = "", ylab = "")
+#legend(.6,2,c("Target density, f(t)","c * g(t)"),lty=c(1,1),col=c("blue","red"))
+```
+
+:::
+
+::::
+
+## Acceptance-rejection sampling
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{r, echo=F, message=F, warning=F, fig.width = 4, fig.height=3.5, fig.align='left'}
+gridpts <- seq(0, 1, 0.01)
+x <- dbeta(gridpts, 2.7, 6.3)
+y <- dunif(gridpts)
+c = 2.68
+plot(gridpts,x,xlim=c(0,1),ylim=c(0,2.8),type="l",col="blue",main="",xlab="",ylab="",
+     lwd=1.5)
+lines(gridpts,c*y,col="red", lwd=1.5)
+#legend(.6,2,c("Target density, f(t)","c * g(t)"),lty=c(1,1),col=c("blue","red"))
+```
+
+:::
+
+::: {.column width="50%"}
+
+:::
+
+::::
+
+## Acceptance-rejection sampling
 
 * Want to sample continuous r.v. $X \sim f$
 * Can easily sample from a different density: $Y \sim g$, such that
