@@ -1970,63 +1970,124 @@ U_2)\]</span></p>
 <p>The goal of this portion of the assignment is to show that the
 Box-Muller transform works. To do so, we will need to revisit
 transformations of multiple random variables.</p>
-<div id="transformations-of-multiple-random-variables" class="section level3">
-<h3>Transformations of multiple random variables</h3>
-<p>Let <span class="math inline">\((X_1,...,X_n)&#39;\)</span> be a
-continuous random vector with joint pdf <span class="math inline">\(f_X(x_1,...,x_n)\)</span>. Let <span class="math inline">\((Y_1,...,Y_n)&#39;\)</span> be a continuous random
-vector defined by</p>
-<p><span class="math display">\[Y_1 = g_1(X_1,...,X_n) \hspace{1cm} Y_2
-= g_2(X_1,...,X_n) \hspace{1cm} \text{etc.}\]</span> Assume that the
-functions <span class="math inline">\(g_1,...,g_n\)</span> are such that
-for all <span class="math inline">\((y_1,...,y_n)\)</span> there is
-exactly one <span class="math inline">\((x_1,...,x_n)\)</span> such that
-<span class="math inline">\((y_1,...,y_n) =
-(g_1(x_1,...,x_n),...,g_n(x_1,...,x_n))\)</span>. That is, collectively
-the transformation is invertible, and we can define functions <span class="math inline">\(h_1,...,h_n\)</span> such that <span class="math inline">\(x_1 = h_1(y_1,...,y_n)\)</span>, <span class="math inline">\(x_2 = h_2(y_1,...,y_n)\)</span>, etc.</p>
-<p>Then, the joint pdf of <span class="math inline">\((Y_1,...,Y_n)&#39;\)</span> is given by</p>
-<p><span class="math display">\[f_Y(y_1,...,y_n) = f_X(h_1(y_1,...,y_n),
-..., h_n(y_1,...,y_n)) \ |\det({\bf J})|\]</span></p>
+<div id="step-1-the-goal" class="section level3">
+<h3>Step 1: The goal</h3>
+<p>Recall that two variables <span class="math inline">\(X_1,
+X_2\)</span> are <em>independent</em> if their joint pdf factors as the
+product of the marginal pdfs:</p>
+<p><span class="math display">\[f_{X_1, X_2}(x_1, x_2) = f_{X_1}(x_1)
+f_{X_2}(x_2)\]</span></p>
+<p>To prove that <span class="math inline">\(X_1,X_2\)</span> are
+independent <span class="math inline">\(N(0, 1)\)</span> random
+variables therefore involves finding their joint pdf <span class="math inline">\(f_{X_1, X_2}(x_1, x_2)\)</span>.</p>
+</div>
+<div id="step-2-re-writing-the-transformation" class="section level3">
+<h3>Step 2: Re-writing the transformation</h3>
+<p>In the definition of the Box-Muller transformation above, we can see
+that both <span class="math inline">\(X_1\)</span> and <span class="math inline">\(X_2\)</span> are functions of <span class="math inline">\(U_1\)</span> and <span class="math inline">\(U_2\)</span>; let’s call these functions <span class="math inline">\(g_1\)</span> and <span class="math inline">\(g_2\)</span>:</p>
+<p><span class="math display">\[X_1 = g_1(U_1, U_2) = \sqrt{-2
+\log(U_1)} \cos (2 \pi U_2)\]</span></p>
+<p><span class="math display">\[X_2 = g_2(U_1, U_2) = \sqrt{-2
+\log(U_1)} \sin (2 \pi U_2)\]</span></p>
+<p>Now, in this case we can <em>invert</em> this process, to write <span class="math inline">\(U_1\)</span> and <span class="math inline">\(U_2\)</span> as functions of <span class="math inline">\(X_1\)</span> and <span class="math inline">\(X_2\)</span>:</p>
+<p><span class="math display">\[U_1 = h_1(X_1, X_2) = \exp \left\lbrace
+- \frac{(X_1^2 + X_2^2)}{2} \right\rbrace\]</span></p>
+<p><span class="math display">\[U_2 = h_2(X_1, X_2) = \frac{1}{2\pi}
+\arctan \left( \frac{Y_2}{Y_1} \right)\]</span></p>
+<div id="question-4a-written" class="section level4 question">
+<h4>Question 4(a) (written)</h4>
+<p>Show that if <span class="math inline">\(X_1 = \sqrt{-2 \log(U_1)}
+\cos (2 \pi U_2)\)</span> and <span class="math inline">\(X_2 = \sqrt{-2
+\log(U_1)} \sin (2 \pi U_2)\)</span>, then <span class="math inline">\(U_1 = \exp \left\lbrace - \frac{(X_1^2 +
+X_2^2)}{2} \right\rbrace\)</span> and <span class="math inline">\(U_2 =
+\frac{1}{2\pi} \arctan \left( \frac{Y_2}{Y_1} \right)\)</span>.</p>
+<p>You may use fundamental trig identities. Show all work.</p>
+</div>
+</div>
+<div id="step-3-transformations-of-multiple-random-variables" class="section level3">
+<h3>Step 3: transformations of multiple random variables</h3>
+<p>We want to find the joint density <span class="math inline">\(f_{X_1,
+X_2}(x_1, x_2)\)</span>, and we have <span class="math inline">\(U_1 =
+h_1(X_1, X_2)\)</span> and <span class="math inline">\(U_2 = h_2(X_1,
+X_2)\)</span>. We also know the joint pdf <span class="math inline">\(f_{U_1, U_2}(u_1, u_2)\)</span> (<em>hint:</em>
+<span class="math inline">\(U_1\)</span> and <span class="math inline">\(U_2\)</span> are independent <span class="math inline">\(Uniform(0, 1)\)</span>!). How do we use this
+information to get <span class="math inline">\(f_{X_1,
+X_2}\)</span>?</p>
+<p>It turns out (you do not need to prove this) that</p>
+<p><span class="math display">\[f_{X_1, X_2}(x_1, x_2) = f_{U_1,
+U_2}(h_1(x_1, x_2), h_2(x_1, x_2)) |\det({\bf J})|,\]</span></p>
 <p>where <span class="math inline">\(|\det ({\bf J})|\)</span> is the
 absolute value of the determinant of the matrix of partial
 derivatives:</p>
 <p><span class="math display">\[\det({\bf J}) = \begin{vmatrix}
-\frac{\partial x_1}{\partial y_1} &amp; \frac{\partial x_1}{\partial
-y_2} &amp; \cdots &amp; \frac{\partial x_1}{\partial y_n} \\
-\frac{\partial x_2}{\partial y_1} &amp; \frac{\partial x_2}{\partial
-y_2} &amp; \cdots &amp; \frac{\partial x_2}{\partial y_n} \\ \vdots
-&amp; \vdots &amp; \cdots &amp; \vdots \\ \frac{\partial x_n}{\partial
-y_1} &amp; \frac{\partial x_n}{\partial y_2} &amp; \cdots &amp;
-\frac{\partial x_n}{\partial y_n} \end{vmatrix}\]</span></p>
-<p>and the partial derivatives are <span class="math inline">\(\dfrac{\partial x_i}{\partial y_j} =
-\dfrac{\partial h_i(y_1,...,y_n)}{\partial y_j}\)</span></p>
+\frac{\partial u_1}{\partial x_1} &amp; \frac{\partial u_1}{\partial
+x_2} \\ \frac{\partial u_2}{\partial x_1} &amp; \frac{\partial
+u_2}{\partial x_2} \end{vmatrix}\]</span></p>
+<p>and the partial derivatives are <span class="math inline">\(\dfrac{\partial u_i}{\partial x_j} =
+\dfrac{\partial h_i(x_1, x_2)}{\partial x_j}\)</span></p>
+<p>This might look unfamiliar, but that’s ok! We will break it down
+step-by-step.</p>
 </div>
-<div id="sidebar-partial-derivatives" class="section level3">
-<h3>Sidebar: partial derivatives</h3>
-<p>Suppose you have a function of multiple variables. For example,
-consider</p>
-<p><span class="math display">\[f(x, y) = ax^2 + bxy + cy^2\]</span></p>
-<p>We’d like to understand how that function changes as we change <span class="math inline">\(x\)</span>. To do this, we can take a derivative
-with respect to <span class="math inline">\(x\)</span>. Similarly, if we
-want to understand how the function changes as we change <span class="math inline">\(y\)</span>, then we need to take a derivative with
-respect to <span class="math inline">\(y\)</span>. Because there are
-other variables in the function, these derivatives are called
+<div id="partial-derivatives" class="section level3">
+<h3>Partial derivatives</h3>
+<p>Suppose you have functions of multiple variables. For example,
+suppose we have</p>
+<p><span class="math display">\[h_1(x_1, x_2) = 2x_1^2 + 3x_1x_2 +
+x_2\]</span></p>
+<p>We’d like to understand how this function changes as we change <span class="math inline">\(x_1\)</span> (keeping <span class="math inline">\(x_2\)</span> fixed). To do this, just like in
+single variable calculus, we take the derivative with respect to <span class="math inline">\(x_1\)</span>! Similarly, if we want to understand
+how the function changes as we change <span class="math inline">\(x_2\)</span>, then we need to take a derivative
+with respect to <span class="math inline">\(x_2\)</span>. Because there
+are other variables in the function, these derivatives are called
 <em>partial</em> derivatives.</p>
 <p>To calculate a partial derivative, I just treat any other variables
 in the function as fixed when I calculate the derivative. For
 example,</p>
-<p><span class="math display">\[\frac{\partial f}{\partial x} = 2ax + by
-\hspace{0.5cm} \text{(treating y as a constant here!)}\]</span></p>
-<div id="question-4-written" class="section level4 question">
-<h4>Question 4 (written)</h4>
-<p>Suppose that <span class="math inline">\(X_1, X_2\)</span> are
-generated by the Box-Muller transform, as defined above. Prove that
-<span class="math inline">\(X_1, X_2\)</span> are independent, <span class="math inline">\(N(0, 1)\)</span> random variables.</p>
-<p><em>Hints:</em></p>
+<p><span class="math display">\[\frac{\partial h_1(x_1, x_2)}{\partial
+x_1} = 4x_1 + 3x_2 \hspace{0.5cm} \text{(treating } x_2 \text{ as a
+constant here!)}\]</span></p>
+<p><span class="math display">\[\frac{\partial h_1(x_1, x_2)}{\partial
+x_2} = 3x_1 +1 \hspace{0.5cm} \text{(treating } x_1 \text{ as a constant
+here!)}\]</span></p>
+<div id="question-4b-written" class="section level4 question">
+<h4>Question 4(b) (written)</h4>
+<p>Calculate the four partial derivatives we need:</p>
 <ul>
-<li>Begin by inverting the transform to find <span class="math inline">\(U_1\)</span> and <span class="math inline">\(U_2\)</span> as functions of <span class="math inline">\(X_1\)</span> and <span class="math inline">\(X_2\)</span></li>
-<li>You may wish to revisit facts about trigonometric functions, such as
-their derivatives. You may look these facts up as needed</li>
+<li><span class="math inline">\(\frac{\partial h_1(x_1, x_2)}{\partial
+x_1}\)</span></li>
+<li><span class="math inline">\(\frac{\partial h_1(x_1, x_2)}{\partial
+x_2}\)</span></li>
+<li><span class="math inline">\(\frac{\partial h_2(x_1, x_2)}{\partial
+x_1}\)</span></li>
+<li><span class="math inline">\(\frac{\partial h_2(x_1, x_2)}{\partial
+x_2}\)</span></li>
 </ul>
+<p>Show all work.</p>
+<p><em>Hint:</em> Recall that the derivative of arctan is</p>
+<p><span class="math display">\[\frac{d}{dx} \text{arctan} \ x =
+\frac{1}{1 + x^2}\]</span></p>
+</div>
+</div>
+<div id="the-determinant" class="section level3">
+<h3>The determinant</h3>
+<p>Recall that the determinant of a 2x2 matrix is</p>
+<p><span class="math display">\[\begin{vmatrix} a &amp; b \\ c &amp; d
+\end{vmatrix} = ad - bc\]</span></p>
+<div id="question-4c-written" class="section level4 question">
+<h4>Question 4(c) (written)</h4>
+<p>Using your answer to 4(b), calculate <span class="math inline">\(|\det ({\bf J})|\)</span>, the absolute value of
+the determinant <span class="math inline">\(\det ({\bf J})\)</span>.
+Note: your answer will be in terms of <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span>.</p>
+<p>Show all work.</p>
+</div>
+</div>
+<div id="putting-it-all-together" class="section level3">
+<h3>Putting it all together</h3>
+<div id="question-4d-written" class="section level4 question">
+<h4>Question 4(d) (written)</h4>
+<p>Suppose that <span class="math inline">\(X_1, X_2\)</span> are
+generated by the Box-Muller transform, as defined above. Using your
+answers to the previous questions, prove that <span class="math inline">\(X_1, X_2\)</span> are independent, <span class="math inline">\(N(0, 1)\)</span> random variables.</p>
 <p>Show all work.</p>
 </div>
 </div>
@@ -2055,26 +2116,35 @@ distribution has density <span class="math display">\[f(x) =
 \frac{x}{\sigma^2} e^{-\frac{x^2}{2 \sigma^2}}, \hspace{1cm} \text{ for
 } x \geq 0,\]</span> where <span class="math inline">\(\sigma&gt;0\)</span> is the scale parameter of the
 distribution.</p>
+<p>To do acceptance-rejection sampling, we need to choose a candidate
+distribution <span class="math inline">\(g\)</span>. How should we do
+that?</p>
+<ul>
+<li>The Rayleigh distribution is supported on <span class="math inline">\([0, \infty)\)</span>, so we need <span class="math inline">\(g\)</span> to be supported on <span class="math inline">\([0, \infty)\)</span> as well</li>
+<li>A distribution <span class="math inline">\(g\)</span> with a similar
+form (<span class="math inline">\(x^{\text{something}} \cdot e^{x \cdot
+\text{something}})\)</span>) seems like a good choice</li>
+</ul>
+<p>In this question, you will use a <span class="math inline">\(Gamma(\alpha, \beta)\)</span> distribution. Recall
+that this distribution has pdf</p>
+<p><span class="math display">\[g(x) = \frac{1}{\Gamma(\alpha)
+\beta^\alpha} x^{\alpha - 1} e^{-x/\beta}\]</span></p>
+<p>We then need to find the value</p>
+<p><span class="math display">\[c = \max_t
+\frac{f(t)}{g(t)}\]</span></p>
 <div id="question-5-written" class="section level4 question">
 <h4>Question 5 (written)</h4>
-<p>Propose a candidate distribution <span class="math inline">\(g\)</span> for acceptance-rejection sampling from
-the Rayleigh distribution. Explain your choice of <span class="math inline">\(g\)</span>, and find the value <span class="math inline">\(c\)</span>.</p>
-<p><em>Hints:</em></p>
-<ul>
-<li>In this problem, <span class="math inline">\(g\)</span> should
-<em>not</em> be a uniform density</li>
-<li>The Rayleigh distribution is supported on <span class="math inline">\([0, \infty)\)</span>. Think about other continuous
-distributions supported on <span class="math inline">\([0,
-\infty)\)</span> which have a pdf which looks kind of similar to the
-Rayleigh pdf</li>
-</ul>
+<p>To generate from a <span class="math inline">\(Rayleigh(\sigma)\)</span> distribution, suppose we
+choose <span class="math inline">\(g\)</span> to be the pdf of a <span class="math inline">\(Gamma(2, 2\sigma^2)\)</span>. Using calculus, find
+the bound <span class="math inline">\(c\)</span>.</p>
 </div>
 <div id="question-6-code" class="section level4 question">
 <h4>Question 6 (code)</h4>
 <p>Using your answer to question 5, write a function called
 <code>my_rrayleigh</code> to simulate from the Rayleigh distribution
-with acceptance-rejection sampling. Your function should satisfy the
-following requirements:</p>
+with acceptance-rejection sampling, with the candidate density specified
+in question 5. Your function should satisfy the following
+requirements:</p>
 <p>Inputs:</p>
 <ul>
 <li><code>n</code>: the number of samples to take</li>

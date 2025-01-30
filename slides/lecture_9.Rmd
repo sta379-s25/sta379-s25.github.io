@@ -4,25 +4,153 @@ author: "Ciaran Evans"
 output: beamer_presentation
 ---
 
-## Previously
+## Recap: acceptance-rejection sampling
 
-* Methods to generate $U \sim Uniform(0, 1)$:
+* Want to sample continuous r.v. $X \sim f$
+* Can easily sample from a different density: $Y \sim g$, such that $\frac{f(t)}{g(t)} \leq c$
 
-    * Linear congruential generator
-    * Mersenne twister 
-    * lots of other variants and alternatives
 
-* Methods to generate other random variables:
+1. Sample $Y \sim g$
+2. Sample $U \sim Uniform(0, 1)$
+3. If $U \leq \dfrac{f(Y)}{cg(Y)}$, set $X = Y$. Otherwise, return to step 1.
 
-    * inverse transform method
-        * Pros: easy and efficient if the inverse cdf is easy to find
-        * Cons: requires the inverse cdf to be tractable
-    * Acceptance-rejection sampling:
-        * Pros: works for any continuous distribution if you can find a good candidate $g$
-        * Cons: can be slow/inefficient if we don't choose a good candidate density
-        * Project 1: Making acceptance-rejection sampling more efficient with an *adaptive* candidate density
-        
-**Today:** How else can we generate random variables?
+**Question:** What are some potential downsides to the acceptance-rejection sampling method?
+
+\vspace{3cm}
+
+
+## Inefficiency in acceptance-rejection sampling
+
+1. Sample $Y \sim g$
+2. Sample $U \sim Uniform(0, 1)$
+3. If $U \leq \dfrac{f(Y)}{cg(Y)}$, set $X = Y$. Otherwise, return to step 1.
+
+$$P(\text{accept } Y | Y = y) = P \left( U \leq \frac{f(y)}{cg(y)}\right) = \frac{f(y)}{cg(y)}$$
+
+$$P(\text{accept } Y) = \ ??$$
+
+\vspace{4cm}
+
+## Inefficiency in acceptance-rejection sampling
+
+$Beta(2.7, 6.3)$ example from class activity:
+
+```{r, echo=F, message=F, warning=F, fig.width = 4, fig.height=3.5, fig.align='left'}
+gridpts <- seq(0, 1, 0.01)
+x <- dbeta(gridpts, 2.7, 6.3)
+y <- dunif(gridpts)
+c = 2.68
+plot(gridpts,x,xlim=c(0,1),ylim=c(0,2.8),type="l",col="blue",main="",xlab="",ylab="",
+     lwd=1.5)
+lines(gridpts,c*y,col="red", lwd=1.5)
+#legend(.6,2,c("Target density, f(t)","c * g(t)"),lty=c(1,1),col=c("blue","red"))
+```
+
+Here $c = 2.7$. About many samples from $g$ would I need to get 1000 samples from $f$?
+
+\vspace{2cm}
+
+## Inefficiency in acceptance-rejection sampling
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{r, echo=F, message=F, warning=F, fig.width = 4, fig.height=3.5, fig.align='left'}
+gridpts <- seq(0, 1, 0.01)
+x <- dbeta(gridpts, 2.7, 6.3)
+y <- dunif(gridpts)
+c = 2.68
+plot(gridpts,x,xlim=c(0,1),ylim=c(0,2.8),type="l",col="blue",main="",xlab="",ylab="",
+     lwd=1.5)
+lines(gridpts,c*y,col="red", lwd=1.5)
+#legend(.6,2,c("Target density, f(t)","c * g(t)"),lty=c(1,1),col=c("blue","red"))
+```
+
+:::
+
+::: {.column width="50%"}
+
+```{r, echo=F, message=F, warning=F, fig.width = 4, fig.height=3.5, fig.align='left'}
+gridpts <- seq(0, 1, 0.01)
+x <- dbeta(gridpts, 2.7, 6.3)
+y <- dunif(gridpts)
+c = 2.68
+plot(gridpts,x,xlim=c(0,1),ylim=c(0,2.8),type="l",col="blue",main="",xlab="",ylab="",
+     lwd=1.5)
+lines(gridpts,1.5*dnorm(gridpts, mean=0.22, sd=0.22),col="red", lwd=1.5)
+#legend(.6,2,c("Target density, f(t)","c * g(t)"),lty=c(1,1),col=c("blue","red"))
+```
+
+:::
+
+::::
+
+**Question:** Which of these two candidate densities $g$ would you prefer? 
+
+\vspace{2cm}
+
+## Drawbacks of acceptance-rejection sampling
+
+1. Need to find a suitable candidate $g$
+2. Requires more samples $Y \sim g$ than we get from target $f$ (because we reject some samples)
+    * Want $g$ to be as close as possible to $f$, to accept as many samples as possible
+3. Calculating $f(Y)$ for candidate draws $Y \sim g$ may be expensive for some distributions
+
+**Project 1:** Modifying the acceptance-rejection method to address these drawbacks
+
+**Today:** Another approach to generating random variables
+
+
+```{r, include=F}
+log_f_beta <- function(x, a, b){
+  (a-1)*log(x) + (b-1)*log(1-x) - log(beta(a, b))
+}
+
+log_f_prime_beta <- function(x, a, b){
+  (a-1)/x - (b-1)/(1-x)
+}
+
+get_intervals <- function(x, k, ls, dls, lower_endpoint, upper_endpoint){
+  z <- c(lower_endpoint,
+         (ls[2:k] - ls[1:(k-1)] - 
+            x[2:k]*dls[2:k] + x[1:(k-1)]*dls[1:(k-1)])/(
+              dls[1:(k-1)] - dls[2:k]
+            ),
+         upper_endpoint)
+  
+  p <- ifelse(abs(dls) < sqrt(.Machine$double.eps), # tolerance for "near equality"
+              exp(ls - x*dls)*(z[2:(k+1)] - z[1:k]),
+              exp(ls - x*dls)*(exp(z[2:(k+1)] * dls) - exp(z[1:k]*dls))/dls)
+  
+  output <- list("z" = z,
+                 "p" = p)
+  
+  return(output)
+}
+```
+
+
+```{r, include=F, echo=F, message=F, warning=F, fig.width = 4, fig.height=3.5, fig.align='left'}
+k <- 5
+x <- seq(0.05, 0.95, length = k)
+log_f <- function(t){log_f_beta(t, 2.7, 6.3)}
+log_f_prime <- function(t){log_f_prime_beta(t, 2.7, 6.3)}
+
+intervals <- get_intervals(x = x, k = k, ls = log_f(x), dls = log_f_prime(x), 
+                           lower_endpoint = 0, upper_endpoint = Inf)
+z <- intervals$z
+
+gk <- function(t, x, z){
+  idx <- sapply(t, function(ti){min(which(ti < z)) - 1})
+  exp(log_f(x[idx]) - x[idx]*log_f_prime(x[idx]) + t*log_f_prime(x[idx]))
+}
+
+plot(gridpts,dbeta(gridpts, 2.7, 6.3), xlim=c(0,1), ylim=c(0,3.5), type="l", 
+     col="blue", main="", xlab="", ylab="", lwd=1.5)
+lines(gridpts, gk(gridpts, x, z), lwd=1.5)
+```
+
 
 ## Generating a Normal random variable
 
@@ -103,7 +231,7 @@ Methods to generate random variables, in rough order of preference:
 
 1. Use inverse transform method (if inverse cdf is tractable)
 2. Find a different transformation (if possible)
-3. Acceptance-rejection sampling
+3. Acceptance-rejection sampling (perhaps with modifications)
 
 ## Homework 3
 
