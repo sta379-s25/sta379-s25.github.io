@@ -1,0 +1,198 @@
+---
+title: "Project 1: Adaptive acceptance-rejection sampling"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+**Due:** Friday February 28, 10:00am
+
+**Submission:** For this assignment, you will submit two files:
+
+* An R script (`challenge3_code.R`) containing your R function for question 3
+* A pdf containing your written answers to questions 1 and 2
+
+**Mastery:** To master this assignment, you must satisfy the following requirements:
+
+* Your code must pass all specified unit tests, *as written* (you may not modify the unit tests which I provide)
+* Your code must meet all requirements described in the questions below (matching the requested inputs and outputs)
+* You must comment your code
+* Your written solutions must be complete and correct, with no missing steps or mistakes
+* Your work must abide by the academic honesty requirements in the syllabus 
+
+If you make an honest effort to answer all questions, but you do not master all of the questions on your first submission, you will have one resubmission attempt after receiving feedback.
+
+
+## Recap: acceptance-rejection sampling
+
+In class and on HW 3, we looked at *acceptance-rejection* sampling as one possible method for sampling from a distribution. Recall that acceptance-rejection sampling works like this:
+
+Suppose we wish to sample a random variable with probability function $f$, and we have the ability to sample from some other distribution with probability function $g$, such that for some $c > 0$,
+
+$$\frac{f(t)}{g(t)} \leq c \hspace{1cm} \text{for all } t \text{ where } f(t) > 0$$
+
+
+Acceptance-rejection sampling then generates $X \sim f$ as follows:
+
+1. Sample $Y \sim g$
+2. Sample $U \sim Uniform(0, 1)$
+3. If $U \leq \dfrac{f(Y)}{cg(Y)}$, set $X = Y$. Otherwise, return to step 1.
+
+### Example
+
+For example, suppose we want to sample from the $Beta(2.7, 6.3)$ distribution. The Beta distribution is supported on $(0, 1)$, so we need to choose a candidate density $g$ which has the same support. One possibility is the $Uniform(0, 1)$ distribution, in which case $g(t) = 1$ for all $t \in (0, 1)$. Here is an illustration:
+
+```{r, echo=F}
+gridpts <- seq(0, 1, 0.01)
+x <- dbeta(gridpts, 2.7, 6.3)
+y <- dunif(gridpts)
+c = 2.68
+plot(gridpts,x,xlim=c(0,1),ylim=c(0,2.8),type="l",col="blue",main="",xlab="",ylab="",
+     lwd=1.5)
+lines(gridpts,c*y,col="red", lwd=1.5)
+legend(.6,2,c("Target density, f(t)","c * g(t)"),lty=c(1,1),col=c("blue","red"))
+```
+
+### Limitations
+
+The advantage of this method is that we don't need to find some transformation or invert a cdf in order to generate our samples. The disadvantage, however, is that because we sometimes reject draws from $g$, it takes more effort to get our target samples.
+
+We showed in class that the fraction of draws we accept is $1/c$. This means that if we want $n$ draws from the target density $f$, we expect to need about $cn$ draws from $g$. When $f$ and $g$ are quite different, $c$ is large, and it takes us a lot of work to sample from $f$!
+
+In general, we would like to choose a candidate density $g$ which is as close as possible to our target density $f$. For example, in the plot below we would prefer the second candidate density ($c = 1.26$) vs. the first candidate density ($c = 2.7$).
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{r, echo=F}
+gridpts <- seq(0, 1, 0.01)
+x <- dbeta(gridpts, 2.7, 6.3)
+y <- dunif(gridpts)
+c = 2.68
+plot(gridpts,x,xlim=c(0,1),ylim=c(0,2.8),type="l",col="blue",main="",xlab="",ylab="",
+     lwd=1.5)
+lines(gridpts,c*y,col="red", lwd=1.5)
+#legend(.6,2,c("Target density, f(t)","c * g(t)"),lty=c(1,1),col=c("blue","red"))
+```
+
+:::
+
+::: {.column width="50%"}
+
+```{r, echo=F}
+gridpts <- seq(0, 1, 0.01)
+x <- dbeta(gridpts, 2.7, 6.3)
+y <- dunif(gridpts)
+c = 2.68
+plot(gridpts,x,xlim=c(0,1),ylim=c(0,2.8),type="l",col="blue",main="",xlab="",ylab="",
+     lwd=1.5)
+lines(gridpts,1.5*dnorm(gridpts, mean=0.22, sd=0.22),col="red", lwd=1.5)
+#legend(.6,2,c("Target density, f(t)","c * g(t)"),lty=c(1,1),col=c("blue","red"))
+```
+
+:::
+
+::::
+
+In general, choosing a good candidate density $g$ can be tricky. So what do we do? One option is *adaptive* acceptance-rejection sampling. Here are the basic steps:
+
+1. Rather than choose $g$ from some known parametric family, we will make $g$ an **approximation** of $f$. This is done by constructing a piecewise exponential hull for the function $f$ (details below)
+
+2. When we observe new points, we *update* our approximation of $f$, so that it gets better. This way, over time our candidate density is closer and closer to the true density $f$
+
+
+## Motivation: constructing a piecewise exponential hull to approximate $f$
+
+Consider our $Beta(2.7, 6.3)$ density again:
+
+```{r, echo=F}
+gridpts <- seq(0, 1, 0.01)
+x <- dbeta(gridpts, 2.7, 6.3)
+y <- dunif(gridpts)
+c = 2.68
+plot(gridpts,x,xlim=c(0,1),ylim=c(0,2.8),type="l",col="blue",main="",xlab="",ylab="",
+     lwd=1.5)
+```
+
+This distribution lives on the unit interval $(0, 1)$. To approximate the function, we start by choosing a small number of values at which to approximate the function. For example, suppose we choose the four points
+
+$$x_1 = 0.05, \ x_2 = 0.35, \ x_3 = 0.65, \ x_4 = 0.95$$
+```{r, echo=F}
+gridpts <- seq(0, 1, 0.01)
+x <- dbeta(gridpts, 2.7, 6.3)
+y <- dunif(gridpts)
+c = 2.68
+plot(gridpts,x,xlim=c(0,1),ylim=c(0,2.8),type="l",col="blue",main="",xlab="",ylab="",
+     lwd=1.5)
+x <- seq(0.05, 0.95, length=4)
+for(i in 1:length(x)){
+  lines(c(x[i], x[i]), c(0, dbeta(x[i], 2.7, 6.3)), lwd=1.5)
+}
+#lines(c(x, x), c(rep(0, 4), dbeta(x, 2.7, 6.3)))
+#lines(c(0.2, 0.2), )
+```
+
+
+```{r, include=F}
+log_f_beta <- function(x, a, b){
+  (a-1)*log(x) + (b-1)*log(1-x) - log(beta(a, b))
+}
+
+log_f_prime_beta <- function(x, a, b){
+  (a-1)/x - (b-1)/(1-x)
+}
+
+get_intervals <- function(x, k, ls, dls, lower_endpoint, upper_endpoint){
+  z <- c(lower_endpoint,
+         (ls[2:k] - ls[1:(k-1)] - 
+            x[2:k]*dls[2:k] + x[1:(k-1)]*dls[1:(k-1)])/(
+              dls[1:(k-1)] - dls[2:k]
+            ),
+         upper_endpoint)
+  
+  p <- ifelse(abs(dls) < sqrt(.Machine$double.eps), # tolerance for "near equality"
+              exp(ls - x*dls)*(z[2:(k+1)] - z[1:k]),
+              exp(ls - x*dls)*(exp(z[2:(k+1)] * dls) - exp(z[1:k]*dls))/dls)
+  
+  output <- list("z" = z,
+                 "p" = p)
+  
+  return(output)
+}
+```
+
+
+```{r, include=F, echo=F, message=F, warning=F, fig.width = 4, fig.height=3.5, fig.align='left'}
+k <- 4
+x <- seq(0.05, 0.95, length = k)
+log_f <- function(t){log_f_beta(t, 2.7, 6.3)}
+log_f_prime <- function(t){log_f_prime_beta(t, 2.7, 6.3)}
+
+intervals <- get_intervals(x = x, k = k, ls = log_f(x), dls = log_f_prime(x), 
+                           lower_endpoint = 0, upper_endpoint = Inf)
+z <- intervals$z
+
+gk <- function(t, x, z){
+  idx <- sapply(t, function(ti){min(which(ti < z)) - 1})
+  exp(log_f(x[idx]) - x[idx]*log_f_prime(x[idx]) + t*log_f_prime(x[idx]))
+}
+
+plot(gridpts,dbeta(gridpts, 2.7, 6.3), xlim=c(0,1), ylim=c(0,3.5), type="l", 
+     col="blue", main="", xlab="", ylab="", lwd=1.5)
+lines(gridpts, gk(gridpts, x, z), lwd=1.5)
+```
+
+
+
+### Formalizing
+
+Let $f$ be the target density we are trying to estimate, and suppose that $f$ is a **log-concave** density and is differentiable.
+
+**Definition:** Let $\ell(t) = \log f(t)$. We say that $f$ is **log-concave** if $\ell(t)$ is a concave function. 
+
+How would we check this?  Recall from calculus that if $\ell(t)$ is differentiable, then
+
+
