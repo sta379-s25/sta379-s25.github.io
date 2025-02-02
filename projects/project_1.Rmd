@@ -7,25 +7,32 @@ output:
 link-citations: yes
 ---
 
-**Due:** Friday February 28, 10:00am
+**Due:** Wednesday March 5, 10:00am
 
-**Submission:** For this assignment, you will submit two files:
+**Submission:** See the Submission Checklist at the end of the assignment
 
-* An R script (`challenge3_code.R`) containing your R function for question 3
-* A pdf containing your written answers to questions 1 and 2
+**Rules:** Projects in this course take the place of exams. Their goal is both to assess what you have learned in the class, and to explore extensions of the material more complex than we can cover on a homework assignment. Therefore, projects **must be completed independently**. You **may not:**
 
-**Mastery:** To master this assignment, you must satisfy the following requirements:
+* Discuss the project with anyone other than the course instructor
+* Share tips, hints, suggestions, code snippets, full or partial solutions, etc. to any of the pieces of this project with anyone other than the course instructor
+* Use any other resource (a book, the internet, generative AI such as ChatGPT, etc.) to find solutions to mathematical questions or the coding implementation
+* Read any other implementations or pseudocode for the coding portion of the project
 
-* Your code must pass all specified unit tests, *as written* (you may not modify the unit tests which I provide)
-* Your code must meet all requirements described in the questions below (matching the requested inputs and outputs)
-* You must comment your code
-* Your written solutions must be complete and correct, with no missing steps or mistakes
-* Your work must abide by the academic honesty requirements in the syllabus 
+However, you **may:**
 
-If you make an honest effort to answer all questions, but you do not master all of the questions on your first submission, you will have one resubmission attempt after receiving feedback.
+* Read an overview of the adaptive sampling algorithm in *Computational Statistics* (Givens and Hoeting, available electronically through the ZSR library)
+* Discuss the project with me in office hours (however, I may provide somewhat less specific assistance than on homework assignments)
+* Refer to any of your previous assignments and feedback
+* Refer to other resources (the internet, books, notes from prior courses) for short questions not specific to the project assignment. Such questions could include things like
+    * How do I take the derivative of the log function?
+    * How do I find the length of a vector in R?
+    * How do I calculate the cdf from the pdf?
+    * What does [a specific error message] mean?
+    
+Any violation of the rules will be treated as plagiarism, and may result in a 0 on the assignment with no option of resubmission.
 
 
-## Recap: acceptance-rejection sampling
+# Recap: acceptance-rejection sampling
 
 In class and on HW 3, we looked at *acceptance-rejection* sampling as one possible method for sampling from a distribution. Recall that acceptance-rejection sampling works like this:
 
@@ -40,7 +47,7 @@ Acceptance-rejection sampling then generates $X \sim f$ as follows:
 2. Sample $U \sim Uniform(0, 1)$
 3. If $U \leq \dfrac{f(Y)}{cg(Y)}$, set $X = Y$. Otherwise, return to step 1.
 
-### Example
+## Example
 
 For example, suppose we want to sample from the $Beta(2.7, 6.3)$ distribution. The Beta distribution is supported on $(0, 1)$, so we need to choose a candidate density $g$ which has the same support. One possibility is the $Uniform(0, 1)$ distribution, in which case $g(t) = 1$ for all $t \in (0, 1)$. Here is an illustration:
 
@@ -55,7 +62,7 @@ lines(gridpts,c*y,col="red", lwd=1.5)
 legend(.6,2,c("Target density, f(t)","c * g(t)"),lty=c(1,1),col=c("blue","red"))
 ```
 
-### Limitations
+## Limitations
 
 The advantage of this method is that we don't need to find some transformation or invert a cdf in order to generate our samples. The disadvantage, however, is that because we sometimes reject draws from $g$, it takes more effort to get our target samples.
 
@@ -97,6 +104,8 @@ lines(gridpts,1.5*dnorm(gridpts, mean=0.22, sd=0.22),col="red", lwd=1.5)
 
 ::::
 
+# Adaptive sampling
+
 In general, choosing a good candidate density $g$ can be tricky. So what do we do? One option is *adaptive* acceptance-rejection sampling. Here are the basic steps:
 
 1. Rather than choose $g$ from some known parametric family, we will make $g$ an **approximation** of $f$. This is done by constructing a piecewise exponential hull for the function $f$ (details below)
@@ -117,7 +126,7 @@ plot(gridpts,x,xlim=c(0,1),ylim=c(0,2.8),type="l",col="blue",main="",xlab="",yla
      lwd=1.5)
 ```
 
-This distribution lives on the unit interval $(0, 1)$. To approximate the function, we start by choosing a small number of values at which to approximate the function. For example, suppose we choose the four points
+This distribution lives on the unit interval $(0, 1)$. To approximate the function, we start by choosing a small number $k$ of values at which to approximate the function. For example, suppose we choose the $k = 4$ points
 
 $$x_1 = 0.05, \ x_2 = 0.35, \ x_3 = 0.65, \ x_4 = 0.95$$
 ```{r, echo=F}
@@ -164,9 +173,12 @@ get_intervals <- function(x, k, ls, dls, lower_endpoint, upper_endpoint){
 }
 ```
 
+We then construct a piecewise function $g_c$, such that $g_c(x_i) = f(x_i)$ at the points $x_1, ..., x_k$, and $g_c(t) \geq f(t)$ for all $t$ where $f(t) > 0$:
 
-```{r, include=F, echo=F, message=F, warning=F, fig.width = 4, fig.height=3.5, fig.align='left'}
+
+```{r echo=F, message=F, warning=F}
 k <- 4
+gridpts <- seq(0, 1, 0.005)
 x <- seq(0.05, 0.95, length = k)
 log_f <- function(t){log_f_beta(t, 2.7, 6.3)}
 log_f_prime <- function(t){log_f_prime_beta(t, 2.7, 6.3)}
@@ -180,19 +192,643 @@ gk <- function(t, x, z){
   exp(log_f(x[idx]) - x[idx]*log_f_prime(x[idx]) + t*log_f_prime(x[idx]))
 }
 
-plot(gridpts,dbeta(gridpts, 2.7, 6.3), xlim=c(0,1), ylim=c(0,3.5), type="l", 
+plot(gridpts,dbeta(gridpts, 2.7, 6.3), xlim=c(0,1), ylim=c(0,5), type="l", 
      col="blue", main="", xlab="", ylab="", lwd=1.5)
-lines(gridpts, gk(gridpts, x, z), lwd=1.5)
+lines(gridpts, gk(gridpts, x, z), lwd=1.5, col="red")
+
+for(i in 1:length(x)){
+  lines(c(x[i], x[i]), c(0, dbeta(x[i], 2.7, 6.3)), lwd=1.5)
+}
+```
+
+Note that $g_c$ is not a density; since $g_c(t) \geq f(t)$ for all $t$, and there are values for which this inequality is strict, then $g_c$ does not integrate to 1. Rather, $g_c$ plays exactly the same role as $cg(t)$ in the acceptance-rejection sampling procedure we saw in class. The only difference is that instead of finding a parametric density $g$ and then finding the bound $c$, we construct $g_c$ piecewise at the grid points $x_1, ..., x_k$.
+
+### Working with the log density
+
+How do we construct this function $g_c$? The first step is to work with the log density instead. Let 
+
+$$\ell(x) = \log f(x)$$
+At each grid point $x_i$, we calculate the slope $\ell'(x_i)$ of the tangent line to $\ell(x_i)$, and construct a piecewise linear function from these tangents. Provided that $\ell(x)$ is a **concave** function, the tangent lines will bound $\ell(x)$ from above:
+
+```{r echo=F, message=F, warning=F}
+k <- 4
+gridpts <- seq(0, 1, 0.005)
+x <- seq(0.05, 0.95, length = k)
+log_f <- function(t){log_f_beta(t, 2.7, 6.3)}
+log_f_prime <- function(t){log_f_prime_beta(t, 2.7, 6.3)}
+
+intervals <- get_intervals(x = x, k = k, ls = log_f(x), dls = log_f_prime(x), 
+                           lower_endpoint = 0, upper_endpoint = Inf)
+z <- intervals$z
+
+gk <- function(t, x, z){
+  idx <- sapply(t, function(ti){min(which(ti < z)) - 1})
+  exp(log_f(x[idx]) - x[idx]*log_f_prime(x[idx]) + t*log_f_prime(x[idx]))
+}
+
+plot(gridpts,dbeta(gridpts, 2.7, 6.3, log=T), xlim=c(0,1), ylim=c(-10,2), type="l", 
+     col="blue", main="", xlab="", ylab="", lwd=1.5)
+lines(gridpts, log(gk(gridpts, x, z)), lwd=1.5, col="red")
+
+for(i in 1:(length(x) - 1)){
+  lines(c(x[i], x[i]), c(-10, dbeta(x[i], 2.7, 6.3, log=T)), lwd=1.5)
+}
+
+legend(.7,2,c("log f(t)","Tangent lines"),lty=c(1,1),col=c("blue","red"))
+```
+
+Letting $g_c^*$ be the piecewise linear function defined by the tangent lines, $g_c(t) = \exp\{g_c^*(t)\}$.
+
+## Motivation: Adapting the grid
+
+We begin with a relatively small number $k$ of grid points $x_1,...,x_k$ at which we place our tangent lines. When $k$ is small, we have a fairly rough approximation of $f$, particularly in areas where the second derivative of $f$ is far from 0. Notice in the figure below how $g_c(t)$ and $f(t)$ are pretty different around $t = 0.2$:
+
+```{r echo=F}
+k <- 4
+gridpts <- seq(0, 1, 0.005)
+x <- seq(0.05, 0.95, length = k)
+log_f <- function(t){log_f_beta(t, 2.7, 6.3)}
+log_f_prime <- function(t){log_f_prime_beta(t, 2.7, 6.3)}
+
+intervals <- get_intervals(x = x, k = k, ls = log_f(x), dls = log_f_prime(x), 
+                           lower_endpoint = 0, upper_endpoint = Inf)
+z <- intervals$z
+
+gk <- function(t, x, z){
+  idx <- sapply(t, function(ti){min(which(ti < z)) - 1})
+  exp(log_f(x[idx]) - x[idx]*log_f_prime(x[idx]) + t*log_f_prime(x[idx]))
+}
+
+plot(gridpts,dbeta(gridpts, 2.7, 6.3), xlim=c(0,1), ylim=c(0,5), type="l", 
+     col="blue", main="", xlab="", ylab="", lwd=1.5)
+lines(gridpts, gk(gridpts, x, z), lwd=1.5, col="red")
+
+for(i in 1:length(x)){
+  lines(c(x[i], x[i]), c(0, dbeta(x[i], 2.7, 6.3)), lwd=1.5)
+}
 ```
 
 
+As we know from before, acceptance-rejection sampling will be less efficient for greater differences between our candidate and target. One option is to choose a greater value of $k$ to begin with. However, the challenge of choosing initial grid points $x_1,...,x_k$ is that we have to decide ahead of time where the important differences between $g_c$ and $f$ will be. An alternative is to begin sampling with our rough approximation, and refine $g_c$ as we sample new points from $f$.
 
-### Formalizing
+In the example above, suppose we sampled $x = 0.2$. We can then expand the grid with this new observation:
 
-Let $f$ be the target density we are trying to estimate, and suppose that $f$ is a **log-concave** density and is differentiable.
+$$x_1 = 0.05, \ x_2 = 0.2, \ x_3 = 0.35, \ x_4 = 0.65, \ x_5 = 0.95$$
 
-**Definition:** Let $\ell(t) = \log f(t)$. We say that $f$ is **log-concave** if $\ell(t)$ is a concave function. 
+And we can update $g_c$ with the updated grid:
 
-How would we check this?  Recall from calculus that if $\ell(t)$ is differentiable, then
 
+```{r echo=F}
+k <- 4
+gridpts <- seq(0, 1, 0.005)
+x <- seq(0.05, 0.95, length = k)
+x <- sort(c(x, 0.2))
+k <- 5
+log_f <- function(t){log_f_beta(t, 2.7, 6.3)}
+log_f_prime <- function(t){log_f_prime_beta(t, 2.7, 6.3)}
+
+intervals <- get_intervals(x = x, k, ls = log_f(x), dls = log_f_prime(x), 
+                           lower_endpoint = 0, upper_endpoint = Inf)
+z <- intervals$z
+
+gk <- function(t, x, z){
+  idx <- sapply(t, function(ti){min(which(ti < z)) - 1})
+  exp(log_f(x[idx]) - x[idx]*log_f_prime(x[idx]) + t*log_f_prime(x[idx]))
+}
+
+plot(gridpts,dbeta(gridpts, 2.7, 6.3), xlim=c(0,1), ylim=c(0,5), type="l", 
+     col="blue", main="", xlab="", ylab="", lwd=1.5)
+lines(gridpts, gk(gridpts, x, z), lwd=1.5, col="red")
+
+for(i in 1:length(x)){
+  lines(c(x[i], x[i]), c(0, dbeta(x[i], 2.7, 6.3)), lwd=1.5)
+}
+```
+
+That's a better approximation already! 
+
+Were we lucky to observe a value $x = 0.2$ in exactly the region where $g_c$ poorly approximated $f$? Sort of -- but note that $g_c$ is likely to do worse initially in higher-density regions of $f$, which are *exactly* the regions we are most likely to observe when sampling.
+
+**Note:** The actual update process is a bit more complicated; full details are provided below. But this example shows you the intuition for updating the grid.
+
+
+## The formal procedure
+
+### Steup and assumptions
+
+* Let $f$ be the target density we are trying to estimate, and let $\ell(t) = \log f(t)$. Adaptive acceptance-rejection sampling assumes the following:
+  * $\ell(t)$ is a **concave** function
+  * $f(t) > 0$ on a (possibly infinite) interval $(u_1, u_2)$. In the Beta example, $u_1 = 0$ and $u_2 = 1$. For a Gamma distribution, $u_1 = 0$ and $u_2 = \infty$. etc.
+* Let $k$ be the size of the initial grid (typically $k$ is relatively small)
+* Choose initial grid points $x_1 < x_2 < \cdots < x_k$
+  * If $u_1 = -\infty$, choose $x_1$ such that $\ell'(x_1) > 0$
+  * If $u_2 = \infty$, choose $x_k$ such that $\ell'(x_k) < 0$
+  
+### The initial hull
+
+The piecewise linear upper hull $g_c^*$ of $\ell$ is formed by the tangent lines at our grid points $x_i$. These tangent lines intersect at the points $z_0,...,z_k$:
+
+$$z_i = \frac{\ell(x_{i+1}) - \ell(x_i) - x_{i+1}\ell'(x_{i+1}) + x_i \ell'(x_i)}{\ell'(x_i) - \ell'(x_{i+1})} \hspace{1cm} i = 1,...,k-1$$
+and $z_0 = u_1$, $z_k = u_2$. Then, $g_c^*$ is given by
+
+$$g_c^*(x) = \ell(x_i) + (x - x_i) \ell'(x_i) \hspace{1cm} \text{for } x \in [z_{i-1}, z_i]$$
+By construction, $\ell(t) \leq g_c^*(t)$ for all $t$. Letting $g_c(t) = \exp\{g_c^*(t)\}$, we thus have
+
+$$f(t) \leq g_c(t) \hspace{1cm} \text{for all } t$$
+
+### Sampling from the hull
+
+Now that we have our approximation of $f(t)$, we proceed as in regular acceptance-rejection sampling: take a sample from the approximation, and decide whether to accept or reject the sample.
+
+Let $p_i$ be the area under $g_c$ over the interval $[z_{i-1}, z_i]$:
+
+$$p_i = \int \limits_{z_{i-1}}^{z_i} g_c(t) dt$$
+
+Let $h_i(t)$ be the normalized candidate density, conditional on being in interval $[z_{i-1}, z_i]$:
+
+$$h_i(t) = \begin{cases} \dfrac{g_c(t)}{p_i} & t \in [z_{i-1}, z_i] \\ 0 & \text{else} \end{cases}$$
+
+The function $h_i(t)$ is now a density over the interval $[z_{i-1}, z_i]$. To draw a sample from the candidate density, we do the following:
+
+1. Sample an interval: choose interval $i \in \{1,...,k\}$ with probability $\dfrac{p_i}{\sum_{j=1}^k p_j}$
+2. The selected index $i$ gives the interval $[z_{i-1}, z_i]$ and the density $h_i(t)$. Sample $Y \sim h_i$ using the inverse transform method
+
+### Deciding whether to accept, and updating the grid
+
+Now we have to decide whether to accept our draw $Y$. Sometimes, the function $f$ is expensive to evaluate; to avoid the expense of calculating $f$ every time, we use a **squeezing function** that bounds $f$ from *below*.
+
+Define the piecewise function $s^*$ by
+
+$$s^*(x) = \begin{cases} \dfrac{(x_{i+1} - x) \ell(x_i) + (x - x_i)\ell(x_{i+1})}{x_{i+1} - x_i} & x \in [x_i, x_{i+1}], \ i = 1,...,k-1 \\ -\infty & x < x_1 \text{ or } x > x_k \end{cases}$$
+
+Now $s^*$ is used in our decision to accept or reject the candidate draw $Y$.
+
+1. Sample $U \sim U(0, 1)$
+2. If $\log(U) \leq s^*(Y) - g_c^*(Y)$, accept and set $X = Y$. (Do not update the grid)
+3. If $\log(U) > s^*(Y) - g_c^*(Y)$, check whether $\log(U) \leq \ell(Y) - g_c^*(Y)$
+    * If no: reject, and go back to sampling $Y$
+    * If yes: accept and set $X = Y$, and update the grid. (see below)
+
+### Updating the grid
+
+Suppose we observe a candidate draw $Y = y$. If $\log(U) > s^*(y) - g_c^*(y)$ but $\log(U) \leq \ell(y) - g_c^*(y)$, we will add $y$ to our grid and update our approximation.
+
+1. The set of grid points is now $x_1 < \cdots < x_i < y < x_{i+1} < \cdots < x_k$, where we insert $y$ into the grid points to preserve ordering
+2. Likewise, $\ell(y)$ and $\ell'(y)$ are added to $\{\ell(x_i)\}$ and $\{\ell'(x_i)\}$
+3. The intersection points $z_i$ are updated for the new grid
+3. The functions $g_c^*$ and $s^*$ are now defined in terms of the updated grid
+
+### Overall summary
+
+To sample $X \sim f$, do the following:
+
+1. Choose $k$ and the initial grid points $x_1 < \cdots < x_k$
+2. Calculate the initial $\ell(x_i)$, $\ell'(x_i)$, and $z_i$
+3. Sample $Y$ as follows:
+    (a) Sample $i \in \{1,...,k\}$ with probability $\dfrac{p_i}{\sum_{j=1}^k p_j}$
+    (b) Sample $Y \sim h_i$ using the inverse transform method
+4. Sample $U \sim Uniform(0, 1)$
+5. Decide whether to accept or reject:
+    (a) If  $\log(U) \leq s^*(Y) - g_c^*(Y)$, accept and set $X = Y$
+    (b) Else if $\log(U) \leq \ell(Y) - g_c^*(Y)$: accept, set $X = Y$, and update the grid
+        * Add $Y$ to the grid points; make sure to keep them ordered
+        * Add $\ell(Y)$ and $\ell'(Y)$ to the $\ell(x_i)$ and $\ell'(x_i)$
+        * Update the intersection points $z_i$
+        * We now have a larger grid: $k \leftarrow k + 1$
+    (c) Else go back to step 3
+6. Continue this process, updating the grid as we go, until the desired number of samples from $f$ is reached
+
+# Some examples
+
+Suppose we wish to sample from a $Rayleigh(2)$ distribution, which has lower and upper bounds $u_1 = 0$ and $u_2 = \infty$.
+
+```{r include=F}
+get_intervals <- function(gridpts, k, ls, dls, lower_endpoint, upper_endpoint){
+  z <- c(lower_endpoint,
+         (ls[2:k] - ls[1:(k-1)] - 
+            gridpts[2:k]*dls[2:k] + gridpts[1:(k-1)]*dls[1:(k-1)])/(
+              dls[1:(k-1)] - dls[2:k]
+            ),
+         upper_endpoint)
+  
+  p <- ifelse(abs(dls) < sqrt(.Machine$double.eps), # tolerance for "near equality"
+              exp(ls - gridpts*dls)*(z[2:(k+1)] - z[1:k]),
+              exp(ls - gridpts*dls)*(exp(z[2:(k+1)] * dls) - exp(z[1:k]*dls))/dls)
+  
+  output <- list("z" = z,
+                 "p" = p)
+  
+  return(output)
+}
+
+
+sample_envelope <- function(gridpts, k, ls, dls, z, p){
+  norm_p <- p/sum(p)
+  i <- sample(1:k, 1, prob = norm_p)
+  u <- runif(1)
+  if(abs(dls[i]) < sqrt(.Machine$double.eps)){
+    y <- u*(z[i+1] - z[i]) + z[i]
+  } else {
+    y <- log(u * (exp(z[i+1]*dls[i]) - exp(z[i]*dls[i])) + exp(z[i]*dls[i]))/dls[i]
+  }
+  
+  return(list("y" = y, "interval" = i))
+}
+
+
+
+
+update_grid <- function(x_new, l_new, dl_new, idx, gridpts, k, ls, dls, z, p){
+  if(idx == 0){
+    gridpts <- c(x_new, gridpts)
+    ls <- c(l_new, ls)
+    dls <- c(dl_new, dls)
+    
+    z_new <- (ls[2] - ls[1] - gridpts[2]*dls[2] + gridpts[1]*dls[1])/(dls[1] - dls[2])
+    z <- c(z[1], z_new, z[2:(k+1)])
+    
+    p_new <- (exp(ls[1:2] + (z[2:3] - gridpts[1:2])*dls[1:2]) - 
+                exp(ls[1:2] + (z[1:2] - gridpts[1:2])*dls[1:2]))/dls[1:2]
+    p <- c(p_new, p[2:k])
+  } else if(idx == k){
+    gridpts <- c(gridpts, x_new)
+    ls <- c(ls, l_new)
+    dls <- c(dls, dl_new)
+    
+    z_new <- (ls[k+1] - ls[k] - gridpts[k+1]*dls[k+1] + gridpts[k]*dls[k])/(dls[k] - dls[k+1])
+    z <- c(z[1:k], z_new, z[k+1])
+    
+    p_new <- (exp(ls[k:(k+1)] + (z[(k+1):(k+2)] - gridpts[k:(k+1)])*dls[k:(k+1)]) - 
+                exp(ls[k:(k+1)] + (z[k:(k+1)] - gridpts[k:(k+1)])*dls[k:(k+1)]))/dls[k:(k+1)]
+    p <- c(p[1:(k-1)], p_new)
+    
+  } else {
+    gridpts <- c(gridpts[1:idx], x_new, gridpts[(idx+1):k])
+    ls <- c(ls[1:idx], l_new, ls[(idx+1):k])
+    dls <- c(dls[1:idx], dl_new, dls[(idx+1):k])
+    
+    z_new1 <- (ls[idx+1] - ls[idx] - gridpts[idx+1]*dls[idx+1] + gridpts[idx]*dls[idx])/(dls[idx] - dls[idx+1])
+    z_new2 <- (ls[idx+2] - ls[idx+1] - gridpts[idx+2]*dls[idx+2] + gridpts[idx+1]*dls[idx+1])/(dls[idx+1] - dls[idx+2])
+    z <- c(z[1:idx], z_new1, z_new2, z[(idx+2):(k+1)])
+    
+    p_new <- (exp(ls[idx:(idx+2)] + (z[(idx+1):(idx+3)] - gridpts[idx:(idx+2)])*dls[idx:(idx+2)]) - 
+                exp(ls[idx:(idx+2)] + (z[idx:(idx+2)] - gridpts[idx:(idx+2)])*dls[idx:(idx+2)]))/dls[idx:(idx+2)]
+    
+    if(idx == 1){
+      p <- c(p_new, p[3:k])
+    } else if(idx == (k-1)){
+      p <- c(p[1:(k-2)], p_new)
+    } else {
+      p <- c(p[1:(idx-1)], p_new, p[(idx+2):k])
+    }
+    
+  }
+  
+  k <- k + 1
+  
+  output <- list("gridpts" = gridpts,
+                 "ls" = ls,
+                 "dls" = dls,
+                 "z" = z,
+                 "p" = p)
+}
+
+
+adaptive_sampling <- function(n, gridpts, log_f, log_f_prime, lower_endpoint, upper_endpoint,
+                              trace=F){
+  x <- rep(NA, n)
+  m <- 0 # count the number of acceptances
+  attempt_results <- c()
+  
+  # evaluate log f and derivative at the initial grid points
+  ls <- log_f(gridpts)
+  dls <- log_f_prime(gridpts)
+  
+  # get the initial intervals
+  intervals <- get_intervals(gridpts, k, ls, dls, lower_endpoint, upper_endpoint)
+  z <- intervals$z
+  p <- intervals$p
+  
+  while(m < n){
+    # sample from envelope
+    e_samp <- sample_envelope(gridpts, k, ls, dls, z, p)
+    y <- e_samp$y
+    i <- e_samp$i
+    
+    # acceptance-rejection
+    e_star <- ls[i] + (y - gridpts[i])*dls[i]
+    
+    # the sampled y is between z_{i-1} and z_i. So, y is either > x_i or < x_i
+    # if y is below x[1] or above x[k], assign negative infinity
+    if(y < gridpts[1]){
+      s_star <- -Inf
+      idx <- 0
+    } else if(y > gridpts[k]){
+      s_star <- Inf
+      idx <- k
+    } else if(y < gridpts[i]){
+      s_star <- ((gridpts[i] - y)*ls[i-1] + (y - gridpts[i-1])*ls[i])/(gridpts[i] - gridpts[i-1])
+      idx <- i - 1
+    } else {
+      s_star <- ((gridpts[i+1] - y)*ls[i] + (y - gridpts[i])*ls[i+1])/(gridpts[i+1] - gridpts[i])
+      idx <- i
+    }
+    
+    u <- runif(1)
+    if(log(u) <= s_star - e_star){
+      m <- m + 1
+      x[m] <- y
+      if(trace){
+        attempt_results <- c(attempt_results, 1)
+      }
+    } else if(log(u) <= log_f(y) - e_star){
+      m <- m + 1
+      x[m] <- y
+      if(trace){
+        attempt_results <- c(attempt_results, 1)
+      }
+      
+      new_grid <- update_grid(y, log_f(y), log_f_prime(y), 
+                              idx, gridpts, k, ls, dls, z, p)
+      k <- k + 1
+      gridpts <- new_grid$gridpts
+      z <- new_grid$z
+      ls <- new_grid$ls
+      dls <- new_grid$dls
+      p <- new_grid$p
+    } else {
+      if(trace){
+        attempt_results <- c(attempt_results, 0)
+      }
+    }
+    
+  }
+  
+  if(trace){
+    output <- list("x" = x,
+                   "gridpts" = gridpts,
+                   "z" = z,
+                   "p" = p,
+                   "attempt_results" = attempt_results)
+  } else {
+    output <- x
+  }
+  
+  return(output)
+  
+}
+
+
+
+
+
+
+
+# functions for the rayleigh distribution
+log_f_rayleigh <- function(x, scale){
+  sigma2 <- scale^2
+  log(x) - log(sigma2) - x^2/(2*sigma2)
+}
+
+log_f_prime_rayleigh <- function(x, scale){
+  sigma2 <- scale^2
+  1/x - x/sigma2
+}
+
+```
+
+
+### Initializing
+
+Suppose we choose the $k = 5$ initial grid points
+
+```{r echo=F}
+k <- 5
+gridpts <- seq(0.1, 10, length = k)
+gridpts
+```
+
+
+The corresponding $z_i$ values are
+
+```{r echo=F}
+log_f <- function(t){log_f_rayleigh(t, 2)}
+log_f_prime <- function(t){log_f_prime_rayleigh(t, 2)}
+
+intervals <- get_intervals(gridpts = gridpts, k = k, ls = log_f(gridpts), 
+                           dls = log_f_prime(gridpts), 
+                           lower_endpoint = 0, upper_endpoint = Inf)
+intervals$z
+```
+
+and the corresponding interval weights $p_i$ are
+
+```{r echo=F}
+intervals$p
+```
+
+### Updating, example 1
+
+Suppose we now want to add the point $x_{new} = 0.005$ to our grid. The new grid points will be
+
+```{r echo=F}
+x_new <- 0.005
+grid_new <- update_grid(x_new, log_f(x_new), log_f_prime(x_new), 0,
+                        gridpts, k, log_f(gridpts), log_f_prime(gridpts), 
+                        intervals$z, intervals$p)
+grid_new$gridpts
+```
+
+The new $z_i$ values will be
+
+```{r echo=F}
+grid_new$z
+```
+
+and the new $p_i$ values will be
+
+```{r echo=F}
+grid_new$p
+```
+
+### Updating, example 2
+
+Suppose instead of $0.005$, we had added the point $x_{new} = 3$. The new $x_i$ values should be
+
+```{r echo=F}
+x_new <- 3
+grid_new <- update_grid(x_new, log_f(x_new), log_f_prime(x_new), 2,
+                        gridpts, k, log_f(gridpts), log_f_prime(gridpts), 
+                        intervals$z, intervals$p)
+grid_new$gridpts
+```
+
+The new $z_i$ are
+
+```{r echo=F}
+grid_new$z
+```
+
+and the new $p_i$ are
+
+```{r echo=F}
+grid_new$p
+```
+
+
+# Task 1: Implementing the adaptive sampling function
+
+Your main task in this assignment is to implement the adaptive acceptance-rejection sampling procedure described above.
+
+Write a function in R called `adaptive_sampling` which satisfies the following requirements:
+
+* **Inputs:**
+    * `n`: the desired number of samples
+    * `gridpts`: a vector, the initial grid points $x_1,...,x_k$
+    * `log_f`: a function which takes a single input and returns the log density function $\ell(t) = \log f(t)$
+    * `log_f_prime`: a function which takes a single input and returns the derivative $\ell'(t)$
+    * `lower_endpoint`: the lower bound $u_1$ on the support of $f$
+    * `upper_endpoint`: the upper bound $u_2$ on the support of $f$
+    * `trace`: a logical with default `FALSE` 
+* **Outputs:** 
+    * If `trace = FALSE`: return a vector containing the `n` samples from the target density `f`
+    * If `trace = TRUE`: return a list containing the following elements
+        * `x`: a vector containing the `n` samples from the target density `f`
+        * `gridpts`: the grid points $x_1, x_2,...$ at the end of the adaptive sampling procedure
+        * `z`: the intersection points $z_0, z_1,...$ at the end of the adaptive sampling procedure
+        * `p`: the interval areas $p_1, p_2,...$ at the end of the adaptive sampling procedure
+        * `attempt_results`: a vector containing the acceptance or rejection result (1 or `TRUE` for accepted, 0 or `FALSE` for rejected) for every sample $y$ from the candidate distribution (not just the accepted samples)
+    
+### Helper functions
+
+Long functions which do many things are hard to read, hard to debug, and hard to test. The better implementations will divide the work and the steps of the adaptive sampling procedure between several smaller helper functions. Each helper function would be responsible for one piece of the process, and would get called inside the main `adaptive_sampling` function.
+
+Suggested helper functions include
+
+* A function to calculate the intersection points $z_i$ 
+* A function to calculate the probabilities $p_i$
+* A function to sample a candidate draw $Y$ (choose interval $i$ and then choose $Y \sim h_i$)
+* A function to update your grid (the $x_i$, $z_i$, $\ell(x_i)$, and $\ell'(x_i)$) when you add a new point
+        
+Using helper functions is recommended, and necessary for achieving a higher grade on the project. If you would like to divide the work differently between helper functions, that is ok, provided that your code is clear, readable, and a single helper function does not do too many tasks. 
+
+### Unit tests
+
+I have provided a set of unit tests for the main `adaptive_sampling` function, including some examples of $\ell(t)$ and $\ell'(t)$ for different distributions.
+
+**You** are responsible for creating `testthat` unit tests for any helper functions. These unit tests should check things like:
+
+* Do we get the correct type of output? (e.g., if we expect a list, do we get a list?)
+* Do we get the right size of output? (e.g., if you are creating the intersection points $z_i$, the number of intersection points is $k+1$)
+* Do we get the right values of output? (e.g., if the returned values should be sorted, is the output actually sorted?) 
+
+## Implementation tips and recommendations
+
+1. Getting started: start by writing a small function to initialize part of the process, e.g. to calculate the intersection points $z_i$ given initial grid points $x_i$
+2. The procedure described here requires you to have expressions for $p_i$, and be able to sample from $h_i$. You will solve these problems in the mathematical questions below. But don't worry -- I have mostly provided the solution you are trying to find, your task is just to derive it. This means that you should be able to implement most of the algorithm without doing the math first.
+3. Do not re-calculate all of the intersection points $z_i$ whenever you update the grid; adding a new grid point only impacts a couple of the nearby $z_i$
+4. Do not re-calculate all of the $\ell(x_i)$ and $\ell'(x_i)$ when you update the grid; inside your sampling function, keep track of $\ell(x_i)$ and $\ell'(x_i)$ (e.g., as vectors), and just add new points as needed
+5. Do NOT write one big function that does every step of the adaptive sampling procedure. Split the work into helper functions
+6. As you will see in the mathematical questions below, several quantities depend on whether $\ell'(x_i) = 0$. Due to rounding errors, I would recommend you avoid testing for exact equality with 0; this will likely cause problems in your code. Instead, I would recommend that you test whether $\ell'(x_i)$ is *close enough* to 0. In R, this can be done using `all.equal` or `.Machine$double.eps`. For example:
+
+```{r}
+1e-12 == 0
+all.equal(1e-12, 0) # close enough to 0
+abs(1e-12) < sqrt(.Machine$double.eps) # close enough to 0
+```
+
+
+# Task 2: Mathematical questions
+
+:::{.question}
+#### Question 1 (written)
+
+The $Beta(\alpha, \beta)$ distribution has pdf
+
+$$f(t) = \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)} t^{\alpha - 1} (1 - t)^{\beta - 1} \hspace{1cm} \text{for } t \in (0, 1)$$
+
+Let $\ell(t) = \log f(t)$, and suppose that $\alpha, \beta > 1$. 
+
+For our purposes, a twice-differentiable function is **concave** if the second derivative is non-positive everywhere.
+
+Show that $\ell(t)$ is a concave function. Show all work.
+
+:::
+
+:::{.question}
+#### Question 2 (written)
+
+The $Rayleigh(\sigma)$ distribution has density
+
+$$f(t) = \frac{t}{\sigma^2} e^{-\frac{t^2}{2 \sigma^2}}, \hspace{1cm} \text{ for } t \geq 0$$
+
+Let $\ell(t) = \log f(t)$.
+
+For our purposes, a twice-differentiable function is **concave** if the second derivative is non-positive everywhere.
+
+Show that $\ell(t)$ is a concave function. Show all work.
+
+:::
+
+:::{.question}
+#### Question 3 (written)
+
+If $\ell(t)$ is a strictly concave differentiable function (that is, $\ell'(t)$ is a strictly decreasing function), explain why the denominator in the definition of $z_i$ is guaranteed to not be 0.
+
+:::
+
+:::{.question}
+#### Question 4 (written)
+
+Show that
+
+$$p_i = \begin{cases} \dfrac{\exp\{ \ell(x_i) - x_i \ell'(x_i) \}}{\ell'(x_i)} \left( \exp\{ z_i \ell'(x_i)\} - \exp\{z_{i-1} \ell'(x_i)\} \right) & \ell'(x_i) \neq 0 \\ \exp\{ \ell(x_i)\}(z_i - z_{i-1}) & \ell'(x_i) = 0 \end{cases}$$
+
+Show all work.
+
+:::
+
+:::{.question}
+#### Question 5 (written)
+
+In the description above, I tell you to sample $Y \sim h_i$ using the inverse transform method. This means we need the cdf for $h_i$.
+
+Show that
+
+$$H_i(t) := \frac{1}{p_i} \int \limits_{z_{i-1}}^{t} g_c(x) dx = \begin{cases} \dfrac{\exp\{t \ell'(x_i)\} - \exp\{z_{i-1} \ell'(x_i)\}}{\exp\{z_i \ell'(x_i)\} - \exp\{z_{i-1} \ell'(x_i)\}} & \ell'(x_i) \neq 0 \\ \dfrac{t - z_{i-1}}{z_i - z_{i-1}} & \ell'(x_i) = 0 \end{cases}$$
+
+Show all work.
+
+:::
+
+:::{.question}
+#### Question 6 (written)
+
+In the description above, I tell you to sample $Y \sim h_i$ using the inverse transform method. Find $H_i^{-1}(u)$ as a function of $u$. Show all work.
+
+:::
+
+
+# Grading rubric
+
+Each component of the assignment will be graded as mastered / not yet mastered. If you make an honest attempt at a component but do not master that component on your initial submission, you will have one attempt to re-submit and master that component. Note that mastering the `adaptive_sampling` component requires that the function be fully correct and complete; if it does not pass one or more of the unit tests, there is no partial credit for the `adaptive_sampling` component.
+
+| Component | Portion of total grade | Minimum requirements to receive credit |
+| --- | --- | --- |
+| Main `adaptive_sampling` function | 45% | Function meets requirements listed above and passes all provided unit tests |
+| Use of helper functions | 10% | Computation is reasonably divided between several helper functions, each with a clear task |
+| Code style and readability | 5% | Code is commented, clearly written, and uses informative names |
+| Unit tests | 10% | Several unit tests are written in `project1_tests.R` for each helper function, testing that the helper functions work as desired. The helper functions pass the provided unit tests. |
+| Mathematical questions | 30% (5% each) | Each question will be graded for mastery. Mastery requires a fully complete and correct solution, with no errors or missing steps/explanation. The mathematical questions will be treated separately, e.g. mastering 5 of the 6 questions would give 25 out of 30 possible points |
+
+
+# Submission checklist
+
+* pdf with written solutions to the mathematical questions 1--6. (Canvas)
+* implementation in `project1_code.R` (GitHub)
+    * main `adaptive_sampling` function, following all listed requirements
+    * associated helper functions
+* unit tests in `project1_tests.R` (GitHub)
+    * I have provided unit tests for the `adaptive_sampling` function; do not edit these
+    * You are responsible for creating unit tests for all helper functions which you write
 
