@@ -4,6 +4,16 @@ author: "Ciaran Evans"
 output: beamer_presentation
 ---
 
+## Logistics
+
+* Additional office hours added Mondays 2-3pm
+* Upcoming due dates:
+    * HW 1 resubmissions due today (end of the day)
+    * HW 3 due Friday
+    * Challenge 1 due Friday
+* Feedback requested (google form)
+* Project 1 released later this week
+
 ## Recap: acceptance-rejection sampling
 
 * Want to sample continuous r.v. $X \sim f$
