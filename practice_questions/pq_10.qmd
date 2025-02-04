@@ -1,0 +1,58 @@
+---
+title: "Practice Questions: Compass search"
+format: html
+---
+
+## Logistic regression
+
+We have data on medical school admissions for 55 students from a liberal arts college. The data include the variables
+
+* `Acceptance`: whether the student was accepted (1) or not accepted (0) to med school
+* `GPA`: the student's college GPA (4-point scale)
+
+We would like to build a model to predict acceptance using college GPA. Because acceptance is a binary variable, a **logistic regression** model is appropriate.
+
+Let $p_i = P(\text{Acceptance}_i = 1)$ be the probability of acceptance for the $i$th individual in the data. Then, the logistic regression model is
+
+$$\log \left(\frac{p_i}{1 - p_i} \right) = \beta_0 + \beta_1 \text{GPA}_i$$
+
+Fitting the model in R:
+
+```{r}
+library(Stat2Data)
+data("MedGPA")
+
+glm(Acceptance ~ GPA, family = binomial, data = MedGPA)
+```
+
+### Optimization
+
+For linear regression, we minimized the RSS. What about logistic regression? 
+
+It turns out that the logistic regression model here estimates $\beta_0$ and $\beta_1$ by minimizing the following function:
+
+$$f(\beta_0, \beta_1) = - \sum \limits_{i=1}^n \left \lbrace \text{Acceptance}_i(\beta_0 + \beta_1 \text{GPA}_i) - \log(1 + e^{\beta_0 + \beta_1 \text{GPA}_i}) \right\rbrace$$
+
+The function below calculates this for an input vector $\beta = (\beta_0, \beta_1)$:
+
+```{r}
+logistic_loss <- function(beta){
+  odds <- exp(beta[1] + beta[2]*MedGPA$GPA)
+  p <- odds/(1 + odds)
+  -1*sum(dbinom(MedGPA$Acceptance, 1, p, log=T))
+}
+```
+
+
+## Compass search
+
+Begin with initial values $(\beta_0^{(0)}, \beta_1^{(0)}) = (0, 0)$ and initial step size $\Delta_0 = 1$.
+
+1. Find the test points around the initial guess, and calculate $f(\beta_0, \beta_1)$ at each of the test points. Will the compass search algorithm move to one of the new points, or shrink the step size?
+
+2. Update the test points based on question 1, and recalculate $f(\beta_0, \beta_1)$ at each. Will the compass search algorithm move to one of the new points, or shrink the step size?
+
+3. Write code to repeat the compass search until the step size $\Delta_k < 1 \times 10^{-6}$. Your final point should be very close to the estimates from the `glm` function in R.
+
+4. How many steps did you take in question 3?
+

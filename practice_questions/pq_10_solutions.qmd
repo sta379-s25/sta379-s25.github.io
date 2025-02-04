@@ -1,0 +1,108 @@
+---
+title: "Compass search practice questions: solutions"
+format: html
+---
+
+```{r}
+library(Stat2Data)
+data("MedGPA")
+
+glm(Acceptance ~ GPA, family = binomial, data = MedGPA)
+```
+
+```{r}
+logistic_loss <- function(beta){
+  odds <- exp(beta[1] + beta[2]*MedGPA$GPA)
+  p <- odds/(1 + odds)
+  -1*sum(dbinom(MedGPA$Acceptance, 1, p, log=T))
+}
+```
+
+1.
+
+```{r}
+step_size <- 1
+cur_point <- c(0, 0)
+
+compass_grid <- rbind(c(0, 0),
+                      c(0, 1),
+                      c(1, 0),
+                      c(0, -1),
+                      c(-1, 0))
+
+test_points <- sweep(step_size*compass_grid, 2, cur_point, "+")
+loss_vals <- apply(test_points, 1, logistic_loss)
+
+test_points
+loss_vals
+```
+
+$f(\beta_0, \beta_1)$ is smallest at the initial value, so we stay put and shrink the step size.
+
+2.
+
+```{r}
+step_size <- 0.5
+cur_point <- c(0, 0)
+
+compass_grid <- rbind(c(0, 0),
+                      c(0, 1),
+                      c(1, 0),
+                      c(0, -1),
+                      c(-1, 0))
+
+test_points <- sweep(step_size*compass_grid, 2, cur_point, "+")
+loss_vals <- apply(test_points, 1, logistic_loss)
+
+test_points
+loss_vals
+```
+
+Shrink the step size again
+
+3.
+
+```{r}
+step_size <- 1
+cur_point <- c(0, 0)
+
+compass_grid <- rbind(c(0, 0),
+                      c(0, 1),
+                      c(1, 0),
+                      c(0, -1),
+                      c(-1, 0))
+
+iter_count <- 0
+
+while(step_size > 1e-6){
+  test_points <- sweep(step_size*compass_grid, 2, cur_point, "+")
+  loss_vals <- apply(test_points, 1, logistic_loss)
+  
+  idx <- which.min(loss_vals)
+  if(idx == 1){
+    step_size <- step_size* 0.5
+  } else {
+    cur_point <- test_points[idx,]
+  }
+  
+  iter_count <- iter_count + 1
+}
+```
+
+```{r}
+cur_point
+```
+
+We are very close to the estimates from the `glm` function!
+
+4.
+
+```{r}
+iter_count
+```
+
+It took over 11000 iterations to get there. Note: compass search is deterministic, so you should get the same number of steps as me.
+
+
+
+
