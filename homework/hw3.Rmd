@@ -236,7 +236,7 @@ Now, in this case we can *invert* this process, to write $U_1$ and $U_2$ as func
 
 $$U_1 = h_1(X_1, X_2) = \exp \left\lbrace - \frac{(X_1^2 + X_2^2)}{2} \right\rbrace$$
 
-$$U_2 = h_2(X_1, X_2) = \frac{1}{2\pi} \arctan \left( \frac{Y_2}{Y_1} \right)$$
+$$U_2 = h_2(X_1, X_2) = \frac{1}{2\pi} \arctan \left( \frac{X_2}{X_1} \right)$$
 
 
 :::{.question}

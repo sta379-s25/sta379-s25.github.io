@@ -1,79 +1,396 @@
 ---
-title: "Lecture 9: Linear regression"
+title: "Lecture 10: Beginning optimization"
 author: "Ciaran Evans"
 output: beamer_presentation
+editor_options: 
+  chunk_output_type: console
 ---
 
-## Previously: hypothesis testing and power
+## Motivation: regression models
 
-Suppose we have a sample $X_1,...,X_n \overset{iid}{\sim} N(\mu, 1)$, and we want to test the hypotheses
+Data on 116 sparrows from Kent Island, New Brunswick.
 
-$$H_0: \mu = 0 \hspace{0.5cm} H_A: \mu \neq 0$$
+* `Weight`: the weight of the sparrow (in grams)
+* `WingLength`: the sparrow’s wing length (in mm)
 
-Calculate $p$-value, reject when $p < \alpha$ for pre-specified $\alpha$.
-
-**Power function:**
-
-$$Power(\mu) = P(\text{reject } H_0 | \mu)$$
-
-
-**Question:** How does power change as a function of $\mu$ and $n$?
-
-\vspace{2cm}
-
-## Previously: hypothesis testing and power
-
-Suppose we have a sample $X_1,...,X_n \overset{iid}{\sim} N(\mu, 1)$, and we want to test the hypotheses
-
-$$H_0: \mu = 0 \hspace{0.5cm} H_A: \mu \neq 0$$
-$$Power(\mu) = P(\text{reject } H_0 | \mu)$$
-
-```{r, echo=F, message=F, fig.align='center', fig.width=4, fig.height=2}
+```{r, echo=F, message=F, warning=F, fig.align='center', fig.width=2.5, fig.height=2}
+library(Stat2Data)
 library(tidyverse)
-set.seed(379)
+data("Sparrows")
 
-nsim <- 1000
-n_values <- c(10, 20, 50)
-mu_x_values <- seq(-2, 2, 0.5)
-sim_settings <- expand.grid("mu" = mu_x_values, "n" = n_values)
-
-power_res <- rep(NA, nrow(sim_settings))
-for(j in 1:nrow(sim_settings)){
-  n <- sim_settings$n[j] # sample size
-  mu_x <- sim_settings$mu[j] # true mean
-  test_results <- rep(NA, nsim)  # vector to store the test results
-  
-  for(i in 1:nsim){
-    x <- rnorm(n, mean=mu_x, sd=1)
-    test_results[i] <- t.test(x, alternative="two.sided", mu=0)$p.value
-  }
-  
-  power_res[j] <- mean(test_results < 0.05)
-}
-
-cbind(sim_settings, power_res) |>
-  mutate(n = paste0("n = ", n)) |>
-  ggplot(aes(x = mu, y = power_res)) +
-  geom_point() +
-  geom_line() +
-  geom_hline(yintercept = 0.05, lty = 2) +
-  facet_wrap(~n) +
-  labs(x= "mu", y = "Power") +
+Sparrows |>
+  ggplot(aes(x = WingLength, y = Weight)) +
+  geom_point(size = 0.75) +
   theme_bw()
 ```
 
-## Another hypothesis test
+**Question:** How could I model the relationship between these two variables?
 
-Suppose we observe data $(X_1, Y_1),...,(X_n, Y_n)$ where
+## Motivation: linear regression
 
-$$Y_i = \beta_0 + \beta_1 X_{i} +  \varepsilon_i \hspace{1cm} \varepsilon_i \overset{iid}{\sim} N(0, \sigma^2)$$
-We want to test the hypotheses $H_0: \beta_1 = 0$ vs. $H_A: \beta_1 \neq 0$. 
+```{r, echo=F, message=F, warning=F, fig.align='center', fig.width=3, fig.height=2.5}
+library(Stat2Data)
+library(tidyverse)
+data("Sparrows")
 
-How do you think $Power(\beta_1)$ will change as
+Sparrows |>
+  ggplot(aes(x = WingLength, y = Weight)) +
+  geom_point(size = 0.75) +
+  theme_bw() +
+  geom_smooth(method = "lm", se=F)
+```
 
-* we change $\beta_1$?
-* we change $n$?
-* we change $\sigma^2$?
+**Question:** How do I get the fitted regression line?
+
+## Motivation: linear regression
+
+**Population model:** $\text{Weight}_i = \beta_0 + \beta_1 \text{WingLength}_i + \varepsilon_i$
+
+**Fitted model:** $\widehat{\text{Weight}}_i = \widehat{\beta}_0 + \widehat{\beta}_1 \text{WingLength}_i$
+
+**In R:** 
+
+```{r, eval=F}
+lm(Weight ~ WingLength, data = Sparrows)
+```
+
+\begin{verbatim}
+Coefficients:
+(Intercept)   WingLength  
+     1.3655       0.4674 
+\end{verbatim}
+
+**Mathematically:** $\widehat{\beta}_0, \widehat{\beta}_1$ are the values which *minimize* the residual sum of squares:
+
+$$RSS(\beta_0, \beta_1) = \sum \limits_{i=1}^n (\text{Weight}_i - \beta_0 - \beta_1 \text{WingLength}_i)^2$$
+
+## Overview: Optimization
+
+**Definition:** *Optimization* is the problem of finding values that minimize or maximize some function.
+
+**Example:** 
+
+$$RSS(\beta_0, \beta_1) = \sum \limits_{i=1}^n (\text{Weight}_i - \beta_0 - \beta_1 \text{WingLength}_i)^2$$
+
+* $RSS(\beta_0, \beta_1)$ is a function of $\beta_0$ and $\beta_1$
+* We want to find the values of $\beta_0$ and $\beta_1$ that *minimize* this function
+
+**Question:** How could we go about minimizing this function?
+
+\vspace{2cm}
+
+## Overview: types of optimization methods
+
+In this course, we will focus on two main types of optimization
+
+\vspace{0.5cm}
+
+* **Derivative-based methods:** use the derivative (and possibly higher-order derivatives too) to find a maximum/minimum.
+
+\vspace{0.5cm}
+
+* **Derivative-free methods:** do not use any derivatives (or approximations to derivatives).
+
+\vspace{0.5cm}
+
+We will begin with derivative-free methods.
+
+## Optimization without a derivative
+
+$$RSS(\beta_0, \beta_1) = \sum \limits_{i=1}^n (\text{Weight}_i - \beta_0 - \beta_1 \text{WingLength}_i)^2$$
+
+**Question:** How would you try to minimize $RSS(\beta_0, \beta_1)$ *without* taking a derivative? Brainstorm with your neighbor for 1-2 minutes, then we will discuss as a class.
+
+\vspace{5cm}
+
+
+## Initial idea: grid search
+
+* Define a set of values for $\beta_0, \beta_1$
+* Calculate $RSS(\beta_0, \beta_1)$ for each pair of values
+* Choose the values which minimize $RSS(\beta_0, \beta_1)$
+
+```{r, echo=F, message=F, warning=F, fig.align='center', fig.width=2.5, fig.height=2}
+Sparrows |>
+  ggplot(aes(x = WingLength, y = Weight)) +
+  geom_point(size = 0.75) +
+  theme_bw()
+```
+
+**Question:** What is a reasonable range of values to consider for $\beta_0$ and $\beta_1$?
+
+## Initial idea: grid search
+
+Consider values:
+
+* $\beta_0 = -5, \ -4.9, \ -4.8, ..., \ 4.8, \ 4.9, \ 5$
+* $\beta_1 = 0, \ 0.05, ..., \ 1.45, \ 1.5$
+
+```{r, echo=F, message=F, warning=F, fig.align='center', fig.width=4, fig.height=2.5}
+beta0_values <- seq(-5, 5, 0.1)
+beta1_values <- seq(0, 1.5, 0.05)
+beta_grid <- expand.grid(beta0_values, beta1_values)
+
+beta_grid |>
+  ggplot(aes(x = Var1, y = Var2)) +
+  geom_point(size=0.25) +
+  theme_bw() +
+  labs(x = "Beta0 values", y = "Beta1 values", title = "Grid of possible values")
+```
+
+## Initial idea: grid search
+
+```{r, echo=F, message=F, warning=F, fig.align='center', fig.width=4, fig.height=2.5}
+beta0_values <- seq(-5, 5, 0.1)
+beta1_values <- seq(0, 1.5, 0.05)
+beta_grid <- expand.grid(beta0_values, beta1_values)
+
+beta_grid |>
+  ggplot(aes(x = Var1, y = Var2)) +
+  geom_point(size=0.25) +
+  theme_bw() +
+  labs(x = "Beta0 values", y = "Beta1 values", title = "Grid of possible values")
+```
+
+Now we calculate $RSS(\beta_0, \beta_1)$ for each possible pair in the grid.
+
+## Initial idea: grid search
+
+```{r, echo=F, message=F, warning=F, fig.align='center', fig.width=4, fig.height=2.5}
+beta0_values <- seq(-5, 5, 0.1)
+beta1_values <- seq(0, 1.5, 0.05)
+beta_grid <- expand.grid(beta0_values, beta1_values)
+
+rss_vals <- rep(NA, nrow(beta_grid))
+
+for(i in 1:length(rss_vals)){
+  rss_vals[i] <- sum((Sparrows$Weight - beta_grid[i, 1] - beta_grid[i, 2]*Sparrows$WingLength)^2)
+}
+
+beta_grid |>
+  mutate(rss = rss_vals) |>
+  ggplot(aes(x = Var1, y = Var2, color = log(rss))) +
+  geom_point() +
+  theme_bw() +
+  labs(x = "Beta0 values", y = "Beta1 values", title = "Grid of possible values",
+       color = "RSS") +
+  scale_color_gradient(low="blue", high="yellow")
+```
+
+## Initial idea: grid search
+
+```{r, echo=F, message=F, warning=F, fig.align='center', fig.width=4, fig.height=2.5}
+beta_grid |>
+  mutate(rss = rss_vals) |>
+  filter(Var1 >= 0, Var1 <= 2, Var2 >= 0, Var2 <= 0.7) |>
+  ggplot(aes(x = Var1, y = Var2, color = log(rss))) +
+  geom_point() +
+  theme_bw() +
+  labs(x = "Beta0 values", y = "Beta1 values", title = "Grid of possible values",
+       color = "RSS") +
+  #scale_color_gradientn(colors = rev(RColorBrewer::brewer.pal(11, "Spectral")))+
+  scale_color_gradient(low="blue", high="yellow")
+```
+
+Combination with smallest RSS: $\beta_0 =1.8, \ \beta_1 = 0.45$
+
+
+## Grid search: limitations
+
+```{r, echo=F, message=F, warning=F, fig.align='center', fig.width=4, fig.height=2.5}
+beta_grid |>
+  mutate(rss = rss_vals) |>
+  ggplot(aes(x = Var1, y = Var2, color = log(rss))) +
+  geom_point() +
+  theme_bw() +
+  labs(x = "Beta0 values", y = "Beta1 values", title = "Grid of possible values",
+       color = "RSS") +
+  scale_color_gradient(low="blue", high="yellow")
+```
+
+**Question:** What are some disadvantages of this grid search procedure?
+
+## Grid search: limitations
+
+For the basic grid search procedure described here:
+
+* Does not scale well to higher dimensions (more coefficients)
+* Requires a good selection of grid points
+* Doesn't consider new values
+* Can't tell when it is "close" to an optimal value
+
+## Better approach: compass search
+
+**Step 1:** Start with an initial guess for $\beta_0$ and $\beta_1$, and calculate $RSS(\beta_0, \beta_1)$:
+
+```{r, echo=F, message=F, warning=F, fig.align='center', fig.width=4, fig.height=2.5}
+df <- data.frame(b0 = 0, b1 = 1, rss = 20848.66)
+df |>
+  ggplot(aes(x = b0, y = b1, label = paste0("RSS = ", rss))) +
+  geom_point() +
+  theme_classic() +
+  labs(x = "Beta0", y = "Beta1") +
+  scale_x_continuous(limits=c(-1, 2)) +
+  scale_y_continuous(limits = c(0, 1.5)) +
+  geom_text(nudge_x = 0.5, nudge_y = 0.15)
+```
+
+
+## Better approach: compass search
+
+**Step 2:** Try test points in the four directions around the initial point:
+
+```{r, echo=F, message=F, warning=F, fig.align='center', fig.width=4, fig.height=2.5}
+library(ggrepel)
+df <- data.frame(b0 = c(-0.3, 0, 0, 0, 0.3),
+                 b1 = c(1, 1, 0.7, 1.3, 1), 
+                 rss = c(19941.46, 20848.66, 3198.25, 54374.89, 21776.74))
+df |>
+  ggplot(aes(x = b0, y = b1, label = rss)) +
+  geom_point() +
+  theme_classic() +
+  labs(x = "Beta0", y = "Beta1") +
+  scale_x_continuous(limits=c(-1, 2)) +
+  scale_y_continuous(limits = c(0, 1.5)) +
+  geom_text_repel(size=3)
+```
+
+Which of the 5 points is the best current guess for $(\beta_0, \beta_1)$?
+
+## Better approach: compass search
+
+**Step 3:** If one of the four new points is better, move to the new best point:
+
+```{r, echo=F, message=F, warning=F, fig.align='center', fig.width=4, fig.height=2.5}
+df <- data.frame(b0 = c(-0.3, 0, 0, 0, 0.3),
+                 b1 = c(0.7, 0.7, 0.4, 1, 0.7), 
+                 rss = c(2861.47, 3198.25, 1423.66, 20848.66, 3555.91))
+df |>
+  ggplot(aes(x = b0, y = b1, label = rss)) +
+  geom_point() +
+  theme_classic() +
+  labs(x = "Beta0", y = "Beta1") +
+  scale_x_continuous(limits=c(-1, 2)) +
+  scale_y_continuous(limits = c(0, 1.5)) +
+  geom_text_repel(size=3)
+```
+
+Where do we move next?
+
+## Better approach: compass search
+
+**Step 3:** If one of the four new points is better, move to the new best point:
+
+```{r, echo=F, message=F, warning=F, fig.align='center', fig.width=4, fig.height=2.5}
+df <- data.frame(b0 = c(-0.3, 0, 0, 0, 0.3),
+                 b1 = c(0.4, 0.4, 0.1, 0.7, 0.4), 
+                 rss = c(1657.3, 1423.66, 15524.89, 3198.25, 1210.9))
+df |>
+  ggplot(aes(x = b0, y = b1, label = rss)) +
+  geom_point() +
+  theme_classic() +
+  labs(x = "Beta0", y = "Beta1") +
+  scale_x_continuous(limits=c(-1, 2)) +
+  scale_y_continuous(limits = c(0, 1.5)) +
+  geom_text_repel(size=3)
+```
+
+Where do we move next?
+
+## Better approach: compass search
+
+**Step 3:** If one of the four new points is better, move to the new best point:
+
+```{r, echo=F, message=F, warning=F, fig.align='center', fig.width=4, fig.height=2.5}
+df <- data.frame(b0 = c(0, 0.3, 0.3, 0.3, 0.6),
+                 b1 = c(0.4, 0.4, 0.1, 0.7, 0.4), 
+                 rss = c(1423.66, 1210.9, 14741.71, 3555.91, 1019.02))
+df |>
+  ggplot(aes(x = b0, y = b1, label = rss)) +
+  geom_point() +
+  theme_classic() +
+  labs(x = "Beta0", y = "Beta1") +
+  scale_x_continuous(limits=c(-1, 2)) +
+  scale_y_continuous(limits = c(0, 1.5)) +
+  geom_text_repel(size=3)
+```
+
+Where do we move next?
+
+## Better approach: compass search
+
+After a few more iterations, we end up here:
+
+```{r, echo=F, message=F, warning=F, fig.align='center', fig.width=4, fig.height=2.5}
+rss <- function(beta){ sum((Sparrows$Weight - beta[1] -beta[2]*Sparrows$WingLength)^2)}
+cur_point <- c(3.3, 0.4)
+step_size <- 0.3
+test_points <- rbind(cur_point,
+                     cur_point + step_size*c(0, 1),
+                     cur_point + step_size*c(1, 0),
+                     cur_point + step_size*c(0, -1),
+                     cur_point + step_size*c(-1, 0))
+rss_vals <- apply(test_points, 1, rss)
+df <- data.frame(b0 = test_points[,1],
+                 b1 = test_points[,2], 
+                 rss = rss_vals)
+df |>
+  ggplot(aes(x = b0, y = b1, label = rss)) +
+  geom_point() +
+  theme_classic() +
+  labs(x = "Beta0", y = "Beta1") +
+  scale_x_continuous(limits=c(2, 4)) +
+  scale_y_continuous(limits = c(0, 1.5)) +
+  geom_text_repel(size=3)
+```
+
+Where do we move next?
+
+
+## Better approach: compass search
+
+**Step 4:** If none of the new points is an improvement, try again with half the distance:
+
+```{r, echo=F, message=F, warning=F, fig.align='center', fig.width=4, fig.height=2.5}
+rss <- function(beta){ sum((Sparrows$Weight - beta[1] -beta[2]*Sparrows$WingLength)^2)}
+cur_point <- c(3.3, 0.4)
+step_size <- 0.15
+test_points <- rbind(cur_point,
+                     cur_point + step_size*c(0, 1),
+                     cur_point + step_size*c(1, 0),
+                     cur_point + step_size*c(0, -1),
+                     cur_point + step_size*c(-1, 0))
+rss_vals <- apply(test_points, 1, rss)
+df <- data.frame(b0 = test_points[,1],
+                 b1 = test_points[,2], 
+                 rss = rss_vals)
+df |>
+  ggplot(aes(x = b0, y = b1, label = rss)) +
+  geom_point() +
+  theme_classic() +
+  labs(x = "Beta0", y = "Beta1") +
+  scale_x_continuous(limits=c(2, 4)) +
+  scale_y_continuous(limits = c(0, 1.5)) +
+  geom_text_repel(size=3)
+```
+
+Where do we move next?
+
+## Compass search overview (in 2 dimensions)
+
+To minimize some function $f(\beta_0, \beta_1)$:
+
+1. Choose an initial guess $(\beta_0^{(0)}, \beta_1^{(0)})$ and initial step size $\Delta_0$
+2. Evaluate $f$ at the points
+    * $(\beta_0^{(0)}, \beta_1^{(0)})$
+    * $(\beta_0^{(0)}, \beta_1^{(0)} \pm \Delta_0)$
+    * $(\beta_0^{(0)} \pm \Delta_0, \beta_1^{(0)})$
+3. If $f$ is smaller at one of the new points: move to the smallest value, update to $(\beta_0^{(1)}, \beta_1^{(1)})$
+4. Otherwise: $\Delta_{k+1} = 0.5 \Delta_k$ (shrink step size and try again)
+5. Repeat
+
+\vspace{4cm}
+
 
 
 
