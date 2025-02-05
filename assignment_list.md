@@ -9,7 +9,7 @@ description: >-
 
 ## Projects
 
-TBA
+* [Project 1](https://sta379-s25.github.io/projects/project_1.html)
 
 ## Challenges
 
