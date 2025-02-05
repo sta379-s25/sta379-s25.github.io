@@ -1647,6 +1647,8 @@ sampling</li>
         </ul>
         <nav role="navigation" id="toc">
           <ul>
+          <li><a href="#rules" id="toc-rules">Rules</a></li>
+          <li><a href="#overview" id="toc-overview">Overview</a></li>
           <li><a href="#recap-acceptance-rejection-sampling" id="toc-recap-acceptance-rejection-sampling">Recap:
           acceptance-rejection sampling</a>
           <ul>
@@ -1702,11 +1704,13 @@ sampling</h1>
 <p><strong>Due:</strong> Wednesday March 5, 10:00am</p>
 <p><strong>Submission:</strong> See the Submission Checklist at the end
 of the assignment</p>
-<p><strong>Rules:</strong> Projects in this course take the place of
-exams. Their goal is both to assess what you have learned in the class,
-and to explore extensions of the material more complex than we can cover
-on a homework assignment. Therefore, projects <strong>must be completed
-independently</strong>. You <strong>may not:</strong></p>
+<div id="rules" class="section level1">
+<h1>Rules</h1>
+<p>Projects in this course take the place of exams. Their goal is both
+to assess what you have learned in the class, and to explore extensions
+of the material more complex than we can cover on a homework assignment.
+Therefore, projects <strong>must be completed independently</strong>.
+You <strong>may not:</strong></p>
 <ul>
 <li>Discuss the project with anyone other than the course
 instructor</li>
@@ -1739,6 +1743,34 @@ Such questions could include things like
 </ul>
 <p>Any violation of the rules will be treated as plagiarism, and may
 result in a 0 on the assignment with no option of resubmission.</p>
+</div>
+<div id="overview" class="section level1">
+<h1>Overview</h1>
+<p>In this assignment, you will implement a variant of
+acceptance-rejection sampling called <em>adaptive</em>
+acceptance-rejection sampling. The instructions below describe the
+procedure in detail. If you have any clarification questions about
+details of the procedure, please let me know.</p>
+<p>Note that previous exposure to adaptive acceptance-rejection sampling
+is not assumed or expected. One of the important skills in computational
+statistics is understanding and implementing various adaptations and
+modifications of existing algorithms with which you are familiar; there
+are many, many variations of common algorithms, and it would be
+impossible to cover them all in one course.</p>
+<p>There are two main parts to the assignment: implementing the sampling
+procedure, and deriving some of the crucial pieces mathematically. You
+will submit your code implementation on GitHub, and your written work on
+Canvas.</p>
+<div id="using-other-languages" class="section level3">
+<h3>Using other languages</h3>
+<p>The instructions below, and the test code provided, are specific to
+R. If you would like to write your implementation in C++ instead, and
+export to R with Rcpp, you are welcome to do so; the unit tests should
+work directly on R functions with C++ source code.</p>
+<p>If you would like to write your implementation in a different
+language (e.g., Python), come talk to me and we will discuss it.</p>
+</div>
+</div>
 <div id="recap-acceptance-rejection-sampling" class="section level1">
 <h1>Recap: acceptance-rejection sampling</h1>
 <p>In class and on HW 3, we looked at <em>acceptance-rejection</em>

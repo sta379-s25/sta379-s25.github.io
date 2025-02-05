@@ -11,7 +11,9 @@ link-citations: yes
 
 **Submission:** See the Submission Checklist at the end of the assignment
 
-**Rules:** Projects in this course take the place of exams. Their goal is both to assess what you have learned in the class, and to explore extensions of the material more complex than we can cover on a homework assignment. Therefore, projects **must be completed independently**. You **may not:**
+# Rules
+
+Projects in this course take the place of exams. Their goal is both to assess what you have learned in the class, and to explore extensions of the material more complex than we can cover on a homework assignment. Therefore, projects **must be completed independently**. You **may not:**
 
 * Discuss the project with anyone other than the course instructor
 * Share tips, hints, suggestions, code snippets, full or partial solutions, etc. to any of the pieces of this project with anyone other than the course instructor
@@ -30,6 +32,20 @@ However, you **may:**
     * What does [a specific error message] mean?
     
 Any violation of the rules will be treated as plagiarism, and may result in a 0 on the assignment with no option of resubmission.
+
+# Overview
+
+In this assignment, you will implement a variant of acceptance-rejection sampling called *adaptive* acceptance-rejection sampling. The instructions below describe the procedure in detail. If you have any clarification questions about details of the procedure, please let me know.
+
+Note that previous exposure to adaptive acceptance-rejection sampling is not assumed or expected. One of the important skills in computational statistics is understanding and implementing various adaptations and modifications of existing algorithms with which you are familiar; there are many, many variations of common algorithms, and it would be impossible to cover them all in one course.
+
+There are two main parts to the assignment: implementing the sampling procedure, and deriving some of the crucial pieces mathematically. You will submit your code implementation on GitHub, and your written work on Canvas.
+
+### Using other languages
+
+The instructions below, and the test code provided, are specific to R. If you would like to write your implementation in C++ instead, and export to R with Rcpp, you are welcome to do so; the unit tests should work directly on R functions with C++ source code.
+
+If you would like to write your implementation in a different language (e.g., Python), come talk to me and we will discuss it.
 
 
 # Recap: acceptance-rejection sampling

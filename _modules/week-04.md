@@ -10,7 +10,11 @@ February 3
 : *Computational Statistics* (Givens and Hoeting) Chapter 6.2
 
 February 5
-: Fitting linear regression models
+: Beginning optimization
+  : [slides (pdf)](https://sta379-s25.github.io/slides/lecture_10.pdf), [practice questions](https://sta379-s25.github.io/practice_questions/pq_10.html), [practice question solutions](https://sta379-s25.github.io/practice_questions/pq_10_solutions.html)
+  
+: **Project 1 released**{: .label .label-purple }
+  : [Project 1](https://sta379-s25.github.io/projects/project_1.html)
 
 February 7
-: Fitting linear regression models
+: Compass search

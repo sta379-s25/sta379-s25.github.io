@@ -9,12 +9,13 @@ editor_options:
 ## Course logistics
 
 * Thanks for feedback!
+* Sounds like pace is ok -- I will keep checking in
 * Tweak to grading policy: mastery at the question level, not the assignment level
     * Strictly better for your course grade
     * Won't penalize correct questions for mistakes on other questions
     * Resubmission still part of system
 * Using other languages: if you would like to practice a different language for the R coding assignments, I am generally ok with that. Talk to me about it if you are interested
-* Project 1 released
+* Project 1 released, due March 5
 
 ## Motivation: regression models
 
