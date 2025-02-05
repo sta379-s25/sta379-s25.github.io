@@ -242,7 +242,7 @@ $$U_2 = h_2(X_1, X_2) = \frac{1}{2\pi} \arctan \left( \frac{X_2}{X_1} \right)$$
 :::{.question}
 #### Question 4(a) (written)
 
-Show that if $X_1 = \sqrt{-2 \log(U_1)} \cos (2 \pi U_2)$ and $X_2 = \sqrt{-2 \log(U_1)} \sin (2 \pi U_2)$, then $U_1 = \exp \left\lbrace - \frac{(X_1^2 + X_2^2)}{2} \right\rbrace$ and $U_2 = \frac{1}{2\pi} \arctan \left( \frac{Y_2}{Y_1} \right)$.
+Show that if $X_1 = \sqrt{-2 \log(U_1)} \cos (2 \pi U_2)$ and $X_2 = \sqrt{-2 \log(U_1)} \sin (2 \pi U_2)$, then $U_1 = \exp \left\lbrace - \frac{(X_1^2 + X_2^2)}{2} \right\rbrace$ and $U_2 = \frac{1}{2\pi} \arctan \left( \frac{X_2}{X_1} \right)$.
 
 You may use fundamental trig identities. Show all work.
 :::
