@@ -50,6 +50,8 @@ Keep in mind that debugging software issues can take time, so make sure to start
 
 **Office hours:** 
 
+Monday 2--3pm
+
 Wednesday 12--1pm
 
 Thursday 3--4pm
@@ -153,7 +155,7 @@ Unlike homework assignments, **projects must be completed independently**. Any u
 
 ### Exams
 
-There are no exams. Yay!
+There are no exams.
 
 ## Assignment submission
 
@@ -166,23 +168,41 @@ Please see the course resources for full instructions on getting started with R 
 
 ## Grading
 
+*Note: I modified the grading system on February 5. The old system is described in the next section. This modification can only increase your course grade, because I will simply take the higher of the grades under the two systems.*
+
 My goal in this course is to help you learn computational statistics, but it isn't clear that a focus on grades helps students learn; in fact, focusing on grades can detract from the learning process. I also believe that learning takes trial and error, and is not a linear process. Furthermore, this course will have a substantial focus on code implementation, and when you write code in real life, you usually send it to someone else (a colleague, a boss, a tester, a journal reviewer, etc.) for feedback, and then *make revisions based on their feedback*, before the code goes into production.
 
 However, we live in a world where some form of grading is necessary, so I have tried to create a grading system which de-emphasizes grades and focuses on learning. When assigning grades, I believe that
 
 * Assignments should be an opportunity to *practice* the material. It is ok to make mistakes when practicing, as long as you make an honest effort
 * Errors are a good opportunity to learn and revise your work
-* Partial credit and weighted averages of scores make the meaning of a grade confusing. Does an 85 in the course mean you know 85% of everything, or everything about 85% of the material?
 
 To that end, in this course
 
 * I will give you feedback on every assignment
-* All assignments are graded as Mastered / Not yet mastered
+* All assignments are graded on a mastery basis
 * If you haven't yet mastered something, you get to try again!
 
 Coding assignments lend themselves particularly well to this type of grading. Many of your coding assignments will require you to write functions which implement statistical methods. These functions will be assessed with a series of unit tests, which will be provided to you when the assignment is released. If your code is well-written, documented, complete, and passes all unit tests (in addition to any other specifics requested in the assignment), then congratulations! You have mastered that portion of the assignment. Because you will have the unit tests while working on your assignment, you will know before you submit whether your code meets that requirement for mastery.
 
-Your final grade in the course simply reflects your work in the course and how much of the course content you have mastered. The list below shows what you need to do to receive each grade. There will be *N* homework assignments (assigned most weeks), 3 projects, and likely 3-5 challenge assignments (I promise at least 3 challenge assignments).
+Grades on assignments will reflect the amount of the assignment that you have mastered. On a homework assignment with 4 questions, for example, mastering 3 out of 4 questions results in a grade of 75% on that assignment. Grading rubrics for projects and challenges will be communicated separately in the assignment instructions.
+
+There will be *N* homework assignments (assigned most weeks), 3 projects, and likely 3-5 challenge assignments (I promise at least 3 challenge assignments). Final grades in the course will be assigned as follows:
+
+| Component | Weight |
+| --- | --- |
+| Homeworks and Challenges (top *N+1*) | 60% |
+| Projects (top 2) | 40% |
+
+This means that I will only count your top *N+1* homework and challenge grades. That is, doing extra challenges can replace homework assignments.
+
+I will use the standard grading scale (above a 93 is an A, above a 90 is an A-, above an 87 is a B+, etc.)
+
+**Important: Except in a few cases, the combination of resubmissions and partial credit for mastering part of an assignment should result in higher grades than under the original grading system, which required mastering the whole assignment for credit. However, if for whatever reason you would have had a higher grade in the course under the old system, I will give you the higher grade.**
+
+## OLD grading system
+
+Here is the grade breakdown from the old system. Note that mastery under the old system required mastering the entire assignment.
 
 * To get an **A** in the course:
 
@@ -232,8 +252,6 @@ Each grade bundle is an indivisible unit; all assignments in a bundle must meet 
 earn the associated grade. 
 
 There are a few things to note about this grading system. First, a grade of "C" means that you have met the basic requirements for the course (completing most of the homework assignments). It is possible to receive a "C" or "C+" without completing any challenge assignments or projects, provided you keep on top of the homework. Receiving a grade in the "B" range requires completing at least 1 project, while receiving a grade in the "A" range requires completing at least 2 projects. 
-
-Second, the system is built to allow for mistakes. Remember that if you don't master an assignment on the first submission, you can still resubmit once after receiving feedback. Also, you have a bank of extension days, which can be applied to any assignment or resubmission. And importantly, you don't have to master every assignment, nor every assignment of one type, to receive any of the grades. For instance, you only need to master two projects to receive an A; if you aren't able to master a project after resubmitting, there is still the third project you can do instead. 
 
 ## Late work
 

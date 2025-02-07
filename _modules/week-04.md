@@ -17,4 +17,9 @@ February 5
   : [Project 1](https://sta379-s25.github.io/projects/project_1.html)
 
 February 7
-: Compass search
+: Lab day -- Compass search
+  : [practice questions](https://sta379-s25.github.io/practice_questions/pq_11.html), [practice question solutions](https://sta379-s25.github.io/practice_questions/pq_11_solutions.html)
+  
+: [Algorithms for Optimization](https://algorithmsbook.com/optimization/files/optimization.pdf) Chapter 7.3
+  
+: No homework this week -- work on Project 1

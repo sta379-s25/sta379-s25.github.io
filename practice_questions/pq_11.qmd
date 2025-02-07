@@ -1,0 +1,98 @@
+---
+title: "Practice Questions: Compass search"
+format: html
+---
+
+# Logistic regression
+
+We have data on medical school admissions for 55 students from a liberal arts college. The data include the variables
+
+* `Acceptance`: whether the student was accepted (1) or not accepted (0) to med school
+* `GPA`: the student's college GPA (4-point scale)
+
+We would like to build a model to predict acceptance using college GPA. Because acceptance is a binary variable, a **logistic regression** model is appropriate.
+
+Let $p_i = P(\text{Acceptance}_i = 1)$ be the probability of acceptance for the $i$th individual in the data. Then, the logistic regression model is
+
+$$\log \left(\frac{p_i}{1 - p_i} \right) = \beta_0 + \beta_1 \text{GPA}_i$$
+
+Fitting the model in R:
+
+```{r}
+library(Stat2Data)
+data("MedGPA")
+
+glm(Acceptance ~ GPA, family = binomial, data = MedGPA)
+```
+
+### Optimization
+
+For linear regression, we minimized the RSS. What about logistic regression? 
+
+It turns out that the logistic regression model here estimates $\beta_0$ and $\beta_1$ by minimizing the following function:
+
+$$f(\beta_0, \beta_1) = - \sum \limits_{i=1}^n \left \lbrace \text{Acceptance}_i(\beta_0 + \beta_1 \text{GPA}_i) - \log(1 + e^{\beta_0 + \beta_1 \text{GPA}_i}) \right\rbrace$$
+
+The function below calculates this for an input vector $\beta = (\beta_0, \beta_1)$:
+
+```{r}
+logistic_loss <- function(beta){
+  odds <- exp(beta[1] + beta[2]*MedGPA$GPA)
+  p <- odds/(1 + odds)
+  -1*sum(dbinom(MedGPA$Acceptance, 1, p, log=T))
+}
+```
+
+
+### Compass search
+
+Begin with initial values $(\beta_0^{(0)}, \beta_1^{(0)}) = (0, 0)$ and initial step size $\Delta_0 = 1$.
+
+1. Find the test points around the initial guess, and calculate $f(\beta_0, \beta_1)$ at each of the test points. Will the compass search algorithm move to one of the new points, or shrink the step size?
+
+2. Update the test points based on question 1, and recalculate $f(\beta_0, \beta_1)$ at each. Will the compass search algorithm move to one of the new points, or shrink the step size?
+
+3. Write code to repeat the compass search until the step size $\Delta_k < 1 \times 10^{-6}$. Your final point should be very close to the estimates from the `glm` function in R.
+
+4. How many steps did you take in question 3?
+
+
+
+# Another example
+
+Consider vectors ${\bf x} = (x_1, x_2) \in \mathbb{R}^2$, and the function  
+
+$$f({\bf x}) = (x_1^2 + x_2 - 11)^2 + (x_1 + x_2^2 - 7)^2$$
+
+Suppose we want to minimize this function.
+
+With some calculus, you could probably find values at with $f'({\bf x}) = 0$. But do you want to? *If we only need to optimize this once*, the time it takes to run derivative-free optimization is likely more than made up for by the time it would have taken us to solve the system analytically. In such cases, derivative-free optimization might be more attractive than a pencil-and-paper solution.
+
+## Compass search
+
+1. Use compass search to minimize the function, starting at ${\bf x}^{(0)} = (4, 5)$ and an initial step size $\Delta_0 = 1$. What is the location of the minimum that the search produces? How many iterations were needed?
+
+2. Repeat question 1, but this time use an initial point of ${\bf x}^{(0)} = (-5, 2)$. What is the location of the minimum that the search produces? How many iterations were needed?
+
+3. Repeat question 1, but this time use an initial point of ${\bf x}^{(0)} = (1, -2)$. What is the location of the minimum that the search produces? How many iterations were needed?
+
+4. Repeat question 1, but this time use an initial point of ${\bf x}^{(0)} = (-2, -2)$. What is the location of the minimum that the search produces? How many iterations were needed?
+
+## What's going on here?
+
+The function $f({\bf x})$ written here does not have a single minimum; rather, it has four *local* minima. Depending on where we initialize the procedure, we will end up at a different local minimum!
+
+Is this an issue? It depends on the problem we are trying to solve, and the specific function we are trying to minimize.
+
+* In this case, all of the four local minima give $f({\bf x}) = 0$, so there is no reason to prefer one of them; any of them would work equally well if we only care about minimizing the function
+* If local minima produce very different results, it is common to run the optimization procedure multiple times, initializing at different locations
+* Many of our familiar regression models (linear regression, logistic regression, etc.) do not have local minima, so we don't have to worry about the issue in those cases
+* More complex models like neural networks do have local minima in the optimization function. In those cases, different local minima often give similar performance. A variety of methods are also used to overcome local minima and try to find the global minimum 
+
+
+# If you're done early...
+
+Try implementing compass search in more than 2 dimensions. The process is the same, with two compass points per dimension ($\pm \Delta \cdot$ standard basis vectors). E.g. in 3 dimensions, we have $(\Delta, 0, 0),\ (-\Delta, 0, 0),\ (0, \Delta, 0)$, etc.
+
+
+
