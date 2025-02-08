@@ -1,0 +1,652 @@
+---
+title: "Lecture 11: Nelder-Mead method"
+author: "Ciaran Evans"
+output: beamer_presentation
+editor_options: 
+  chunk_output_type: console
+---
+
+## Recap: optimization
+
+**Definition:** *Optimization* is the problem of finding values that minimize or maximize some function.
+
+**Example:** 
+
+$$RSS(\beta_0, \beta_1) = \sum \limits_{i=1}^n (\text{Weight}_i - \beta_0 - \beta_1 \text{WingLength}_i)^2$$
+
+* $RSS(\beta_0, \beta_1)$ is a function of $\beta_0$ and $\beta_1$
+* We want to find the values of $\beta_0$ and $\beta_1$ that *minimize* this function
+
+## Last time: Compass search overview (in 2 dimensions)
+
+To minimize some function $f(\beta_0, \beta_1)$:
+
+1. Choose an initial guess $(\beta_0^{(0)}, \beta_1^{(0)})$ and initial step size $\Delta_0$
+2. Evaluate $f$ at the points
+    * $(\beta_0^{(0)}, \beta_1^{(0)})$
+    * $(\beta_0^{(0)}, \beta_1^{(0)} \pm \Delta_0)$
+    * $(\beta_0^{(0)} \pm \Delta_0, \beta_1^{(0)})$
+3. If $f$ is smaller at one of the new points: move to the smallest value, update to $(\beta_0^{(1)}, \beta_1^{(1)})$
+4. Otherwise: $\Delta_{k+1} = 0.5 \Delta_k$ (shrink step size and try again)
+5. Repeat
+
+\vspace{2cm}
+
+## Downsides of compass search
+
+Downsides of the compass search algorithm given on the previous slide:
+
+* Can require many steps
+* Only considers specific search directions
+* Step size only shrinks; if we find a promising direction, can't take bigger steps
+* Choosing a direction requires many evaluations of $f$
+    * In 2 dimensions (e.g. $\beta_0$ and $\beta_1$), requires 4 evaluations of $f$
+    * In $d$ dimensions ($\beta_0, \beta_1,...,\beta_{d-1}$), requires 2$d$ evaluations of $f$
+    
+**Question:** How could you modify the algorithm to address some of the issues here?
+
+## A modified compass search algorithm
+
+
+## Alternative: Nelder-Mead method
+
+In R, standard function for performing optimization is `optim`:
+
+```{r, eval=F}
+?optim
+```
+
+```
+optim(par, fn, gr = NULL, ...,
+      method = c("Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN",
+                 "Brent"),
+      lower = -Inf, upper = Inf,
+      control = list(), hessian = FALSE)
+```
+
+
+* Another derivative-free optimization method
+* **Very** widely used
+    * Original 1965 paper has 40,000+ citations
+    * Can find many examples of use in biology, medicine, physics, engingeering, etc.
+
+
+## Nelder-Mead method (in 2 dimensions)
+
+Start with 3 initial points, evaluate function $f$ at each point:
+
+```{r echo=F, message=F, warning=F, fig.align='center', fig.width=4, fig.height=2.5}
+library(Stat2Data)
+library(ggrepel)
+data("Sparrows")
+
+rss <- function(beta){
+  sum((Sparrows$Weight - beta[1] - beta[2]*Sparrows$WingLength)^2)
+}
+
+x1 <- c(0.3598633, 0.5937500, 0.4346924)
+x2 <- c(0.5498047, 0.5625000, 0.4870605)
+
+cur_simplex <- cbind(x1, x2)
+
+rss_vals <- apply(cbind(x1, x2), 1, rss)
+
+set.seed(3)
+data.frame(x1, x2, rss_vals) |>
+  ggplot(aes(x = x1, y = x2, label=round(rss_vals))) +
+  geom_point() +
+  #geom_point(aes(x = 0.5, y = 0.5))+
+  geom_polygon(color="black", fill=NA) +
+  theme_classic() +
+  geom_text_repel(size=3, force_pull = 0.5) +
+  scale_x_continuous(limits=c(0.1, 0.75)) +
+  scale_y_continuous(limits = c(0.4, 0.6)) +
+  labs(x = "Beta0", y = "Beta1")
+```
+
+**Question:** Where should I search next?
+
+
+## Nelder-Mead method (in 2 dimensions)
+
+First, calculate centroid of the vertices (except the worst one)
+
+```{r echo=F, message=F, warning=F, fig.align='center', fig.width=4, fig.height=2.5}
+x1 <- c(0.3598633, 0.5937500, 0.4346924)
+x2 <- c(0.5498047, 0.5625000, 0.4870605)
+
+cur_simplex <- cbind(x1, x2)
+
+rss_vals <- apply(cbind(x1, x2), 1, rss)
+cur_simplex <- cur_simplex[order(rss_vals),]
+centroid <- colMeans(cur_simplex[1:2,])
+
+set.seed(3)
+data.frame(x1, x2, rss_vals) |>
+  ggplot(aes(x = x1, y = x2, label=round(rss_vals))) +
+  geom_point() +
+  geom_point(aes(x = centroid[1], y = centroid[2])) +
+  geom_polygon(color="black", fill=NA) +
+  theme_classic() +
+  geom_text_repel(size=3, force_pull = 0.5) +
+  scale_x_continuous(limits=c(0.1, 0.75)) +
+  scale_y_continuous(limits = c(0.4, 0.6)) +
+  labs(x = "Beta0", y = "Beta1")
+```
+
+
+## Reflection
+
+Now reflect the worst vertex over the centroid:
+
+```{r echo=F, message=F, warning=F, fig.align='center', fig.width=4, fig.height=2.5}
+x1 <- c(0.3598633, 0.5937500, 0.4346924)
+x2 <- c(0.5498047, 0.5625000, 0.4870605)
+
+cur_simplex <- cbind(x1, x2)
+
+rss_vals <- apply(cbind(x1, x2), 1, rss)
+cur_simplex <- cur_simplex[order(rss_vals),]
+centroid <- colMeans(cur_simplex[1:2,])
+reflection = centroid + (centroid - cur_simplex[3,])
+
+set.seed(3)
+data.frame(x1, x2, rss_vals) |>
+  ggplot(aes(x = x1, y = x2, label=round(rss_vals))) +
+  geom_point() +
+  geom_point(aes(x = centroid[1], y = centroid[2])) +
+  geom_point(aes(x = reflection[1], y = reflection[2])) +
+  geom_polygon(color="black", fill=NA) +
+  theme_classic() +
+  geom_text_repel(size=3, force_pull = 0.5) +
+  scale_x_continuous(limits=c(0.1, 0.75)) +
+  scale_y_continuous(limits = c(0.4, 0.6)) +
+  labs(x = "Beta0", y = "Beta1") +
+  geom_segment(aes(x = reflection[1], y = reflection[2], 
+                   xend= cur_simplex[3,1], yend = cur_simplex[3,2]), lty=2)
+```
+
+
+
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+Initial points:
+
+```{r, echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+plot_triangle <- function(cur_simplex, xlim=NA, ylim=NA,
+                          quiet = F){
+  
+  if(any(is.na(xlim))){
+    buffer <- diff(range(cur_simplex[,1]))
+    xlim = c(min(cur_simplex[,1]) - 0.5*buffer, 
+             max(cur_simplex[,1]) + 0.5*buffer)
+  }
+  if(any(is.na(ylim))){
+    buffer <- diff(range(cur_simplex[,2]))
+    ylim = c(min(cur_simplex[,2]) - 0.5*buffer, 
+             max(cur_simplex[,2]) + 0.5*buffer)
+  }
+  if(quiet){
+    data.frame(x1 = cur_simplex[,1], 
+               x2 = cur_simplex[,2]) |>
+      ggplot(aes(x = x1, y = x2)) +
+      geom_point() +
+      geom_polygon(color="black", fill=NA) +
+      theme_classic() +
+      scale_x_continuous(limits=xlim) +
+      scale_y_continuous(limits = ylim) +
+      labs(x = "Beta0", y = "Beta1")
+  } else {
+    rss_vals <- apply(cur_simplex, 1, rss)
+    data.frame(x1 = cur_simplex[,1], 
+               x2 = cur_simplex[,2],
+               rss_vals) |>
+      ggplot(aes(x = x1, y = x2, label=rss_vals)) +
+      geom_point() +
+      geom_polygon(color="black", fill=NA) +
+      theme_classic() +
+      geom_text_repel(size=3, force_pull = 0.5) +
+      scale_x_continuous(limits=xlim) +
+      scale_y_continuous(limits = ylim) +
+      labs(x = "Beta0", y = "Beta1")
+  }
+  
+}
+
+
+nm_step <- function(cur_simplex){
+  rss_vals <- apply(cur_simplex, 1, rss)
+  cur_simplex <- cur_simplex[order(rss_vals),]
+  rss_vals <- sort(rss_vals)
+  centroid <- colMeans(cur_simplex[1:2,])
+  reflection = centroid + (centroid - cur_simplex[3,])
+  
+  if(rss(reflection) < rss_vals[2] && rss(reflection) >= rss_vals[1]){
+    # reflection
+    cur_simplex <- rbind(cur_simplex[1:2,], reflection)
+    print("reflection")
+  } else if(rss(reflection) < rss_vals[1]){
+    # expansion?
+    expansion = centroid + 2*(centroid - cur_simplex[3,])
+    if(rss(expansion) < rss(reflection)){
+      cur_simplex <- rbind(cur_simplex[1:2,], expansion)
+      print("expansion")
+    } else {
+      cur_simplex <- rbind(cur_simplex[1:2,], reflection)
+      print("reflection")
+    }
+  } else if(rss(reflection) < rss_vals[3]){
+    # contract outside
+    co <- centroid + 0.5*(reflection - centroid)
+    if(rss(co) < rss(reflection)){
+      cur_simplex <- rbind(cur_simplex[1:2,], co)
+      print("contract outside")
+    } else {
+      # shrink
+      cur_simplex[2,] <- cur_simplex[1,] + 0.5*(cur_simplex[2,] - cur_simplex[1,])
+      cur_simplex[3,] <- cur_simplex[1,] + 0.5*(cur_simplex[3,] - cur_simplex[1,])
+      print("shrink")
+    }
+  } else {
+    # contract inside
+    ci <- centroid + 0.5*(cur_simplex[3,] - centroid)
+    if(rss(ci) < rss_vals[3]){
+      cur_simplex <- rbind(cur_simplex[1:2,], ci)
+      print("contract inside")
+    } else {
+      # shrink
+      cur_simplex[2,] <- cur_simplex[1,] + 0.5*(cur_simplex[2,] - cur_simplex[1,])
+      cur_simplex[3,] <- cur_simplex[1,] + 0.5*(cur_simplex[3,] - cur_simplex[1,])
+      print("shrink")
+    }
+  }
+  
+  return(cur_simplex)
+}
+
+
+
+
+x1 <- c(0, 0.5, 1)
+x2 <- c(0, 1, 0)
+
+cur_simplex <- cbind(x1, x2)
+
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5))
+```
+
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5))
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5))
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5))
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5))
+```
+
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead in action
+
+$\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
+
+```{r echo=F, fig.align='center', fig.width=4, fig.height=2.5}
+cur_simplex <- nm_step(cur_simplex)
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
+```
+
+## Nelder-Mead summary
+
+* Explores *away* from the current worst point
+    * *Reflection* tries a point in the new direction
+* *Expansion* allows us to increase the "step size" if the new direction is particularly promising
+* *Contraction* and *shrinking* allows us to decrease the "step size" if we are moving too far
+
+
+
+
