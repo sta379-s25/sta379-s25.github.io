@@ -6,6 +6,100 @@ editor_options:
   chunk_output_type: console
 ---
 
+```{r, include=F}
+plot_triangle <- function(cur_simplex, xlim=NA, ylim=NA,
+                          quiet = F){
+  
+  if(any(is.na(xlim))){
+    buffer <- diff(range(cur_simplex[,1]))
+    xlim = c(min(cur_simplex[,1]) - 0.5*buffer, 
+             max(cur_simplex[,1]) + 0.5*buffer)
+  }
+  if(any(is.na(ylim))){
+    buffer <- diff(range(cur_simplex[,2]))
+    ylim = c(min(cur_simplex[,2]) - 0.5*buffer, 
+             max(cur_simplex[,2]) + 0.5*buffer)
+  }
+  if(quiet){
+    data.frame(x1 = cur_simplex[,1], 
+               x2 = cur_simplex[,2]) |>
+      ggplot(aes(x = x1, y = x2)) +
+      geom_point() +
+      geom_polygon(color="black", fill=NA) +
+      theme_classic() +
+      scale_x_continuous(limits=xlim) +
+      scale_y_continuous(limits = ylim) +
+      labs(x = "Beta0", y = "Beta1")
+  } else {
+    rss_vals <- round(apply(cur_simplex, 1, rss))
+    data.frame(x1 = cur_simplex[,1], 
+               x2 = cur_simplex[,2],
+               rss_vals) |>
+      ggplot(aes(x = x1, y = x2, label=rss_vals)) +
+      geom_point() +
+      geom_polygon(color="black", fill=NA) +
+      theme_classic() +
+      geom_text_repel(size=3, force_pull = 0.5) +
+      scale_x_continuous(limits=xlim) +
+      scale_y_continuous(limits = ylim) +
+      labs(x = "Beta0", y = "Beta1")
+  }
+  
+}
+
+
+nm_step <- function(cur_simplex){
+  rss_vals <- apply(cur_simplex, 1, rss)
+  cur_simplex <- cur_simplex[order(rss_vals),]
+  rss_vals <- sort(rss_vals)
+  centroid <- colMeans(cur_simplex[1:2,])
+  reflection = centroid + (centroid - cur_simplex[3,])
+  
+  if(rss(reflection) < rss_vals[2] && rss(reflection) >= rss_vals[1]){
+    # reflection
+    cur_simplex <- rbind(cur_simplex[1:2,], reflection)
+    print("reflection")
+  } else if(rss(reflection) < rss_vals[1]){
+    # expansion?
+    expansion = centroid + 2*(centroid - cur_simplex[3,])
+    if(rss(expansion) < rss(reflection)){
+      cur_simplex <- rbind(cur_simplex[1:2,], expansion)
+      print("expansion")
+    } else {
+      cur_simplex <- rbind(cur_simplex[1:2,], reflection)
+      print("reflection")
+    }
+  } else if(rss(reflection) < rss_vals[3]){
+    # contract outside
+    co <- centroid + 0.5*(reflection - centroid)
+    if(rss(co) < rss(reflection)){
+      cur_simplex <- rbind(cur_simplex[1:2,], co)
+      print("contract outside")
+    } else {
+      # shrink
+      cur_simplex[2,] <- cur_simplex[1,] + 0.5*(cur_simplex[2,] - cur_simplex[1,])
+      cur_simplex[3,] <- cur_simplex[1,] + 0.5*(cur_simplex[3,] - cur_simplex[1,])
+      print("shrink")
+    }
+  } else {
+    # contract inside
+    ci <- centroid + 0.5*(cur_simplex[3,] - centroid)
+    if(rss(ci) < rss_vals[3]){
+      cur_simplex <- rbind(cur_simplex[1:2,], ci)
+      print("contract inside")
+    } else {
+      # shrink
+      cur_simplex[2,] <- cur_simplex[1,] + 0.5*(cur_simplex[2,] - cur_simplex[1,])
+      cur_simplex[3,] <- cur_simplex[1,] + 0.5*(cur_simplex[3,] - cur_simplex[1,])
+      print("shrink")
+    }
+  }
+  
+  return(cur_simplex)
+}
+```
+
+
 ## Recap: optimization
 
 **Definition:** *Optimization* is the problem of finding values that minimize or maximize some function.
@@ -65,7 +159,7 @@ optim(par, fn, gr = NULL, ...,
 ```
 
 
-* Another derivative-free optimization method
+* **Nelder-Mead:** another derivative-free optimization method
 * **Very** widely used
     * Original 1965 paper has 40,000+ citations
     * Can find many examples of use in biology, medicine, physics, engingeering, etc.
@@ -137,7 +231,7 @@ data.frame(x1, x2, rss_vals) |>
 
 ## Reflection
 
-Now reflect the worst vertex over the centroid:
+Now **reflect** the worst vertex over the centroid:
 
 ```{r echo=F, message=F, warning=F, fig.align='center', fig.width=4, fig.height=2.5}
 x1 <- c(0.3598633, 0.5937500, 0.4346924)
@@ -163,10 +257,540 @@ data.frame(x1, x2, rss_vals) |>
   scale_y_continuous(limits = c(0.4, 0.6)) +
   labs(x = "Beta0", y = "Beta1") +
   geom_segment(aes(x = reflection[1], y = reflection[2], 
-                   xend= cur_simplex[3,1], yend = cur_simplex[3,2]), lty=2)
+                   xend= cur_simplex[3,1], yend = cur_simplex[3,2]), lty=2) +
+  annotate(
+    "text", label = round(rss(reflection)),
+    x = reflection[1] + 0.04, y = reflection[2], size = 3
+  )
+```
+
+**Question:** Is the reflected point an improvement?
+
+## Reflection
+
+If the reflected point is *better than the second-worst point* but *worse than the best point*, update the triangle:
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r echo=F, message=F, warning=F, fig.align='center', fig.width=2.5, fig.height=2}
+x1 <- c(0.3598633, 0.5937500, 0.4346924)
+x2 <- c(0.5498047, 0.5625000, 0.4870605)
+
+cur_simplex <- cbind(x1, x2)
+
+rss_vals <- apply(cbind(x1, x2), 1, rss)
+cur_simplex <- cur_simplex[order(rss_vals),]
+centroid <- colMeans(cur_simplex[1:2,])
+reflection = centroid + (centroid - cur_simplex[3,])
+
+set.seed(3)
+data.frame(x1, x2, rss_vals) |>
+  ggplot(aes(x = x1, y = x2, label=round(rss_vals))) +
+  geom_point() +
+  geom_point(aes(x = centroid[1], y = centroid[2])) +
+  geom_point(aes(x = reflection[1], y = reflection[2])) +
+  geom_polygon(color="black", fill=NA) +
+  theme_classic() +
+  geom_text_repel(size=2, force_pull = 0.5) +
+  scale_x_continuous(limits=c(0.1, 0.75)) +
+  scale_y_continuous(limits = c(0.4, 0.6)) +
+  labs(x = "Beta0", y = "Beta1") +
+  geom_segment(aes(x = reflection[1], y = reflection[2], 
+                   xend= cur_simplex[3,1], yend = cur_simplex[3,2]), lty=2) +
+  annotate(
+    "text", label = round(rss(reflection)),
+    x = reflection[1] + 0.04, y = reflection[2], size = 2
+  )
+```
+:::
+
+::: {.column width="50%"}
+```{r include=F}
+x1 <- c(0.3598633, 0.5937500, 0.4346924)
+x2 <- c(0.5498047, 0.5625000, 0.4870605)
+
+cur_simplex <- cbind(x1, x2)
+
+cur_simplex <- nm_step(cur_simplex)
+```
+
+```{r echo=F, message=F, warning=F, fig.align='center', fig.width=2.5, fig.height=2}
+plot_triangle(cur_simplex, xlim=c(0.1, 0.75), ylim = c(0.4, 0.6))
+```
+:::
+
+::::
+
+
+## Another scenario
+
+Sometimes the reflected point is better than *all* of the current vertices:
+
+```{r echo=F, message=F, warning=F, fig.align='center', fig.width=4, fig.height=2.5}
+x1 <- c(1, 0.75, 0.5)
+x2 <- c(0, 0.25, 0)
+
+cur_simplex <- cbind(x1, x2)
+
+rss_vals <- apply(cbind(x1, x2), 1, rss)
+
+#order(rss_vals)
+cur_simplex <- cur_simplex[order(rss_vals),]
+centroid <- colMeans(cur_simplex[1:2,])
+reflection = centroid + (centroid - cur_simplex[3,])
+#rss(reflection)
+expansion = centroid + 2*(centroid - cur_simplex[3,])
+#rss(expansion)
+
+data.frame(x1, x2, rss_vals) |>
+  ggplot(aes(x = x1, y = x2, label=rss_vals)) +
+  geom_point() +
+  #geom_point(aes(x = 0.5, y = 0.5))+
+  geom_point(aes(x = centroid[1], y = centroid[2])) +
+  geom_point(aes(x = reflection[1], y = reflection[2])) +
+  #geom_point(aes(x = expansion[1], y = expansion[2])) +
+  geom_polygon(color="black", fill=NA) +
+  theme_classic() +
+  geom_text_repel(size=3, force_pull = 0.5) +
+  scale_x_continuous(limits=c(0.25, 2)) +
+  scale_y_continuous(limits = c(-0.25, 0.5)) +
+  labs(x = "Beta0", y = "Beta1") +
+  geom_segment(aes(x = reflection[1], y = reflection[2], 
+                   xend= cur_simplex[3,1], yend = cur_simplex[3,2]), lty=2) +
+  annotate(
+    "text", label = round(rss(reflection)),
+    x = reflection[1] + 0.2, y = reflection[2], size=3
+  )
+```
+
+**Question:** Where do you think we should move here?
+
+## Expansion
+
+When the reflected point is better than all the current vertices, try **expanding** in that direction:
+
+```{r echo=F, message=F, warning=F, fig.align='center', fig.width=4, fig.height=2.5}
+x1 <- c(1, 0.75, 0.5)
+x2 <- c(0, 0.25, 0)
+
+cur_simplex <- cbind(x1, x2)
+
+rss_vals <- apply(cbind(x1, x2), 1, rss)
+
+#order(rss_vals)
+cur_simplex <- cur_simplex[order(rss_vals),]
+centroid <- colMeans(cur_simplex[1:2,])
+reflection = centroid + (centroid - cur_simplex[3,])
+#rss(reflection)
+expansion = centroid + 2*(centroid - cur_simplex[3,])
+#rss(expansion)
+
+data.frame(x1, x2, rss_vals) |>
+  ggplot(aes(x = x1, y = x2, label=rss_vals)) +
+  geom_point() +
+  #geom_point(aes(x = 0.5, y = 0.5))+
+  geom_point(aes(x = centroid[1], y = centroid[2])) +
+  geom_point(aes(x = reflection[1], y = reflection[2])) +
+  geom_point(aes(x = expansion[1], y = expansion[2])) +
+  geom_polygon(color="black", fill=NA) +
+  theme_classic() +
+  geom_text_repel(size=3, force_pull = 0.5) +
+  scale_x_continuous(limits=c(0.25, 2)) +
+  scale_y_continuous(limits = c(-0.25, 0.5)) +
+  labs(x = "Beta0", y = "Beta1") +
+  geom_segment(aes(x = reflection[1], y = reflection[2], 
+                   xend= cur_simplex[3,1], yend = cur_simplex[3,2]), lty=2) +
+  geom_segment(aes(x = reflection[1], y = reflection[2], 
+                   xend= expansion[1], yend = expansion[2]), lty=2) +
+  annotate(
+    "text", label = round(rss(reflection)),
+    x = reflection[1] + 0.2, y = reflection[2], size=3
+  ) +
+  annotate(
+    "text", label = round(rss(expansion)),
+    x = expansion[1] + 0.2, y = expansion[2], size=3
+  )
+```
+
+## Expansion
+
+If the expanded point is *better than the reflected point*, update the triangle:
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r echo=F, message=F, warning=F, fig.align='center', fig.width=2.5, fig.height=2}
+x1 <- c(1, 0.75, 0.5)
+x2 <- c(0, 0.25, 0)
+
+cur_simplex <- cbind(x1, x2)
+
+rss_vals <- apply(cbind(x1, x2), 1, rss)
+
+#order(rss_vals)
+cur_simplex <- cur_simplex[order(rss_vals),]
+centroid <- colMeans(cur_simplex[1:2,])
+reflection = centroid + (centroid - cur_simplex[3,])
+#rss(reflection)
+expansion = centroid + 2*(centroid - cur_simplex[3,])
+#rss(expansion)
+
+data.frame(x1, x2, rss_vals) |>
+  ggplot(aes(x = x1, y = x2, label=rss_vals)) +
+  geom_point() +
+  #geom_point(aes(x = 0.5, y = 0.5))+
+  geom_point(aes(x = centroid[1], y = centroid[2])) +
+  geom_point(aes(x = reflection[1], y = reflection[2])) +
+  geom_point(aes(x = expansion[1], y = expansion[2])) +
+  geom_polygon(color="black", fill=NA) +
+  theme_classic() +
+  geom_text_repel(size=2, force_pull = 0.5) +
+  scale_x_continuous(limits=c(0.25, 2)) +
+  scale_y_continuous(limits = c(-0.25, 0.5)) +
+  labs(x = "Beta0", y = "Beta1") +
+  geom_segment(aes(x = reflection[1], y = reflection[2], 
+                   xend= cur_simplex[3,1], yend = cur_simplex[3,2]), lty=2) +
+  geom_segment(aes(x = reflection[1], y = reflection[2], 
+                   xend= expansion[1], yend = expansion[2]), lty=2) +
+  annotate(
+    "text", label = round(rss(reflection)),
+    x = reflection[1] + 0.2, y = reflection[2], size=2
+  ) +
+  annotate(
+    "text", label = round(rss(expansion)),
+    x = expansion[1] + 0.2, y = expansion[2], size=2
+  )
+```
+:::
+
+::: {.column width="50%"}
+```{r include=F}
+x1 <- c(1, 0.75, 0.5)
+x2 <- c(0, 0.25, 0)
+
+cur_simplex <- cbind(x1, x2)
+
+cur_simplex <- nm_step(cur_simplex)
+```
+
+```{r echo=F, message=F, warning=F, fig.align='center', fig.width=2.5, fig.height=2}
+plot_triangle(cur_simplex, xlim=c(0.25, 2), ylim = c(-0.25, 0.5))
+```
+:::
+
+::::
+
+
+## Another scenario
+
+Sometimes, the reflected point is *worse* than two of the existing vertices, but *better* than the worse vertex:
+
+```{r echo=F, message=F, warning=F, fig.align='center', fig.width=4, fig.height=2.5}
+x1 <- c(0.375, 1, 0.59375)
+x2 <- c(0.25, 0, 0.5625)
+cur_simplex <- cbind(x1, x2)
+
+rss_vals <- apply(cur_simplex, 1, rss)
+cur_simplex <- cur_simplex[order(rss_vals),]
+centroid <- colMeans(cur_simplex[1:2,])
+reflection = centroid + (centroid - cur_simplex[3,])
+
+data.frame(x1, x2, rss_vals) |>
+  ggplot(aes(x = x1, y = x2, label=round(rss_vals))) +
+  geom_point() +
+  #geom_point(aes(x = 0.5, y = 0.5))+
+  geom_point(aes(x = centroid[1], y = centroid[2])) +
+  geom_point(aes(x = reflection[1], y = reflection[2])) +
+  geom_polygon(color="black", fill=NA) +
+  theme_classic() +
+  geom_text_repel(size=3, force_pull = 0.5) +
+  scale_x_continuous(limits=c(-0.5, 1.25)) +
+  scale_y_continuous(limits = c(-0.25, 1)) +
+  labs(x = "Beta0", y = "Beta1") +
+  geom_segment(aes(x = reflection[1], y = reflection[2], 
+                   xend= cur_simplex[3,1], yend = cur_simplex[3,2]), lty=2) +
+  annotate(
+    "text", label = round(rss(reflection)),
+    x = reflection[1] + 0.2, y = reflection[2], size=3
+  )
+```
+
+**Question:** What should we do here?
+
+
+## Contract outside
+
+Move in the direction of the reflected point, but *not as far*:
+
+
+```{r echo=F, message=F, warning=F, fig.align='center', fig.width=4, fig.height=2.5}
+x1 <- c(0.375, 1, 0.59375)
+x2 <- c(0.25, 0, 0.5625)
+cur_simplex <- cbind(x1, x2)
+
+rss_vals <- apply(cur_simplex, 1, rss)
+cur_simplex <- cur_simplex[order(rss_vals),]
+centroid <- colMeans(cur_simplex[1:2,])
+reflection = centroid + (centroid - cur_simplex[3,])
+contract_outside <- centroid + 0.5*(reflection - centroid)
+
+data.frame(x1, x2, rss_vals) |>
+  ggplot(aes(x = x1, y = x2, label=round(rss_vals))) +
+  geom_point() +
+  #geom_point(aes(x = 0.5, y = 0.5))+
+  geom_point(aes(x = centroid[1], y = centroid[2])) +
+  geom_point(aes(x = reflection[1], y = reflection[2])) +
+  geom_point(aes(x = contract_outside[1], y = contract_outside[2])) +
+  geom_polygon(color="black", fill=NA) +
+  theme_classic() +
+  geom_text_repel(size=3, force_pull = 0.5) +
+  scale_x_continuous(limits=c(-0.5, 1.25)) +
+  scale_y_continuous(limits = c(-0.25, 1)) +
+  labs(x = "Beta0", y = "Beta1") +
+  geom_segment(aes(x = contract_outside[1], y = contract_outside[2], 
+                   xend= cur_simplex[3,1], yend = cur_simplex[3,2]), lty=2) +
+  annotate(
+    "text", label = round(rss(reflection)),
+    x = reflection[1] + 0.2, y = reflection[2], size=3
+  ) + 
+  annotate(
+    "text", label = round(rss(contract_outside)),
+    x = contract_outside[1] + 0.2, y = contract_outside[2], size=3
+  )
 ```
 
 
+## Contract outside
+
+Move in the direction of the reflected point, but *not as far*:
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r echo=F, message=F, warning=F, fig.align='center', fig.width=2.5, fig.height=2}
+x1 <- c(0.375, 1, 0.59375)
+x2 <- c(0.25, 0, 0.5625)
+cur_simplex <- cbind(x1, x2)
+
+rss_vals <- apply(cur_simplex, 1, rss)
+cur_simplex <- cur_simplex[order(rss_vals),]
+centroid <- colMeans(cur_simplex[1:2,])
+reflection = centroid + (centroid - cur_simplex[3,])
+contract_outside <- centroid + 0.5*(reflection - centroid)
+
+data.frame(x1, x2, rss_vals) |>
+  ggplot(aes(x = x1, y = x2, label=round(rss_vals))) +
+  geom_point() +
+  #geom_point(aes(x = 0.5, y = 0.5))+
+  geom_point(aes(x = centroid[1], y = centroid[2])) +
+  geom_point(aes(x = reflection[1], y = reflection[2])) +
+  geom_point(aes(x = contract_outside[1], y = contract_outside[2])) +
+  geom_polygon(color="black", fill=NA) +
+  theme_classic() +
+  geom_text_repel(size=2, force_pull = 0.5) +
+  scale_x_continuous(limits=c(-0.5, 1.25)) +
+  scale_y_continuous(limits = c(-0.25, 1)) +
+  labs(x = "Beta0", y = "Beta1") +
+  geom_segment(aes(x = contract_outside[1], y = contract_outside[2], 
+                   xend= cur_simplex[3,1], yend = cur_simplex[3,2]), lty=2) +
+  annotate(
+    "text", label = round(rss(reflection)),
+    x = reflection[1] + 0.2, y = reflection[2], size=2
+  ) + 
+  annotate(
+    "text", label = round(rss(contract_outside)),
+    x = contract_outside[1] + 0.2, y = contract_outside[2], size=2
+  )
+```
+:::
+
+::: {.column width="50%"}
+```{r include=F}
+x1 <- c(0.375, 1, 0.59375)
+x2 <- c(0.25, 0, 0.5625)
+
+cur_simplex <- cbind(x1, x2)
+
+cur_simplex <- nm_step(cur_simplex)
+```
+
+```{r echo=F, message=F, warning=F, fig.align='center', fig.width=2.5, fig.height=2}
+plot_triangle(cur_simplex, xlim=c(-0.5, 1.25), ylim = c(-0.25, 1))
+```
+:::
+
+::::
+
+
+## Another scenario
+
+And sometimes, the reflected point is worse than *any* of the current vertices:
+
+```{r echo=F, message=F, warning=F, fig.align='center', fig.width=4, fig.height=2.5}
+x1 <- c(0, 0.5, 1)
+x2 <- c(0, 1, 0)
+cur_simplex <- cbind(x1, x2)
+
+rss_vals <- apply(cur_simplex, 1, rss)
+cur_simplex <- cur_simplex[order(rss_vals),]
+centroid <- colMeans(cur_simplex[1:2,])
+reflection = centroid + (centroid - cur_simplex[3,])
+
+data.frame(x1, x2, rss_vals) |>
+  ggplot(aes(x = x1, y = x2, label=round(rss_vals))) +
+  geom_point() +
+  #geom_point(aes(x = 0.5, y = 0.5))+
+  geom_point(aes(x = centroid[1], y = centroid[2])) +
+  geom_point(aes(x = reflection[1], y = reflection[2])) +
+  geom_polygon(color="black", fill=NA) +
+  theme_classic() +
+  geom_text_repel(size=3, force_pull = 0.5) +
+  scale_x_continuous(limits=c(-0.25, 2)) +
+  scale_y_continuous(limits = c(-0.25, 1.5)) +
+  labs(x = "Beta0", y = "Beta1") +
+  geom_segment(aes(x = reflection[1], y = reflection[2], 
+                   xend= cur_simplex[3,1], yend = cur_simplex[3,2]), lty=2) +
+  annotate(
+    "text", label = round(rss(reflection)),
+    x = reflection[1] + 0.2, y = reflection[2], size=3
+  )
+```
+
+**Question:** What do you think we should do here?
+
+## Contract inside
+
+Move *away* from the worst point, but stay *inside* the triangle:
+
+```{r echo=F, message=F, warning=F, fig.align='center', fig.width=4, fig.height=2.5}
+x1 <- c(0, 0.5, 1)
+x2 <- c(0, 1, 0)
+cur_simplex <- cbind(x1, x2)
+
+rss_vals <- apply(cur_simplex, 1, rss)
+cur_simplex <- cur_simplex[order(rss_vals),]
+centroid <- colMeans(cur_simplex[1:2,])
+reflection = centroid + (centroid - cur_simplex[3,])
+contract_inside <- centroid + 0.5*(cur_simplex[3,] - centroid)
+
+data.frame(x1, x2, rss_vals) |>
+  ggplot(aes(x = x1, y = x2, label=round(rss_vals))) +
+  geom_point() +
+  #geom_point(aes(x = 0.5, y = 0.5))+
+  geom_point(aes(x = centroid[1], y = centroid[2])) +
+  geom_point(aes(x = reflection[1], y = reflection[2])) +
+  geom_point(aes(x = contract_inside[1], y = contract_inside[2])) +
+  geom_polygon(color="black", fill=NA) +
+  theme_classic() +
+  geom_text_repel(size=3, force_pull = 0.5) +
+  scale_x_continuous(limits=c(-0.25, 2)) +
+  scale_y_continuous(limits = c(-0.25, 1.5)) +
+  labs(x = "Beta0", y = "Beta1") +
+  geom_segment(aes(x = contract_inside[1], y = contract_inside[2], 
+                   xend= cur_simplex[3,1], yend = cur_simplex[3,2]), lty=2) +
+  annotate(
+    "text", label = round(rss(reflection)),
+    x = reflection[1] + 0.2, y = reflection[2], size=3
+  ) +
+  annotate(
+    "text", label = round(rss(contract_inside)),
+    x = contract_inside[1] + 0.2, y = contract_inside[2], size=3
+  )
+```
+
+
+## Contract inside
+
+Move *away* from the worst point, but stay *inside* the triangle:
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r echo=F, message=F, warning=F, fig.align='center', fig.width=2.5, fig.height=2}
+x1 <- c(0, 0.5, 1)
+x2 <- c(0, 1, 0)
+cur_simplex <- cbind(x1, x2)
+
+rss_vals <- apply(cur_simplex, 1, rss)
+cur_simplex <- cur_simplex[order(rss_vals),]
+centroid <- colMeans(cur_simplex[1:2,])
+reflection = centroid + (centroid - cur_simplex[3,])
+contract_inside <- centroid + 0.5*(cur_simplex[3,] - centroid)
+
+data.frame(x1, x2, rss_vals) |>
+  ggplot(aes(x = x1, y = x2, label=round(rss_vals))) +
+  geom_point() +
+  #geom_point(aes(x = 0.5, y = 0.5))+
+  geom_point(aes(x = centroid[1], y = centroid[2])) +
+  geom_point(aes(x = reflection[1], y = reflection[2])) +
+  geom_point(aes(x = contract_inside[1], y = contract_inside[2])) +
+  geom_polygon(color="black", fill=NA) +
+  theme_classic() +
+  geom_text_repel(size=2, force_pull = 0.5) +
+  scale_x_continuous(limits=c(-0.25, 2)) +
+  scale_y_continuous(limits = c(-0.25, 1.5)) +
+  labs(x = "Beta0", y = "Beta1") +
+  geom_segment(aes(x = contract_inside[1], y = contract_inside[2], 
+                   xend= cur_simplex[3,1], yend = cur_simplex[3,2]), lty=2) +
+  annotate(
+    "text", label = round(rss(reflection)),
+    x = reflection[1] + 0.2, y = reflection[2], size=2
+  ) +
+  annotate(
+    "text", label = round(rss(contract_inside)),
+    x = contract_inside[1] + 0.2, y = contract_inside[2], size=2
+  )
+```
+:::
+
+::: {.column width="50%"}
+```{r include=F}
+x1 <- c(0, 0.5, 1)
+x2 <- c(0, 1, 0)
+cur_simplex <- cbind(x1, x2)
+
+cur_simplex <- nm_step(cur_simplex)
+```
+
+```{r echo=F, message=F, warning=F, fig.align='center', fig.width=2.5, fig.height=2}
+plot_triangle(cur_simplex, xlim=c(-0.25, 2), ylim = c(-0.25, 1.5))
+```
+:::
+
+::::
+
+## Shrinking
+
+Sometimes, none of the other transformations improve the triangle. In that case, we *shrink* towards the best current vertex
+
+```{r echo=F, message=F, warning=F, fig.align='center', fig.width=4, fig.height=2.5}
+x1 <- c(0, 0.5, 1)
+x2 <- c(0, 1, 0)
+
+cur_simplex <- cbind(x1, x2)
+new_simplex <- cur_simplex
+new_simplex[2,] <- new_simplex[1,] + 0.5*(cur_simplex[2,] - new_simplex[1,])
+new_simplex[3,] <- new_simplex[1,] + 0.5*(cur_simplex[3,] - new_simplex[1,])
+
+data.frame(x1, x2) |>
+  ggplot(aes(x = x1, y = x2)) +
+  geom_point() +
+  geom_polygon(color="black", fill=NA) +
+  theme_classic() +
+  scale_x_continuous(limits=c(-0.25, 1.5)) +
+  scale_y_continuous(limits = c(-0.25, 1.5)) +
+  geom_point(aes(x = new_simplex[2,1], y = new_simplex[2,2])) +
+  geom_point(aes(x = new_simplex[3,1], y = new_simplex[3,2])) +
+  geom_curve(aes(x = cur_simplex[2,1], y = cur_simplex[2,2],
+                 xend = new_simplex[2,1], yend = new_simplex[2,2] + 0.05),
+             lty = 2, arrow = arrow(length = unit(0.03, "npc"))) +
+  geom_curve(aes(x = cur_simplex[3,1], y = cur_simplex[3,2],
+                 xend = new_simplex[3,1], yend = new_simplex[3,2] - 0.05),
+             lty = 2, curvature = -0.4,
+             arrow = arrow(length = unit(0.03, "npc"))) +
+  labs(x = "", y = "")
+```
 
 
 ## Nelder-Mead in action
@@ -176,99 +800,6 @@ $\widehat{\text{Weight}}_i = 1.3655 + 0.4674 \text{WingLength}_i$
 Initial points:
 
 ```{r, echo=F, fig.align='center', fig.width=4, fig.height=2.5}
-plot_triangle <- function(cur_simplex, xlim=NA, ylim=NA,
-                          quiet = F){
-  
-  if(any(is.na(xlim))){
-    buffer <- diff(range(cur_simplex[,1]))
-    xlim = c(min(cur_simplex[,1]) - 0.5*buffer, 
-             max(cur_simplex[,1]) + 0.5*buffer)
-  }
-  if(any(is.na(ylim))){
-    buffer <- diff(range(cur_simplex[,2]))
-    ylim = c(min(cur_simplex[,2]) - 0.5*buffer, 
-             max(cur_simplex[,2]) + 0.5*buffer)
-  }
-  if(quiet){
-    data.frame(x1 = cur_simplex[,1], 
-               x2 = cur_simplex[,2]) |>
-      ggplot(aes(x = x1, y = x2)) +
-      geom_point() +
-      geom_polygon(color="black", fill=NA) +
-      theme_classic() +
-      scale_x_continuous(limits=xlim) +
-      scale_y_continuous(limits = ylim) +
-      labs(x = "Beta0", y = "Beta1")
-  } else {
-    rss_vals <- apply(cur_simplex, 1, rss)
-    data.frame(x1 = cur_simplex[,1], 
-               x2 = cur_simplex[,2],
-               rss_vals) |>
-      ggplot(aes(x = x1, y = x2, label=rss_vals)) +
-      geom_point() +
-      geom_polygon(color="black", fill=NA) +
-      theme_classic() +
-      geom_text_repel(size=3, force_pull = 0.5) +
-      scale_x_continuous(limits=xlim) +
-      scale_y_continuous(limits = ylim) +
-      labs(x = "Beta0", y = "Beta1")
-  }
-  
-}
-
-
-nm_step <- function(cur_simplex){
-  rss_vals <- apply(cur_simplex, 1, rss)
-  cur_simplex <- cur_simplex[order(rss_vals),]
-  rss_vals <- sort(rss_vals)
-  centroid <- colMeans(cur_simplex[1:2,])
-  reflection = centroid + (centroid - cur_simplex[3,])
-  
-  if(rss(reflection) < rss_vals[2] && rss(reflection) >= rss_vals[1]){
-    # reflection
-    cur_simplex <- rbind(cur_simplex[1:2,], reflection)
-    print("reflection")
-  } else if(rss(reflection) < rss_vals[1]){
-    # expansion?
-    expansion = centroid + 2*(centroid - cur_simplex[3,])
-    if(rss(expansion) < rss(reflection)){
-      cur_simplex <- rbind(cur_simplex[1:2,], expansion)
-      print("expansion")
-    } else {
-      cur_simplex <- rbind(cur_simplex[1:2,], reflection)
-      print("reflection")
-    }
-  } else if(rss(reflection) < rss_vals[3]){
-    # contract outside
-    co <- centroid + 0.5*(reflection - centroid)
-    if(rss(co) < rss(reflection)){
-      cur_simplex <- rbind(cur_simplex[1:2,], co)
-      print("contract outside")
-    } else {
-      # shrink
-      cur_simplex[2,] <- cur_simplex[1,] + 0.5*(cur_simplex[2,] - cur_simplex[1,])
-      cur_simplex[3,] <- cur_simplex[1,] + 0.5*(cur_simplex[3,] - cur_simplex[1,])
-      print("shrink")
-    }
-  } else {
-    # contract inside
-    ci <- centroid + 0.5*(cur_simplex[3,] - centroid)
-    if(rss(ci) < rss_vals[3]){
-      cur_simplex <- rbind(cur_simplex[1:2,], ci)
-      print("contract inside")
-    } else {
-      # shrink
-      cur_simplex[2,] <- cur_simplex[1,] + 0.5*(cur_simplex[2,] - cur_simplex[1,])
-      cur_simplex[3,] <- cur_simplex[1,] + 0.5*(cur_simplex[3,] - cur_simplex[1,])
-      print("shrink")
-    }
-  }
-  
-  return(cur_simplex)
-}
-
-
-
 
 x1 <- c(0, 0.5, 1)
 x2 <- c(0, 1, 0)
@@ -277,6 +808,8 @@ cur_simplex <- cbind(x1, x2)
 
 plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5))
 ```
+
+Nelder-Mead approach: search for a minimum through transformations of the triangle
 
 
 ## Nelder-Mead in action
