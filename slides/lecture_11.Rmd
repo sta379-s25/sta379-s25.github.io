@@ -139,8 +139,13 @@ Downsides of the compass search algorithm given on the previous slide:
     
 **Question:** How could you modify the algorithm to address some of the issues here?
 
-## A modified compass search algorithm
+## Compass search modifications
 
+* Try the most recent direction of movement first (*dynamic ordering*)
+
+\vspace{1cm}
+
+* Try directions one at a time, and move as soon as an improvement on current position is found -- don't have to try *all* directions and find the *best* direction (*opportunistic*)
 
 ## Alternative: Nelder-Mead method
 
@@ -1180,6 +1185,10 @@ plot_triangle(cur_simplex, xlim=c(-0.5, 1.5), ylim = c(-0.5, 1.5), quiet=T)
 * *Expansion* allows us to increase the "step size" if the new direction is particularly promising
 * *Contraction* and *shrinking* allows us to decrease the "step size" if we are moving too far
 
+## Your turn
 
+Try out the Nelder-Mead transformations for minimizing a function on an interactive example (link also on course website):
+
+[https://alexdowad.github.io/visualizing-nelder-mead/](https://alexdowad.github.io/visualizing-nelder-mead/)
 
 
