@@ -1,0 +1,55 @@
+---
+title: "Practice Questions: Fitting regression models"
+format: html
+---
+
+## Fitting linear regression models
+
+We demonstrated in class that the least-squares estimates $\widehat{\beta}$ for the coefficients of a linear regression model are given by
+
+$$\widehat{\beta} = ({\bf X}_D^T {\bf X}_D)^{-1} {\bf X}_D^T {\bf y}$$
+
+where ${\bf y}$ is the vector of observed responses, and ${\bf X}_D$ is the design matrix. The first column of ${\bf X}_D$ is a column of all 1s, and each of the subsequent columns corresponds to the values of one of the explanatory variables in our model.
+
+### Example
+
+The `FirstYearGPA` dataset from the `Stat2Data` package contains information on the first-year college GPA of 219 college students, with additional information on their high school GPA, SAT scores, and demographics. The variables include:
+
+* `GPA`: First-year college GPA on a 0.0 to 4.0 scale
+* `HSGPA`: High school GPA on a 0.0 to 4.0 scale
+* `SATM`: Math SAT score
+
+We can load the data in R with
+
+```{r, eval=F}
+library(Stat2Data)
+data("FirstYearGPA")
+```
+
+### Question
+
+Suppose we want to predict first-year college GPA from high school GPA and math SAT score. The design matrix ${\bf X}_D$ will be
+
+$${\bf X}_D = \begin{bmatrix} 1 & \text{HSGPA}_1 & \text{SATM}_1 \\ 1 & \text{HSGPA}_2 & \text{SATM}_2 \\ \vdots & \vdots & \vdots \\ 1 & \text{HSGPA}_{219} & \text{SATM}_{219} \end{bmatrix}$$
+
+
+1. Calculate the fitted regression coefficients $\widehat{\beta}$ using the expression $({\bf X}_D^T {\bf X}_D)^{-1} {\bf X}_D^T {\bf y}$. Verify that your estimates agree with the results of the `lm` function in R.
+
+
+## Fitting logistic regression models
+
+In a linear regression model, we can get a closed-form equation for the estimates $\widehat{\beta}$, which come from minimizing the residual sum of squares. Logistic regression, however, minimizes a different criterion.
+
+Suppose we have a single explanatory variable $X_i$, and a binary response variable $Y_i \in \{0, 1\}$. Let $p_i = P(Y_i = 1)$. The logistic regression model is
+
+$$\log \left(\frac{p_i}{1 - p_i} \right) = \beta_0 + \beta_1 X_i$$
+
+For this model, the estimates $\widehat{\beta}_0$ and $\widehat{\beta}_1$ are found by minimizing the following function:
+
+$$f(\beta_0, \beta_1) = - \sum \limits_{i=1}^n \left \lbrace Y_i(\beta_0 + \beta_1 X_i) - \log(1 + e^{\beta_0 + \beta_1 X_i}) \right\rbrace$$
+
+### Questions
+
+1. Calculate the partial derivaties $\frac{\partial f}{\partial \beta_0}$ and $\frac{\partial f}{\partial \beta_1}$ for the logistic regression model.
+2. Can you solve the system $\nabla f = 0$ in closed form?
+

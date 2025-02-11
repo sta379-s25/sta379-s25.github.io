@@ -1,0 +1,35 @@
+---
+title: "Fitting regression models practice questions: solutions"
+format: html
+---
+
+## Linear regression
+
+1. 
+
+```{r}
+library(Stat2Data)
+data("FirstYearGPA")
+
+lm(GPA ~ HSGPA + SATM, data = FirstYearGPA) |> coef()
+```
+
+```{r}
+y <- FirstYearGPA$GPA
+XD <- cbind(1, FirstYearGPA$HSGPA, FirstYearGPA$SATM)
+solve(t(XD) %*% XD) %*% t(XD) %*% y
+```
+
+## Logistic regression
+
+1. 
+
+$$f(\beta_0, \beta_1) = - \sum \limits_{i=1}^n \left \lbrace Y_i(\beta_0 + \beta_1 X_i) - \log(1 + e^{\beta_0 + \beta_1 X_i}) \right\rbrace$$
+
+$$\frac{\partial f}{\partial \beta_0} = -\sum \limits_{i=1}^n \left\lbrace Y_i - \frac{e^{\beta_0 + \beta_1 X_i}}{1 + e^{\beta_0 + \beta_1 X_i}} \right\rbrace$$
+
+$$\frac{\partial f}{\partial \beta_1} = -\sum \limits_{i=1}^n \left\lbrace Y_i X_i - \frac{e^{\beta_0 + \beta_1 X_i}}{1 + e^{\beta_0 + \beta_1 X_i}} X_i \right\rbrace$$
+
+2. The system cannot be solved in closed form
+
+

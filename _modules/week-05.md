@@ -13,6 +13,7 @@ February 10
 
 February 12
 : Fitting regression models
+  : [slides (pdf)](https://sta379-s25.github.io/slides/lecture_12.pdf), [practice questions](https://sta379-s25.github.io/practice_questions/pq_12.html), [practice question solutions](https://sta379-s25.github.io/practice_questions/pq_12_solutions.html)
 
 February 14
 : Fitting regression models
