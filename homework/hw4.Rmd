@@ -127,15 +127,15 @@ The modified algorithm is then:
 
 For example, suppose that $f$ is a function of 2 parameters (i.e., $d = 2$). Then, my initial search directions are
 
-$${\bf D}^{(0)} = \{ {\bf e}_1, {\bf e}_2, -{\bf e}_1, -{\bf e}_2 \}$$
+$${\bf D}^{(0)} = \{ \textbf{e}_1, \textbf{e}_2, -\textbf{e}_1, -\textbf{e}_2 \}$$
 
 Suppose on the first iteration, ${\bf e}_1$ does not improve $f$, but ${\bf e}_2$ does. Then, the updated ordering of the directions should be
 
-$${\bf D}^{(1)} = \{{\bf e}_2, {\bf e}_1, -{\bf e}_1, -{\bf e}_2\}$$
+$${\bf D}^{(1)} = \{ {\bf e}_2, {\bf e}_1, -{\bf e}_1, -{\bf e}_2 \}$$
 
 And now suppose on the second iteration, ${\bf e}_2$ and ${\bf e}_1$ do not improve $f$, but $-{\bf e}_1$ does. The updated ordering should then be
 
-$${\bf D}^{(2)} = \{-{\bf e}_1, {\bf e}_2, {\bf e}_1, -{\bf e}_2\}$$
+$${\bf D}^{(2)} = \{ -{\bf e}_1, {\bf e}_2, {\bf e}_1, -{\bf e}_2 \}$$
 
 
 ### Implementation
