@@ -1,0 +1,315 @@
+---
+title: "Homework 4"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+## Compass search
+
+In class, we saw compass search in two dimensions -- for example, trying to fit a simple linear regression model and estimate the coefficients $\beta_0$ and $\beta_1$. The algorithm can be generalized to arbitrary many dimensions (e.g., for fitting a model with multiple explanatory variables).
+
+### Compass search algorithm
+
+Let ${\bf x} = (x_1,...,x_d)$ be a $d$-dimensional vector, and suppose we wish to minimize $f({\bf x})$, a real-valued function of the vector ${\bf x}$.
+
+Let ${\bf e}_1,...,{\bf e}_d$ be the *standard basis vectors*:
+
+$${\bf e}_1 = (1, 0, 0, ..., 0), \ {\bf e}_2 = (0, 1, 0, ..., 0), ..., \ {\bf e}_d = (0, 0, ..., 0, 1)$$
+
+That is, each ${\bf e}_i$ is a $d$-dimensional vector with a 1 in the $i$th entry and 0s everywhere else.
+
+Compass search works like this:
+
+1. Specify an initial estimate ${\bf x}^{(0)}$ and an initial step size $\Delta_0$ 
+2. For $i = 1,...,d$, 
+    * compute the points ${\bf x}_{i, 1} = {\bf x}^{(0)} + \Delta_0 {\bf e}_i$ and ${\bf x}_{i, 2} = {\bf x}^{(0)} - \Delta_0 {\bf e}_i$
+    * calculate $f({\bf x}_{i, 1})$ and $f({\bf x}_{i, 2})$
+3. Let ${\bf x}_{\text{new}}$ be the new point among the ${\bf x}_{i,j}$ with the smallest value of $f({\bf x}_{i, j})$
+4. Update:
+    * If $f({\bf x}_{\text{new}}) < f({\bf x}^{(0)})$, then ${\bf x}^{(1)} = {\bf x}_{\text{new}}$ and $\Delta_1 = \Delta_0$
+    * Otherwise ${\bf x}^{(1)} = {\bf x}^{(0)}$ and $\Delta_1 = \alpha\Delta_0$, where $\alpha < 1$ shrinks the step size
+5. Repeat from step 2 until the step size $\Delta < \varepsilon$ for some specified small number $\varepsilon$, or until a maximum number of iterations has been reached
+
+A common value of $\alpha$ here is $\alpha = 0.5$ (i.e., divide the step size by 2). The value of $\varepsilon$ should be something small, like $\varepsilon = 1 \times 10^{-6}$
+
+### Implementation
+
+Compass search is really a big iterative loop. And loops are often slow in R. So for this assignment, you will implement compass search in C++.
+
+However, most of our work is in R, so we will likely be in a scenario in which we have data and a function in R that we would like to optimize, but we want the optimization to happen in C++. This means we need to be able to write a function in R and pass it to a C++ function as an argument.
+
+Here is an example of calling an R function from C++:
+
+```{r}
+# a simple R function that we define
+example_f <- function(x){
+  return(sum(x))
+}
+
+# C++ function that calls the R function
+Rcpp::cppFunction('double test_eval(Function f, arma::vec x){
+  double res = Rcpp::as<double>(f(x));
+  return res;
+}', depends = "RcppArmadillo")
+
+# test_eval function now has c++ source code, but takes an R function as an argument
+test_eval(example_f, 1:3)
+```
+
+**Note:**
+
+* We pass the R function using the `Function` object type from `Rcpp`
+* We have to convert the R function output into a double in C++ (`Rcpp::as<double>(f(x))`)
+
+
+
+
+:::{.question}
+#### Question 1 (.R file)
+
+Write a C++ function called `compass_searchC` that implements the basic compass search algorithm described above. Your function should satisfy the following requirements:
+
+Inputs:
+
+* `f`: a `Function` (from R) that we want to optimize
+* `x`: an `arma::vec`, the initial point ${\bf x}^{(0)}$
+* `step_size`: a `double`, the initial step size $\Delta_0$. Default: `step_size = 1`
+* `step_change`: a `double`, the value $\alpha$ which we multiply to shrink the step size. Default: `step_change = 0.5`
+* `eps`: a `double`, the termination criterion $\varepsilon$ for compass search algorithm. Default: $1 \times 10^{-6}$
+* `max_iter`: an `int`, the maximum number of iterations allowed. Default: 1000
+
+Output: a `List`, containing the following named elements:
+
+* `x`: the final estimate of the point ${\bf x}$ which minimizes $f$
+* `iterations`: an integer, the number of iterations taken by the compass search algorithm
+
+Additional requirements: 
+
+* You may not use any existing compass search functions to write your code
+
+*Hint*: You can create a matrix of $d$-dimensional standard basis vectors (that is, the $d$-dimensional identity matrix) with
+
+`arma::mat basis(d, d, arma::fill::eye);`
+
+**Test cases:** See the unit tests in `hw4_tests.R`
+
+:::
+
+
+### Modified compass search algorithm
+
+The compass search algorithm described above requires $2d$ function evaluations at every step. When the dimensionality of our problem is large, that can be a lot of evaluations!
+
+There are many ways we could consider modifying this compass search procedure. One option is to be a bit more efficient (hopefully) in the order in which we evaluate new points. Consider the following two adjustments:
+
+* Instead of looking over all $2d$ possible new points ${\bf x}_{i,j}$ and choosing the point among them which minimizes $f$, we could move as soon as we find a point which decreases $f$
+* Rather than looking over the $2d$ possible new points in arbitrary order, we can keep track of the direction of most recent movement, and search there first. If we need to move a lot in one direction, reordering the directions will be more efficient
+
+The modified algorithm is then:
+
+1. Specify an initial estimate ${\bf x}^{(0)}$ and an initial step size $\Delta_0$. Let ${\bf D} = \{ {\bf e}_1, {\bf e}_2,...,{\bf e}_d, -{\bf e}_1,...,-{\bf e}_d \}$ denote our initial ordering of the $2d$ test point directions
+2. For each direction ${\bf v}$ in ${\bf D}$:
+    * ${\bf x}_{\bf v} = {\bf x}^{(0)} + \Delta_0 {\bf v}$
+    * calculate $f({\bf x}_{\bf v})$ 
+    * If $f({\bf x}_{\bf v}) < f({\bf x}^{(0)})$: 
+        * stop trying directions
+        * ${\bf x}^{(1)} = {\bf x}_{\bf v}$
+        * $\Delta_1 = \Delta_0$
+        * Move direction ${\bf v}$ to the front of ${\bf D}$
+3. If none of the test points ${\bf x}_{\text{new}}$ were better than ${\bf x}^{(0)}$, set ${\bf x}^{(1)} = {\bf x}^{(0)}$ and $\Delta_1 = \alpha\Delta_0$, where $\alpha < 1$ shrinks the step size
+4. Repeat from step 2 until the step size $\Delta < \varepsilon$ for some specified small number $\varepsilon$, or until a maximum number of iterations has been reached
+
+
+### Reordering the direction
+
+For example, suppose that $f$ is a function of 2 parameters (i.e., $d = 2$). Then, my initial search directions are
+
+$${\bf D}^{(0)} = \{{\bf e}_1, {\bf e}_2, -{\bf e}_1, -{\bf e}_2\}$$
+
+Suppose on the first iteration, ${\bf e}_1$ does not improve $f$, but ${\bf e}_2$ does. Then, the updated ordering of the directions should be
+
+$${\bf D}^{(1)} = \{{\bf e}_2, {\bf e}_1, -{\bf e}_1, -{\bf e}_2\}$$
+
+And now suppose on the second iteration, ${\bf e}_2$ and ${\bf e}_1$ do not improve $f$, but $-{\bf e}_1$ does. The updated ordering should then be
+
+$${\bf D}^{(2)} = \{-{\bf e}_1, {\bf e}_2, {\bf e}_1, -{\bf e}_2\}$$
+
+
+### Implementation
+
+To implement this modified compass search algorithm, you can adapt your code from question 1. An important tweak is that we now need to keep track of the order in which we consider the different search directions, and update the order as we go.
+
+One nice way of doing this could be to make a vector of indices for the $2d$ different search directions, and modify the order of that vector as we go. For this reordering, Armadillo vectors might not be the right choice of object for these indices. Rather, I suggest you use a `std::vector` object. This is a vector from the standard template library (STL) in C++, which provides a lot of useful data structures and functions for implementing common general-purpose algorithms. In particular, `std::rotate` allows you to move around the positions of vector elements.
+
+Here is example C++ code creating the vector of indices $0,...,2d-1$ (remember C++ starts at 0):
+
+```{Rcpp, eval = F}
+std::vector<int> idx(2*d);
+std::iota(idx.begin(), idx.end(), 0);
+```
+
+And here is an example of shifting the element at index $i$ to the front of the vector:
+
+```{Rcpp, eval=F}
+std::rotate(idx.begin(),idx.begin()+i, idx.begin()+i+1);
+```
+
+**Important:** `std::iota` and `std::rotate` modify the vector `idx` directly; you don't have to reassign the results to `idx`.
+
+
+:::{.question}
+#### Question 2 (.R file)
+
+Write a C++ function called `mod_compass_searchC` that implements the modified compass search algorithm described above. Your function should satisfy the following requirements:
+
+Inputs:
+
+* `f`: a `Function` (from R) that we want to optimize
+* `x`: an `arma::vec`, the initial point ${\bf x}^{(0)}$
+* `step_size`: a `double`, the initial step size $\Delta_0$. Default: `step_size = 1`
+* `step_change`: a `double`, the value $\alpha$ which we multiply to shrink the step size. Default: `step_change = 0.5`
+* `eps`: a `double`, the termination criterion $\varepsilon$ for compass search algorithm. Default: $1 \times 10^{-6}$
+* `max_iter`: an `int`, the maximum number of iterations allowed. Default: 1000
+
+Output: a `List`, containing the following named elements:
+
+* `x`: the final estimate of the point ${\bf x}$ which minimizes $f$
+* `iterations`: an integer, the number of iterations taken by the compass search algorithm
+
+Additional requirements: 
+
+* You may not use anyone else's compass search functions to write your code
+* At each iteration, stop searching once you have found a direction of improvement
+* At each iteration, reorder the vector to put the new direction of improvement first
+
+**Test cases:** See the unit tests in `hw4_tests.R`
+
+:::
+
+
+### Benefits of the modified algorithm
+
+In the practice questions from February 7, you used compass search to fit a logistic regression model to medical school admissions data. 
+
+Let $p_i = P(\text{Acceptance}_i = 1)$ be the probability of acceptance for the $i$th individual in the data. Then, the logistic regression model is
+
+$$\log \left(\frac{p_i}{1 - p_i} \right) = \beta_0 + \beta_1 \text{GPA}_i$$
+The function we are trying to minimize is
+
+$$f(\beta_0, \beta_1) = - \sum \limits_{i=1}^n \left \lbrace \text{Acceptance}_i(\beta_0 + \beta_1 \text{GPA}_i) - \log(1 + e^{\beta_0 + \beta_1 \text{GPA}_i}) \right\rbrace$$
+
+When we started at $(0, 0)$, with an initial step size of 1, compass search took over 11000 iterations to finish. If we plot the guesses $(\beta_0^{(k)}, \beta_1^{(k)})$ over time, we can see that compass search moves in a nice diagonal line from (0, 0) up to about (-19, 5.5):
+
+```{r comp, include=F, cache=T}
+library(Stat2Data)
+data("MedGPA")
+
+compass_search <- function(f, x, step_size = 1, trace=F){
+  
+  step_size <- 1
+  cur_point <- x
+  d <- length(x)
+  compass_grid <- rbind(rep(0, d),
+                        diag(d),
+                        -1*diag(d))
+  
+  iter_count <- 0
+  
+  if(trace){
+    track_pts <- c(cur_point)
+  }
+  
+  while(step_size > 1e-6){
+    test_points <- sweep(step_size*compass_grid, 2, cur_point, "+")
+    f_vals <- apply(test_points, 1, f)
+    
+    idx <- which.min(f_vals)
+    if(idx == 1){
+      step_size <- step_size* 0.5
+    } else {
+      cur_point <- test_points[idx,]
+    }
+    
+    iter_count <- iter_count + 1
+    if(trace){
+      track_pts <- rbind(track_pts, cur_point)
+    }
+    
+  }
+  if(trace){
+    list("x"=cur_point, "iterations"=iter_count, "track_pts" = track_pts)
+  } else {
+    list("x"=cur_point, "iterations"=iter_count)
+  }
+  
+}
+
+logistic_loss <- function(beta){
+  odds <- exp(beta[1] + beta[2]*MedGPA$GPA)
+  p <- odds/(1 + odds)
+  -1*sum(dbinom(MedGPA$Acceptance, 1, p, log=T))
+}
+
+res <- compass_search(logistic_loss, c(0, 0), trace=T)
+```
+
+```{r, echo=F}
+plot(res$track_pts[,1], res$track_pts[,2], type="l",
+     xlab = "Beta0 current guess", ylab = "Beta1 current guess",
+     main = "Compass search path")
+```
+
+This means that compass search is really only moving in two directions here -- up and left. If we reorder the directions in the modified search algorithm, we should only need to look in two directions at most (we can ignore the "down" and "right" directions), which should speed up the search by something like a factor of 2.
+
+Here is the code from February 7 to load the med school acceptance data and fit the logistic regression model in R:
+
+```{r, message=F, warning=F}
+library(Stat2Data)
+data("MedGPA")
+
+glm(Acceptance ~ GPA, family = binomial, data = MedGPA)
+```
+
+And here is the function $f(\beta_0, \beta_1)$ to minimize:
+
+```{r}
+logistic_loss <- function(beta){
+  odds <- exp(beta[1] + beta[2]*MedGPA$GPA)
+  p <- odds/(1 + odds)
+  -1*sum(dbinom(MedGPA$Acceptance, 1, p, log=T))
+}
+```
+
+
+:::{.question}
+#### Question 3 (.html file)
+
+Use compass search to fit the logistic regression model, starting from $(0, 0)$. Try both of your implementations. Do the end results agree? How many steps were required?
+
+:::
+
+:::{.question}
+#### Question 4 (.html file)
+
+Use the `bench::mark` function to compare the speed of your two compass search implementations on the logistic regression model for the medical school acceptance data. How does the speed compare?
+
+:::
+
+:::{.question}
+#### Question 5 (.html file)
+
+Now let's consider more explanatory variables: 
+
+$$\log \left(\frac{p_i}{1 - p_i} \right) = \beta_0 + \beta_1 \text{GPA}_i + \beta_2 \text{MCAT}_i$$
+
+Use the `bench::mark` function to compare the speed of your two compass search implementations on this logistic regression model, beginning at the point $(0, 0, 0)$. How does the speed compare?
+
+**Note:** You will need to modify the `logistic_loss` function!
+
+:::
+
+
+

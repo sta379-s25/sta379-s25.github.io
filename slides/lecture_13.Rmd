@@ -1,0 +1,668 @@
+---
+title: "Lecture 13: Gradient descent"
+author: "Ciaran Evans"
+output: beamer_presentation
+editor_options: 
+  chunk_output_type: console
+---
+
+## Recap: optimization
+
+Possibilities so far
+
+* Derivatives are hard / expensive to find (or we don't want to calculate them)
+    * Derivative-free optimization!
+* Derivatives can be calculated and lead to a closed-form solution
+    * Example: the usual linear regression model
+
+
+Another possibility
+
+* Derivatives can be calculated, but there is no closed-form solution to the system
+    * Example: logistic regression
+    
+**Today:** Begin iterative procedures using derivative information
+
+
+## When is there no closed form?
+
+Answer: almost always! A few examples:
+
+* **Nonlinear least squares:** Minimize $L({\bf y}, \beta) = \sum \limits_{i=1}^n (Y_i - m(X_i, \beta))^2$ for some nonlinear function $m$
+
+* **Logistic regression:** Minimize $L({\bf y}, \beta) = - \sum \limits_{i=1}^n \left \lbrace Y_i(\beta_0 + \beta_1 X_i) - \log(1 + e^{\beta_0 + \beta_1 X_i}) \right\rbrace$
+
+* **Robust regression:** Minimize $L({\bf y}, \beta) = \sum \limits_{i=1}^n \rho(Y_i - \beta_0 - \beta_1 X_i)$ where 
+
+$$\rho(Y_i - \beta_0 - \beta_1 X_i) = \begin{cases} \frac{1}{2}(Y_i - \beta_0 - \beta_1 X_i)^2 & |Y_i - \beta_0 - \beta_1 X_i| \leq \gamma \\ \gamma |Y_i - \beta_0 - \beta_1 X_i| - \frac{1}{2} \gamma^2 & \text{else} \end{cases}$$
+
+
+## A univariate example
+
+$$f(x) = \frac{x^4}{4} - \sin(x) + 7$$
+
+```{r, echo=F, fig.align='center', fig.width=3, fig.height=3}
+fx <- function(x){
+  x^4/4 - sin(x) + 7
+}
+gridpts <- seq(-3, 3, 0.01)
+plot(gridpts, fx(gridpts), type="l",
+     xlab = "x", ylab = "f(x)", cex.lab=0.75, cex.axis=0.75)
+```
+
+Want to minimize $f$. Derivative:
+
+\vspace{3cm}
+
+## Bisection method
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r, echo=F, fig.align='center', fig.width=2.8, fig.height=3}
+fx <- function(x){
+  x^4/4 - sin(x) + 7
+}
+gridpts <- seq(-3, 3, 0.01)
+plot(gridpts, fx(gridpts), type="l",
+     xlab = "x", ylab = "f(x)", cex.lab=0.75, cex.axis=0.75)
+```
+:::
+
+::: {.column width="50%"}
+```{r, echo=F, fig.align='center', fig.width=2.8, fig.height=3}
+fp <- function(x){
+  x^3 - cos(x)
+}
+gridpts <- seq(-3, 3, 0.01)
+plot(gridpts, fp(gridpts), type="l",
+     xlab = "x", ylab = "f'(x)", cex.lab=0.75, cex.axis=0.75)
+```
+:::
+
+::::
+
+**Idea:** look for sign changes in the derivative
+
+## Bisection
+
+Start with initial interval that contains the sign change in the derivative:
+
+\bigskip
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r, echo=F, fig.align='left', fig.width=2.8, fig.height=3}
+fx <- function(x){
+  x^4/4 - sin(x) + 7
+}
+gridpts <- seq(-3, 3, 0.01)
+plot(gridpts, fx(gridpts), type="l",
+     xlab = "x", ylab = "f(x)", cex.lab=0.75, cex.axis=0.5)
+abline(v = 2, lty=2)
+abline(v = -2, lty=2)
+```
+:::
+
+::: {.column width="50%"}
+Initial interval: $[a_0, b_0]$
+
+* $a_0 = -2$, $b_0 = 2$
+* $f'(a_0) < 0$, $f'(b_0) > 0$
+:::
+
+::::
+
+
+## Bisection
+
+Calculate the midpoint of the interval:
+
+\bigskip
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r, echo=F, fig.align='left', fig.width=2.8, fig.height=3}
+fx <- function(x){
+  x^4/4 - sin(x) + 7
+}
+gridpts <- seq(-3, 3, 0.01)
+plot(gridpts, fx(gridpts), type="l",
+     xlab = "x", ylab = "f(x)", cex.lab=0.75, cex.axis=0.5)
+abline(v = 2, lty=2)
+abline(v = -2, lty=2)
+abline(v = 0, lty=2)
+```
+:::
+
+::: {.column width="50%"}
+Initial interval: $[a_0, b_0]$
+
+* $a_0 = -2$, $b_0 = 2$
+* $f'(a_0) < 0$, $f'(b_0) > 0$
+
+\bigskip
+
+Midpoint: $x_0 = \dfrac{a_0 + b_0}{2}$
+
+* $x_0 = 0$
+:::
+
+::::
+
+\bigskip
+
+**Question:** Where should we look next?
+
+## Bisection
+
+If $\text{sign}(f'(x_0)) = \text{sign}(f'(a_0))$, update the interval to $[a_1, b_1] = [x_0, b_0]$. Otherwise, update the interval to $[a_1, b_1] = [a_0, x_0]$
+
+\bigskip
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r, echo=F, fig.align='left', fig.width=2.8, fig.height=3}
+fx <- function(x){
+  x^4/4 - sin(x) + 7
+}
+gridpts <- seq(-3, 3, 0.01)
+plot(gridpts, fx(gridpts), type="l",
+     xlab = "x", ylab = "f(x)", cex.lab=0.75, cex.axis=0.5)
+abline(v = 2, lty=2)
+abline(v = -2, lty=2)
+abline(v = 0, lty=2)
+```
+:::
+
+::: {.column width="50%"}
+Initial interval: $[a_0, b_0]$
+
+* $a_0 = -2$, $b_0 = 2$
+* $f'(a_0) < 0$, $f'(b_0) > 0$
+
+\bigskip
+
+Midpoint: $x_0 = \dfrac{a_0 + b_0}{2}$
+
+* $x_0 = 0$
+* $f'(x_0) < 0$
+
+\bigskip
+
+New interval: $[a_1, b_1]$
+
+* $a_1 = 0$
+* $b_1 = 2$
+:::
+
+::::
+
+
+## Bisection
+
+Now iterate:
+
+\bigskip
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r, echo=F, fig.align='left', fig.width=2.8, fig.height=3}
+fx <- function(x){
+  x^4/4 - sin(x) + 7
+}
+gridpts <- seq(-1, 3, 0.01)
+plot(gridpts, fx(gridpts), type="l",
+     xlab = "x", ylab = "f(x)", cex.lab=0.75, cex.axis=0.5)
+abline(v = 2, lty=2)
+abline(v = 0, lty=2)
+abline(v = 1, lty=2)
+```
+:::
+
+::: {.column width="50%"}
+* $[a_0, b_0] = [-2, 2]$
+
+\bigskip
+
+* $[a_1, b_1] = [0, -2]$
+
+\bigskip
+
+* $[a_2, b_2] = [0, 1]$
+:::
+
+::::
+
+
+## Bisection
+
+Now iterate:
+
+\bigskip
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r, echo=F, fig.align='left', fig.width=2.8, fig.height=3}
+fx <- function(x){
+  x^4/4 - sin(x) + 7
+}
+gridpts <- seq(0, 1.5, 0.01)
+plot(gridpts, fx(gridpts), type="l",
+     xlab = "x", ylab = "f(x)", cex.lab=0.75, cex.axis=0.5)
+abline(v = 0, lty=2)
+abline(v = 0.5, lty=2)
+abline(v = 1, lty=2)
+```
+:::
+
+::: {.column width="50%"}
+* $[a_0, b_0] = [-2, 2]$
+
+\bigskip
+
+* $[a_1, b_1] = [0, -2]$
+
+\bigskip
+
+* $[a_2, b_2] = [0, 1]$
+
+\bigskip
+
+* $[a_3, b_3] = [0.5, 1]$
+:::
+
+::::
+
+
+## Bisection
+
+Now iterate:
+
+\bigskip
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r, echo=F, fig.align='left', fig.width=2.8, fig.height=3}
+fx <- function(x){
+  x^4/4 - sin(x) + 7
+}
+gridpts <- seq(0.5, 1, 0.005)
+plot(gridpts, fx(gridpts), type="l",
+     xlab = "x", ylab = "f(x)", cex.lab=0.75, cex.axis=0.5)
+abline(v = 0.5, lty=2)
+abline(v = 0.75, lty=2)
+abline(v = 1, lty=2)
+```
+:::
+
+::: {.column width="50%"}
+* $[a_0, b_0] = [-2, 2]$
+
+\bigskip
+
+* $[a_1, b_1] = [0, -2]$
+
+\bigskip
+
+* $[a_2, b_2] = [0, 1]$
+
+\bigskip
+
+* $[a_3, b_3] = [0.5, 1]$
+
+\bigskip
+
+* $[a_4, b_4] = [0.75, 1]$
+:::
+
+::::
+
+
+## Bisection
+
+Now iterate:
+
+\bigskip
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```{r, echo=F, fig.align='left', fig.width=2.8, fig.height=3}
+fx <- function(x){
+  x^4/4 - sin(x) + 7
+}
+gridpts <- seq(0.8632812, 0.8671875, 0.00001)
+plot(gridpts, fx(gridpts), type="l",
+     xlab = "x", ylab = "f(x)", cex.lab=0.75, cex.axis=0.5)
+abline(v = 0.8632812, lty=2)
+abline(v = 0.8671875, lty=2)
+```
+:::
+
+::: {.column width="50%"}
+* $[a_0, b_0] = [-2, 2]$
+
+\bigskip
+
+* $[a_1, b_1] = [0, -2]$
+
+\bigskip
+
+* $[a_2, b_2] = [0, 1]$
+
+\bigskip
+
+* $[a_3, b_3] = [0.5, 1]$
+
+\bigskip
+
+* $[a_4, b_4] = [0.75, 1]$
+
+\bigskip
+
+$\cdots$
+
+* $[a_{10}, b_{10}] = [0.8632812, 0.8671875]$
+:::
+
+::::
+
+```{r, include=F, eval=F}
+a = -2
+b = 2
+for(i in 1:10){
+  x <- (a+b)/2
+  if(fp(x)*fp(a) < 0){
+    b = x
+  } else {
+    a = x
+  }
+}
+```
+
+## Bisection method
+
+\vspace{-2cm}
+
+Advantages:
+
+\vspace{2cm}
+
+Disadvantages:
+
+
+## Another approach
+
+Suppose we are at $x = -2$:
+
+```{r, echo=F, fig.align='left', fig.width=4, fig.height=3.5}
+fx <- function(x){
+  x^4/4 - sin(x) + 7
+}
+gridpts <- seq(-3, 3, 0.01)
+plot(gridpts, fx(gridpts), type="l",
+     xlab = "x", ylab = "f(x)", cex.lab=0.75, cex.axis=0.5)
+abline(v = -2, lty=2)
+```
+
+**Question:** In which direction should we move to try and find the minimum?
+
+## Gradient descent: move downhill
+
+```{r, echo=F, fig.align='left', fig.width=3.5, fig.height=3}
+fx <- function(x){
+  x^4/4 - sin(x) + 7
+}
+gridpts <- seq(-2.5, 1, 0.01)
+plot(gridpts, fx(gridpts), type="l",
+     xlab = "x", ylab = "f(x)", cex.lab=0.75, cex.axis=0.5)
+points(x = -2, y = fx(-2), pch=16)
+abline(v = -2, lty=2)
+abline(a = -3.2587, b = fp(-2), col="red", lty=2)
+```
+
+Initial guess: $x^{(0)} = -2$
+
+Gradient: $f'(x^{(0)}) = -7.584$
+
+Updated guess: $x^{(1)} = x^{(0)} - \alpha f'(x^{(0)})$
+
+## Gradient descent: move downhill
+
+
+```{r, echo=F, fig.align='left', fig.width=3.5, fig.height=3}
+fx <- function(x){
+  x^4/4 - sin(x) + 7
+}
+gridpts <- seq(-2.5, 1, 0.01)
+plot(gridpts, fx(gridpts), type="l",
+     xlab = "x", ylab = "f(x)", cex.lab=0.75, cex.axis=0.5)
+points(x = -2, y = fx(-2), pch=16)
+points(x = -0.4832, y = fx(-0.4832), pch=16, col="red")
+abline(v = -2, lty=2)
+abline(a = -3.2587, b = fp(-2), col="red", lty=2)
+```
+
+Example: $\alpha = 0.2$
+
+* $x^{(0)} = -2$
+* $x^{(1)} = x^{(0)} - \alpha f'(x^{(0)}) = -0.4832$
+
+**Question:** What should we do next?
+
+
+## Gradient descent: move downhill
+
+Iterate!
+
+```{r, echo=F, fig.align='left', fig.width=3.5, fig.height=3}
+fx <- function(x){
+  x^4/4 - sin(x) + 7
+}
+gridpts <- seq(-2.5, 1, 0.01)
+plot(gridpts, fx(gridpts), type="l",
+     xlab = "x", ylab = "f(x)", cex.lab=0.75, cex.axis=0.5)
+points(x = -2, y = fx(-2), pch=16)
+points(x = -0.4832, y = fx(-0.4832), pch=16)
+points(x = -0.2836, y = fx(-0.2836), pch=16, col="red")
+abline(v = -0.4832, lty=2)
+abline(a = fx(-0.4832) - fp(-0.4832)*-0.4832, 
+       b = fp(-0.4832), col="red", lty=2)
+```
+
+\vspace{-0.5cm}
+
+Example: $\alpha = 0.2$
+
+* $x^{(1)} = -0.4832$
+* $x^{(2)} = x^{(1)} - \alpha f'(x^{(1)}) = -0.2836$
+
+**Question:** Why did we move further on the first step than the second?
+
+
+## Gradient descent: move downhill
+
+Iterate!
+
+```{r, echo=F, fig.align='left', fig.width=3.5, fig.height=3}
+fx <- function(x){
+  x^4/4 - sin(x) + 7
+}
+gridpts <- seq(-2.5, 1, 0.01)
+plot(gridpts, fx(gridpts), type="l",
+     xlab = "x", ylab = "f(x)", cex.lab=0.75, cex.axis=0.5)
+points(x = -2, y = fx(-2), pch=16)
+points(x = -0.4832, y = fx(-0.4832), pch=16)
+points(x = -0.2836, y = fx(-0.2836), pch=16)
+points(x = -0.0870, y = fx(-0.0870), pch=16, col="red")
+abline(v = -0.2836, lty=2)
+abline(a = fx(-0.2836) - fp(-0.2836)*-0.2836, 
+       b = fp(-0.2836), col="red", lty=2)
+```
+
+Example: $\alpha = 0.2$
+
+* $x^{(2)} = -0.2836$
+* $x^{(3)} = x^{(2)} - \alpha f'(x^{(2)}) = -0.0870$
+
+
+## Gradient descent: move downhill
+
+After 10 iterations
+
+```{r, echo=F, fig.align='left', fig.width=4, fig.height=4}
+fx <- function(x){
+  x^4/4 - sin(x) + 7
+}
+
+x <- -2
+alpha <- 0.2
+xvals <- rep(NA, 10)
+for(i in 1:30){
+  x <- x - alpha * fp(x)
+  xvals[i] <- x
+}
+
+gridpts <- seq(-2.5, 1, 0.01)
+plot(gridpts, fx(gridpts), type="l",
+     xlab = "x", ylab = "f(x)", cex.lab=0.75, cex.axis=0.5)
+points(x = -2, y = fx(-2), pch=16)
+points(x = xvals, y = fx(xvals), pch=16)
+```
+
+
+## Gradient descent: the step size
+
+* Specify **step size** $\alpha > 0$
+
+\bigskip
+
+* Update: $x^{(k+1)} = x^{(k)} - \alpha f'(x^{(k)})$
+
+
+\bigskip
+
+**Questions:**
+
+* What would happen if $\alpha$ is too *big*?
+* What would happen if $\alpha$ is too *small*?
+
+
+## When the step size is too big
+
+The sequence diverges when $\alpha$ is too large. Using a step size of $\alpha = 0.6$ with the previous example:
+
+
+```{r, echo=F, fig.align='center', fig.width=4, fig.height=3.5}
+fx <- function(x){
+  x^4/4 - sin(x) + 7
+}
+
+x <- -2
+alpha <- 0.6
+xvals <- rep(NA, 2)
+for(i in 1:2){
+  x <- x - alpha * fp(x)
+  xvals[i] <- x
+}
+
+xvals <- c(-2, xvals)
+
+gridpts <- seq(-8, 3, 0.1)
+plot(gridpts, fx(gridpts), type="l",
+     xlab = "x", ylab = "f(x)", cex.lab=0.75, cex.axis=0.5)
+points(x = xvals, y = fx(xvals), pch=16)
+lines(x = xvals, y = fx(xvals), col="black", lty=2)
+```
+
+$x^{(3)} = -8, \ x^{(4)} = 288,...$
+
+
+## When the step size is too small
+
+When $\alpha$ is too small, the process takes a **long** time. Using a step size of $\alpha = 0.01$ in the previous example:
+
+```{r, echo=F, fig.align='center', fig.width=4, fig.height=3.5}
+fx <- function(x){
+  x^4/4 - sin(x) + 7
+}
+
+x <- -2
+alpha <- 0.01
+xvals <- rep(NA, 2)
+for(i in 1:100){
+  x <- x - alpha * fp(x)
+  xvals[i] <- x
+}
+
+xvals <- c(-2, xvals)
+
+gridpts <- seq(-2.5, 1, 0.1)
+plot(gridpts, fx(gridpts), type="l",
+     xlab = "x", ylab = "f(x)", cex.lab=0.75, cex.axis=0.5)
+points(x = xvals, y = fx(xvals), pch=16, cex=0.5)
+```
+
+$x^{(99)}= -0.2537, \ x^{(100)} = -0.2439, ...$
+
+
+## Choosing a step size
+
+* Choosing an appropriate step size is important to actually optimize the function
+
+\bigskip
+
+* **Next week:** discuss methods for selecting step size and modifications
+    * Line search
+    * Adaptive step size methods
+
+\bigskip
+
+* **Future:** Using second-derivative information 
+
+
+## Gradient descent in more dimensions
+
+* Points ${\bf x} = (x_1,...,x_d)^T \in \mathbb{R}^d$
+* $f({\bf x}) \in \mathbb{R}$
+* Gradient: 
+
+$$\nabla f({\bf x}) = \begin{pmatrix} \frac{\partial f}{\partial x_1} \\ \vdots \\ \frac{\partial f}{\partial x_d} \end{pmatrix} \in \mathbb{R}^d$$
+
+* $\alpha > 0$
+
+Same idea: 
+
+$${\bf x}^{(k+1)} = {\bf x}^{(k)} - \alpha \nabla f({\bf x}^{(k)})$$
+
+## Example
+
+* ${\bf x} = \begin{pmatrix} x_1 \\ x_2 \end{pmatrix}$
+* $f({\bf x}) = 5x_1^2 + 0.5x_2^2$
+
+$$\nabla f({\bf x}) = $$
+
+\vspace{4cm}
+
+## Example
+
+* ${\bf x} = \begin{pmatrix} x_1 \\ x_2 \end{pmatrix}$, $f({\bf x}) = 5x_1^2 + 0.5x_2^2$
+* $\nabla f({\bf x}) = \begin{pmatrix} 10x_1 \\ x_2 \end{pmatrix}$
+
+Suppose ${\bf x}^{(0)} = \begin{pmatrix} 1 \\ 20 \end{pmatrix}$ and $\alpha = 0.1$
+
+$$\nabla f({\bf x}^{(0)}) = $$
+
+\bigskip
+
+$${\bf x}^{(1)} = {\bf x}^{(0)} - \alpha \nabla f({\bf x}^{(0)})$$
+
+
+
