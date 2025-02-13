@@ -28,11 +28,11 @@ Another possibility
 
 Answer: almost always! A few examples:
 
-* **Nonlinear least squares:** Minimize $L({\bf y}, \beta) = \sum \limits_{i=1}^n (Y_i - m(X_i, \beta))^2$ for some nonlinear function $m$
+* **Nonlinear least squares:** Minimize $L(\beta) = \sum \limits_{i=1}^n (Y_i - m(X_i, \beta))^2$ for some nonlinear function $m$
 
-* **Logistic regression:** Minimize $L({\bf y}, \beta) = - \sum \limits_{i=1}^n \left \lbrace Y_i(\beta_0 + \beta_1 X_i) - \log(1 + e^{\beta_0 + \beta_1 X_i}) \right\rbrace$
+* **Logistic regression:** Minimize $L(\beta) = - \sum \limits_{i=1}^n \left \lbrace Y_i(\beta_0 + \beta_1 X_i) - \log(1 + e^{\beta_0 + \beta_1 X_i}) \right\rbrace$
 
-* **Robust regression:** Minimize $L({\bf y}, \beta) = \sum \limits_{i=1}^n \rho(Y_i - \beta_0 - \beta_1 X_i)$ where 
+* **Robust regression:** Minimize $L(\beta) = \sum \limits_{i=1}^n \rho(Y_i - \beta_0 - \beta_1 X_i)$ where 
 
 $$\rho(Y_i - \beta_0 - \beta_1 X_i) = \begin{cases} \frac{1}{2}(Y_i - \beta_0 - \beta_1 X_i)^2 & |Y_i - \beta_0 - \beta_1 X_i| \leq \gamma \\ \gamma |Y_i - \beta_0 - \beta_1 X_i| - \frac{1}{2} \gamma^2 & \text{else} \end{cases}$$
 
@@ -664,5 +664,12 @@ $$\nabla f({\bf x}^{(0)}) = $$
 
 $${\bf x}^{(1)} = {\bf x}^{(0)} - \alpha \nabla f({\bf x}^{(0)})$$
 
+## Homework 4
 
+[https://sta379-s25.github.io/homework/hw4.html](https://sta379-s25.github.io/homework/hw4.html)
+
+* Implementation of compass search and modifications, in C++
+* Weighted least squares
+* Gradient descent for robust regression
+* Note: there are many questions, but most of them are quite short
 
