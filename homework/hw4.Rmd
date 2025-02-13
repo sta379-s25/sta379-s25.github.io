@@ -127,7 +127,7 @@ The modified algorithm is then:
 
 For example, suppose that $f$ is a function of 2 parameters (i.e., $d = 2$). Then, my initial search directions are
 
-$${\bf D}^{(0)} = \{{\bf e}_1, {\bf e}_2, -{\bf e}_1, -{\bf e}_2\}$$
+$${\bf D}^{(0)} = \{ {\bf e}_1, {\bf e}_2, -{\bf e}_1, -{\bf e}_2 \}$$
 
 Suppose on the first iteration, ${\bf e}_1$ does not improve $f$, but ${\bf e}_2$ does. Then, the updated ordering of the directions should be
 
