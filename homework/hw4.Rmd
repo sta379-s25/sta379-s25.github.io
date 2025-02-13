@@ -7,17 +7,17 @@ output:
 link-citations: yes
 ---
 
-## Compass search
+# Compass search
 
-In class, we saw compass search in two dimensions -- for example, trying to fit a simple linear regression model and estimate the coefficients $\beta_0$ and $\beta_1$. The algorithm can be generalized to arbitrary many dimensions (e.g., for fitting a model with multiple explanatory variables).
+In class, we saw compass search in two dimensions -- for example, trying to fit a simple linear regression model and estimate the coefficients $\beta_0$ and $\beta_1$. The algorithm can be generalized to arbitrarily many dimensions (e.g., for fitting a model with multiple explanatory variables).
 
 ### Compass search algorithm
 
-Let ${\bf x} = (x_1,...,x_d)$ be a $d$-dimensional vector, and suppose we wish to minimize $f({\bf x})$, a real-valued function of the vector ${\bf x}$.
+Let ${\bf x} = (x_1,...,x_d)^T$ be a $d$-dimensional vector, and suppose we wish to minimize $f({\bf x})$, a real-valued function of the vector ${\bf x}$.
 
 Let ${\bf e}_1,...,{\bf e}_d$ be the *standard basis vectors*:
 
-$${\bf e}_1 = (1, 0, 0, ..., 0), \ {\bf e}_2 = (0, 1, 0, ..., 0), ..., \ {\bf e}_d = (0, 0, ..., 0, 1)$$
+$${\bf e}_1 = \begin{pmatrix} 1 \\ 0 \\ 0 \\ \vdots \\ 0 \end{pmatrix}, \ {\bf e}_2 = \begin{pmatrix} 0 \\ 1 \\ 0 \\ \vdots \\ 0 \end{pmatrix}, ..., \ {\bf e}_d = \begin{pmatrix} 0 \\ 0 \\ \vdots \\ 0 \\ 1 \end{pmatrix}$$
 
 That is, each ${\bf e}_i$ is a $d$-dimensional vector with a 1 in the $i$th entry and 0s everywhere else.
 
@@ -68,7 +68,7 @@ test_eval(example_f, 1:3)
 
 
 :::{.question}
-#### Question 1 (.R file)
+#### Question 1 (.cpp file)
 
 Write a C++ function called `compass_searchC` that implements the basic compass search algorithm described above. Your function should satisfy the following requirements:
 
@@ -119,7 +119,7 @@ The modified algorithm is then:
         * ${\bf x}^{(1)} = {\bf x}_{\bf v}$
         * $\Delta_1 = \Delta_0$
         * Move direction ${\bf v}$ to the front of ${\bf D}$
-3. If none of the test points ${\bf x}_{\text{new}}$ were better than ${\bf x}^{(0)}$, set ${\bf x}^{(1)} = {\bf x}^{(0)}$ and $\Delta_1 = \alpha\Delta_0$, where $\alpha < 1$ shrinks the step size
+3. If none of the test points ${\bf x}_{{\bf v}}$ were better than ${\bf x}^{(0)}$, set ${\bf x}^{(1)} = {\bf x}^{(0)}$ and $\Delta_1 = \alpha\Delta_0$, where $\alpha < 1$ shrinks the step size
 4. Repeat from step 2 until the step size $\Delta < \varepsilon$ for some specified small number $\varepsilon$, or until a maximum number of iterations has been reached
 
 
@@ -161,7 +161,7 @@ std::rotate(idx.begin(),idx.begin()+i, idx.begin()+i+1);
 
 
 :::{.question}
-#### Question 2 (.R file)
+#### Question 2 (.cpp file)
 
 Write a C++ function called `mod_compass_searchC` that implements the modified compass search algorithm described above. Your function should satisfy the following requirements:
 
@@ -310,6 +310,428 @@ Use the `bench::mark` function to compare the speed of your two compass search i
 **Note:** You will need to modify the `logistic_loss` function!
 
 :::
+
+
+# Weighted least squares
+
+One of the assumptions we commonly make in a standard linear regression model is *constant variance*. That is, the variance of the residuals is the same for all values of our explanatory variable(s). 
+
+Here is an example of data for which that assumption might not be satisfied. Each point represents a county in the US, and we are plotting the number of doctors (MDs) in that county vs. the number of hospitals in the county. We can see that the variability in the number of doctors increases with the number of hospitals.
+
+```{r, message=F, warning=F, echo=F}
+library(Stat2Data)
+library(tidyverse)
+data("CountyHealth")
+
+CountyHealth |>
+  ggplot(aes(x = Hospitals, y = MDs)) +
+  geom_point() +
+  theme_bw()
+```
+
+One way to address non-constant variance is to transform our response variable. However, transforming the response changes the interpretation of our model, which is often not what we want.
+
+Another option is **weighted least squares**.
+
+### Weighted least squares
+
+In the usual linear regression model with $p$ explanatory variables, we write
+
+$$Y_i = \beta_0 + \beta_1 X_{i,1} + \beta_2 X_{i,2} + \cdots + \beta_p X_{i,p} + \varepsilon_i$$
+
+In matrix form, this becomes
+
+$${\bf y} = \begin{bmatrix} Y_1 \\ Y_2 \\ \vdots \\ Y_n \end{bmatrix} = \begin{bmatrix} 1 & X_{1,1} & \cdots & X_{1,p} \\ 1 & X_{2,1} & \cdots & X_{2,p} \\ \vdots & \vdots & \cdots & \vdots \\ 1 & X_{n,1} & \cdots & X_{n,p} \end{bmatrix} \begin{bmatrix} \beta_0 \\ \beta_1 \\ \vdots \\ \beta_p \end{bmatrix} =  {\bf X}_D \beta$$
+
+Least-squares linear regression estimates the coefficients $\beta$ by minimizing
+
+$$L(\beta) = \sum \limits_{i=1}^n (Y_i - \beta_0 - \beta_1 X_{i,1} - \cdots - \beta_p X_{i,p})^2$$
+
+**Weighted least squares** estimates the coefficients $\beta$ by minimizing 
+
+$$L_W( \beta) = \sum \limits_{i=1}^n w_i(Y_i - \beta_0 - \beta_1 X_{i,1} - \cdots - \beta_p X_{i,p})^2$$
+
+where $w_i > 0$ is the *weight* that we place on the $i$th observation when fitting the model. If we are worried about non-constant variance, a common choice is $w_i = 1/Var(\varepsilon_i)$; this is called *inverse variance weighting*.
+
+### Solving for $\beta$
+
+:::{.question}
+#### Question 6 (written)
+
+Show that for the weighted least squares problem above,
+
+$$\nabla L_W(\beta)  = -2 {\bf X}_D^T {\bf W} ({\bf y} - {\bf X}_D \beta)$$
+
+where ${\bf W} = \text{diag}(w_1,...,w_n)$ is a diagonal matrix with the weights $w_i$ on the main diagonal. Show all work.
+
+:::
+
+:::{.question}
+#### Question 7 (written)
+
+Using your answer to question 6, show that the estimated coefficients for weighted least squares regression are given by
+
+$$\widehat{\beta} = ({\bf X}_D^T {\bf W} {\bf X}_D)^{-1} {\bf X}_D^T {\bf W} {\bf y}$$
+
+Show all work.
+
+:::
+
+
+
+
+:::{.question}
+#### Question 8 (.R file)
+
+Write an R function to compute $\widehat{\beta}$ for the weighted least squares method. Your function should satisfy the following requirements:
+
+Inputs:
+
+* `X`: the design matrix ${\bf X}_D$
+* `y`: the vector of responses ${\bf y}$
+* `w`: a vector of weights $w_1,...,w_n$ (which will be used to construct the matrix ${\bf W}$)
+
+Outputs: the vector of estimated coefficients $\widehat{\beta} = ({\bf X}_D^T {\bf W} {\bf X}_D)^{-1} {\bf X}_D^T {\bf W} {\bf y}$
+
+Error handling:
+
+* Throw an error if all weights are 0
+* Throw an error if any weights are negative
+
+Additional requirements: 
+
+* You may not use any existing linear model implementations (e.g., the `lm` function)
+
+**Test cases:** See the unit tests in `hw4_tests.R`
+
+:::
+
+
+### Why do we care?
+
+Why does it matter whether we use weighted least squares to account for non-constant variance? It turns out that, if there is non-constant variance, the variance of the weighted least squares estimate is smaller -- and in statistics, we like smaller variances!
+
+In this part of the assignment, we will demonstrate that with a simulation. The following code simulates 100 observations $(X_i, Y_i)$ from the model
+
+$$Y_i = \beta_0 + \beta_1 X_i + \varepsilon_i$$
+
+where $\beta_0 = 0, \ \beta_1 = 1, \ X_i \sim Uniform(0, 10)$, and $Var(\varepsilon_i) = X_i^2$ (non-constant variance!). We then calculate the estimated slope $\widehat{\beta}_1$ for the ordinary least squares fit and the weighted least squares fit.
+
+
+```{r}
+# sample x
+x <- runif(100, 0, 10)
+
+# create y
+y <- 0 + 1*x + rnorm(100, 0, sd=x)
+
+# get the slope estimate with ordinary least squares
+coef(lm(y ~ x))[2]
+
+# get the slope estimate with weighted least squares
+coef(lm(y ~ x, weights = 1/x^2))[2]
+```
+:::{.question}
+#### Question 9 (.html file)
+
+Using the code provided, repeat the simulation $1000$ times, calculating ordinary least squares and weighted least squares estimates of $\beta_1$ for each simulation repetition. Report the mean and variance of $\widehat{\beta}_1$ for each method. Which method gives better estimates of $\beta_1$ when the data have non-constant variance?
+
+:::
+
+
+
+# Robust regression
+
+In this section of the assignment, you will apply gradient descent to fit another type of regression model, called a *robust* regression model.
+
+
+### Motivation: the impact of outliers
+
+To motivate this model, we will examine a dataset on characteristics of 45 different US occupations in 1950. Each row represents an occupation, and the following variables are available:
+
+* `prestige`: the fraction of respondents in a social survey who rated the occupation as "good" or better in prestige
+* `income`: Percentage of occupational incumbents in the 1950 US Census who earned \$3,500 or more per year (about \$36,000 in 2017 US dollars)
+* `education`: Percentage of occupational incumbents in 1950 who were high school graduates
+
+Suppose we want to model prestige as a function of income and education. We could fit a linear regression model and examine the diagnostics. Here is the plot of Cook's distance (which, you will recall, is used to check for influential points that may be affecting the fit of the model):
+
+```{r, message=F, warning=F}
+library(car)
+
+ols_mod <- lm(prestige ~ income + education, data=Duncan)
+plot(ols_mod, which=4)
+```
+
+From this plot, we can see that two occupations -- minister and train conductor -- are potentially influential. (This is because both occupations have a relatively high prestige, but low income and higher education).
+
+What happens when we remove these two points? Here are the coefficients with the full data:
+
+```{r}
+coef(ols_mod)
+```
+
+And here are the coefficients without the two potential outliers:
+
+```{r}
+ols_mod_2 <- lm(prestige ~ income + education, data=Duncan[-c(6, 16),])
+coef(ols_mod_2)
+```
+
+This is a pretty noticeable change!
+
+
+### What to do about outliers?
+
+If we wish to use ordinary least-squares to fit our model, we could report the model (and any conclusions) with and without the influential points. Another option, however, is to use a different method to estimate the coefficients -- ideally one which is less susceptible to outliers.
+
+Why is least-squares linear regression susceptible to outliers? Because we are using the *squared* residuals, $(Y_i - \widehat{Y}_i)^2$. Influential points have big residuals, which get much bigger when we square them!
+
+A natural fix is then to use a *different* loss function to fit our model.
+
+### Huber loss
+
+The Huber loss function $\rho$ is given by
+
+$$\rho(y - \widehat{y}) = \begin{cases} \frac{1}{2} (y - \widehat{y})^2 & |y - \widehat{y}| \leq \gamma \\ \gamma |y - \widehat{y}| - \frac{1}{2}\gamma^2 & \text{else} \end{cases}$$
+
+That is, when the residual $y - \widehat{y}$ is small, we're comfortable using the usual squared error $(y - \widehat{y})^2$ from OLS. When the residual is large, however, we instead use the *absolute* error $|y - \widehat{y}|$, which places less weight on "big" residuals than the squared error.
+
+The parameter $\gamma$ tells us when to transition from squared errors to absolute errors. Here is a plot of the Huber loss function with $\gamma = 1$. At -1 and 1, the function transitions from quadratic to linear:
+
+```{r, echo=F, message=F, warning=F}
+huber <- function(u, gamma){
+  ifelse(abs(u) <= gamma, 0.5*u^2, gamma*abs(u) - 0.5*gamma^2)
+}
+
+x <- seq(-2, 2, 0.01)
+plot(x, huber(x, 1), type="l", ylab = "Huber loss", title = "Huber loss with gamma = 1")
+abline(v = c(-1, 1), lty=2)
+```
+
+### Robust regression
+
+The robust regression model estimates the coefficients $\beta$ by optimizing a robust loss like the Huber loss function, rather than the sum of squared residuals. For example, suppose we have the model
+
+$$Y_i = \beta_0 + \beta_1 X_{i,1} + \beta_2 X_{i,2} + \cdots + \beta_p X_{i,p} + \varepsilon_i$$
+
+Then, robust regression minimizes
+
+$$L(\beta) = \sum \limits_{i=1}^n \rho(Y_i - \beta_0 - \beta_1 X_{i,1} - \beta_2 X_{i,2} - \cdots - \beta_p X_{i,p})$$
+
+In R, we can fit this with the `rlm` function from the `MASS` package:
+
+```{r, message=F, warning=F}
+library(MASS)
+robust_mod <- rlm(prestige ~ income + education, data=Duncan)
+coef(robust_mod)
+```
+
+We can see that the coefficients on `income` and `education` lie somewhere between the OLS coefficients on the full data, and the OLS coefficients *without* the influential points.
+
+### Fitting robust regression models
+
+Unlike OLS, there is not a closed-form solution for the coefficients estimated by robust regression. Instead, we need to use an iterative procedure, and there are several possibilities. One option is a derivative-free method like Nelder-Mead. If you use Nelder-Mead from the `optim` function in R, starting at the coefficients estimated by OLS with the full data, and using $\gamma = 1$ for the Huber loss, you should get estimates
+
+```{r, echo=F}
+# huber loss function
+huber_loss <- function(u, gamma = 1){
+  ifelse(abs(u) <= gamma, 0.5*u^2, gamma*abs(u) - 0.5*gamma^2)
+}
+
+# huber influence function
+huber_psi <- function(u, gamma = 1){
+  ifelse(abs(u) <= gamma, u, gamma * sign(u))
+}
+
+# robust regression with huber loss function
+
+f <- function(X, y, beta, gamma=1){
+  sum(huber_loss(y - c(X %*% beta), gamma))
+}
+
+f_grad <- function(X, y, beta, gamma=1){
+  -1*t(X) %*% huber_psi(y - c(X %*% beta), gamma)
+}
+
+
+### fitting the model with Nelder-Mead
+f_nm <- function(beta){
+  sum(huber_loss(y - c(X %*% beta), gamma = 1))
+}
+
+X <- cbind(1, Duncan$income, Duncan$education)
+y <- Duncan$prestige
+cur_beta <- lm(prestige ~ income + education, data=Duncan) |> coef()
+optim(cur_beta, f_nm, method = "Nelder-Mead")$par
+```
+
+**Note:** This is different from the `rlm` output because `rlm` is using a different value of $\gamma$ in the Huber loss. We will think about selecting a good value of $\gamma$ in the next assignment.
+
+
+On this assignment you will explore gradient descent to fit robust regression models; on a future assignment, you will see another option that leverages the weighted least squares solutions you found above, called *Iteratively Reweighted Least Squares* (IRLS).
+
+
+:::{.question}
+#### Question 10 (written)
+
+Find an expression for the gradient $\nabla L(\beta)$ for robust regression with the Huber loss function.
+
+**Hint:** Huber loss is piecewise, so your gradient will be a sum of piecewise functions!
+
+:::
+
+Now let's try gradient descent!
+
+:::{.question}
+#### Question 11 (.html file)
+
+Using the gradient you found in the previous question, try gradient descent with a step size of $\alpha = 0.01$. For the Huber loss, use $\gamma = 1$ for now. As your starting point $\beta^{(0)}$, use the coefficient estimates from ordinary least squares with the full data:
+
+```{r}
+coef(ols_mod)
+```
+
+Perform 10 gradient descent steps, and track your updates $\beta^{(k)}$ for the 10 iterations. Plot the updates; what do you notice is happening?
+
+:::
+
+What you should observe is that gradient descent bounces between two values. Rather than getting closer to the true solution, it just alternates! This is one potential failure of gradient descent when the step size $\alpha$ is poor.
+
+Why does this happen? It has to do with the gradient.
+
+:::{.question}
+#### Question 12 (.html file)
+
+Calculate the gradient $\nabla L$ at the two points between which gradient descent is alternating when $\alpha = 0.01$. How are these two gradients related? Explain why this results in gradient descent alternating between the two points.
+
+:::
+
+Clearly, $\alpha = 0.01$ was not the right step size. Let's try a smaller step size:
+
+
+:::{.question}
+#### Question 13 (.html file)
+
+Try gradient descent for the robust regression with a step size of $\alpha = 0.00001$. As before, use $\gamma = 1$ for the Huber loss. As your starting point $\beta^{(0)}$, use the coefficient estimates from ordinary least squares with the full data:
+
+```{r}
+coef(ols_mod)
+```
+
+Perform 10 gradient descent steps, and track your updates $\beta^{(k)}$ for the 10 iterations. Plot the updates; what do you notice is happening?
+
+:::
+
+With a smaller step size, gradient descent no longer alternates between two fixed points. However, it hasn't made much progress after 10 iterations! Let's try more iterations:
+
+
+:::{.question}
+#### Question 14 (.html file)
+
+Try gradient descent for the robust regression with a step size of $\alpha = 0.00001$. As before, use $\gamma = 1$ for the Huber loss. As your starting point $\beta^{(0)}$, use the coefficient estimates from ordinary least squares with the full data:
+
+```{r}
+coef(ols_mod)
+```
+
+Perform 500000 (yes, 500000) gradient descent steps, and track your updates $\beta^{(k)}$ for the iterations. Plot the updates; at what point does it seem like gradient descent is converging to the true minimum? 
+
+:::
+
+
+### Why is gradient descent so slow??
+
+First, it is important to note that gradient descent isn't always slow; done well, it is a good method for optimizing functions. However, gradient descent with a single fixed step size $\alpha$ does poorly when the rate of change in our function is different for the different coordinates.
+
+What do I mean by that? We have been starting at the OLS estimates for the coefficients (a very reasonable place to begin our iterative procedure, since it should be in the right ballpark of the robust estimates). The gradient of our robust loss function at that starting place is
+
+```{r, echo=F}
+huber_psi <- function(u, gamma = 1){
+  ifelse(abs(u) <= gamma, u, gamma * sign(u))
+}
+
+huber_grad <- function(X, y, beta){
+  -1*t(X) %*% huber_psi(y - c(X %*% beta))
+}
+
+cur_beta <- lm(prestige ~ income + education, data=Duncan) |> coef()
+X <- cbind(1, Duncan$income, Duncan$education)
+huber_grad(X, Duncan$prestige, cur_beta)
+```
+
+Notice how the magnitude of the first coordinate is *much* smaller than the magnitude of the second and third coordinates. This means that at our initial $\beta^{(0)}$ (the OLS estimates), the function $L(\beta)$ is much more sensitive to changes in $\beta_1$ and $\beta_2$ than it is to changes in $\beta_0$. 
+
+When we choose the step size, we are hampered by the magnitude of the coordinates of the gradient. If we pick a step size too big, we'll move a good distance in the $\beta_0$ coordinate, but *much* too far in the $\beta_1$ and $\beta_2$ coordinates. If we pick a smaller step size, we're moving the right amount for $\beta_1$ and $\beta_2$, but hardly moving at all for $\beta_0$. In your plot of the gradient descent updates from the 500000 iterations, you should see that we got good estimates of $\beta_1$ and $\beta_2$ much faster than we got good estimates of $\beta_0$.
+
+### What can we do??
+
+There are several approaches we could take to modify the gradient descent algorithm. One of them is to use a different step size for each coordinate. Another is to use information about the curvature of the function $L(\beta)$ -- that is, the rate of change in the gradient, which is the *second* derivative. We will talk about both of these approaches in class.
+
+Here's another option, which is simple to implement, often helps, and is a common pre-processing step in many machine learning models: **scale the explanatory variables**. By scaling, I mean subtract the mean and divide by the standard deviation.
+
+Scaling the explanatory variables will change our estimated coefficients, but it won't change our predictions. Here is an example for the OLS fit:
+
+```{r}
+ols_mod <- lm(prestige ~ income + education, data=Duncan)
+ols_mod_scaled <- lm(prestige ~ scale(income) + scale(education), data=Duncan)
+
+coef(ols_mod)
+coef(ols_mod_scaled)
+
+all.equal(ols_mod$fitted.values, ols_mod_scaled$fitted.values)
+```
+
+Our coefficients are still interpretable after scaling, too. For example, $\widehat{\beta}_1 = 14.63$ would now be interpreted as the expected changed in prestige associated with a one-standard deviation increase in income, holding education fixed. 
+
+Now, let's look at the gradient of the loss function when starting at the OLS solution for the *scaled* variables:
+
+```{r, echo=F}
+# huber loss function
+huber_loss <- function(u, gamma = 1){
+  ifelse(abs(u) <= gamma, 0.5*u^2, gamma*abs(u) - 0.5*gamma^2)
+}
+
+# huber influence function
+huber_psi <- function(u, gamma = 1){
+  ifelse(abs(u) <= gamma, u, gamma * sign(u))
+}
+
+# robust regression with huber loss function
+
+f <- function(X, y, beta, gamma=1){
+  sum(huber_loss(y - c(X %*% beta), gamma))
+}
+
+f_grad <- function(X, y, beta, gamma=1){
+  -1*t(X) %*% huber_psi(y - c(X %*% beta), gamma)
+}
+
+# fixing the issue
+income_scaled <- scale(Duncan$income)
+education_scaled <- scale(Duncan$education)
+X_scaled <- cbind(1, income_scaled, education_scaled)
+
+cur_beta <- lm(Duncan$prestige ~ income_scaled + education_scaled) |> coef()
+#cur_beta
+f_grad(X_scaled, Duncan$prestige, cur_beta)
+```
+
+The magnitudes of the different coordinates are much more similar!
+
+
+:::{.question}
+#### Question 15 (.html file)
+
+Using the scaled explanatory variables, use gradient descent for the robust regression. Use a step size $\alpha = 0.1$, and use $\gamma = 1$ for the Huber loss. As your starting point $\beta^{(0)}$, use the coefficient estimates from ordinary least squares with the full data and scaled explantory variables:
+
+```{r}
+coef(ols_mod_scaled)
+```
+
+Perform 30 iterations. Plot the updates; at what point does it seem like gradient descent is converging to the true minimum? 
+
+:::
+
 
 
 
