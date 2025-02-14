@@ -22,3 +22,4 @@ description: >-
 * [HW 1](https://sta379-s25.github.io/homework/hw1.html)
 * [HW 2](https://sta379-s25.github.io/homework/hw2.html)
 * [HW 3](https://sta379-s25.github.io/homework/hw3.html)
+* [HW 4](https://sta379-s25.github.io/homework/hw4.html)
