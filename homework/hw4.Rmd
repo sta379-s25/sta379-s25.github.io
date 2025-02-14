@@ -7,6 +7,30 @@ output:
 link-citations: yes
 ---
 
+**Due:** Friday February 21, 10:00am
+
+**Submission:** For this assignment, you will submit four files:
+
+* A C++ script (`hw4_code.cpp`) containing your functions for questions 1 and 2 (submitted to GitHub)
+* An R script (`hw4_code.R`) containing your function for question 8 (submitted to GitHub)
+* A knitted html or pdf file (from an R Markdown or Quarto document) showing your code, results, and answers for questions 3--5, 9, 11--15 (submitted to Canvas)
+* A pdf containing your written answers to questions 6, 7, 10 (submitted to Canvas)
+
+**Grading:** There are 15 questions on this assignment. You will receive a score out of 15 for the number of questions mastered. To master a question, you must satisfy the following requirements:
+
+* Function implementations must pass all specified unit tests, *as written* (you may not modify the unit tests which I provide)
+* Your code must meet all requirements described in the questions below (matching the requested inputs and outputs)
+* You must comment your code
+* Your written solutions must be complete and correct, with no missing steps or mistakes
+* Responses to questions asking for description or explanation must be complete, thorough, and correct
+* Your work must abide by the academic honesty requirements in the syllabus 
+
+If you make an honest effort to answer all questions, but you do not master all of the questions on your first submission, you will have one resubmission attempt after receiving feedback.
+
+**Resources:** 
+
+* [Algorithms for Optimization](https://algorithmsbook.com/optimization/files/optimization.pdf) 5.1 and 7.3 -- 7.4
+
 # Compass search
 
 In class, we saw compass search in two dimensions -- for example, trying to fit a simple linear regression model and estimate the coefficients $\beta_0$ and $\beta_1$. The algorithm can be generalized to arbitrarily many dimensions (e.g., for fitting a model with multiple explanatory variables).
@@ -144,7 +168,7 @@ To implement this modified compass search algorithm, you can adapt your code fro
 
 One nice way of doing this could be to make a vector of indices for the $2d$ different search directions, and modify the order of that vector as we go. For this reordering, Armadillo vectors might not be the right choice of object for these indices. Rather, I suggest you use a `std::vector` object. This is a vector from the standard template library (STL) in C++, which provides a lot of useful data structures and functions for implementing common general-purpose algorithms. In particular, `std::rotate` allows you to move around the positions of vector elements.
 
-Here is example C++ code creating the vector of indices $0,...,2d-1$ (remember C++ starts at 0):
+Here is example C++ code creating the vector of indices $0,...,2d-1$ (remember C++ starts indexing at 0):
 
 ```{Rcpp, eval = F}
 std::vector<int> idx(2*d);
@@ -158,6 +182,15 @@ std::rotate(idx.begin(),idx.begin()+i, idx.begin()+i+1);
 ```
 
 **Important:** `std::iota` and `std::rotate` modify the vector `idx` directly; you don't have to reassign the results to `idx`.
+
+We can also iterate over the entries of `idx` with a slightly different for loop:
+
+```{Rcpp, eval=F}
+for(const int& i : idx){
+  // do stuff...
+}
+```
+
 
 
 :::{.question}
@@ -351,7 +384,7 @@ $$L(\beta) = \sum \limits_{i=1}^n (Y_i - \beta_0 - \beta_1 X_{i,1} - \cdots - \b
 
 $$L_W( \beta) = \sum \limits_{i=1}^n w_i(Y_i - \beta_0 - \beta_1 X_{i,1} - \cdots - \beta_p X_{i,p})^2$$
 
-where $w_i > 0$ is the *weight* that we place on the $i$th observation when fitting the model. If we are worried about non-constant variance, a common choice is $w_i = 1/Var(\varepsilon_i)$; this is called *inverse variance weighting*.
+where $w_i \geq 0$ is the *weight* that we place on the $i$th observation when fitting the model. If we are worried about non-constant variance, a common choice is $w_i = 1/Var(\varepsilon_i)$; this is called *inverse variance weighting*.
 
 ### Solving for $\beta$
 
@@ -383,7 +416,7 @@ Show all work.
 :::{.question}
 #### Question 8 (.R file)
 
-Write an R function to compute $\widehat{\beta}$ for the weighted least squares method. Your function should satisfy the following requirements:
+Write an R function called `weighted_lm` to compute $\widehat{\beta}$ for the weighted least squares method. Your function should satisfy the following requirements:
 
 Inputs:
 
