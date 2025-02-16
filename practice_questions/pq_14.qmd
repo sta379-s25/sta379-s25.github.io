@@ -1,0 +1,27 @@
+---
+title: "Practice Questions: Backtracking line search"
+format: html
+---
+
+## Gradient descent
+
+$${\bf x}^{(k+1)} = {\bf x}^{(k)} - \alpha \nabla f({\bf x}^{(k)})$$
+
+## Choosing $\alpha$: backtracking line search
+
+1. Start with initial value of $\alpha$ (often $\alpha = 1$)
+2. Check sufficient decrease condition:
+$$f({\bf x}^{(k)} - \alpha \nabla f({\bf x}^{(k)})) \overset{?}{\leq} f({\bf x}^{(k)}) - c_1 \alpha ||\nabla f({\bf x}^{(k)})||^2$$
+3. If sufficient decrease condition satisfied, use current value of $\alpha$
+4. Otherwise, $\alpha = 0.5 \alpha$ and go back to step 2
+
+## Question
+
+Consider the univariate function $f(x) = \frac{1}{4}x^4 - \sin(x) + 7$. Starting at $x^{(0)} = -2$, use gradient descent with backtracking line search to minimize $f$. 
+
+* In the backtracking line search, start at $\alpha = 1$ and use $c_1 = 0.01$.
+* Stop when $|f'(x^{(k)})| < 0.001$
+
+How many iterations were required?
+
+

@@ -1,0 +1,257 @@
+---
+title: "Lecture 14: Gradient descent -- direction and step size"
+author: "Ciaran Evans"
+output: beamer_presentation
+editor_options: 
+  chunk_output_type: console
+---
+
+## Recap: optimization
+
+* Derivative-free optimization
+    * Compass search, Nelder-Mead, etc.
+
+\bigskip
+
+* Derivative-based optimization with closed form solutions
+    * Least-squares linear regression, weighted least squares, etc.
+
+\bigskip
+
+* Derivative-based optimization with iterative methods
+    * So far: gradient descent
+
+## Gradient descent
+
+* Points ${\bf x} = (x_1,...,x_d)^T \in \mathbb{R}^d$
+* $f({\bf x}) \in \mathbb{R}$
+* Gradient: 
+
+$$\nabla f({\bf x}) = \begin{pmatrix} \frac{\partial f}{\partial x_1} \\ \vdots \\ \frac{\partial f}{\partial x_d} \end{pmatrix} \in \mathbb{R}^d$$
+
+* $\alpha > 0$
+
+Iterative updates: ${\bf x}^{(k+1)} = {\bf x}^{(k)} - \alpha \nabla f({\bf x}^{(k)})$
+
+**Questions for today:**
+
+1. Why the gradient?
+2. How far should we move? (i.e., choosing $\alpha$)
+
+
+## Question 1: Why the gradient?
+
+In the univariate case: $x^{(k+1)} = x^{(k)} - \alpha f'(x^{(k)})$
+
+```{r, echo=F, fig.align='left', fig.width=4, fig.height=3.5}
+fx <- function(x){
+  x^4/4 - sin(x) + 7
+}
+gridpts <- seq(-3, 3, 0.01)
+plot(gridpts, fx(gridpts), type="l",
+     xlab = "x", ylab = "f(x)", cex.lab=0.75, cex.axis=0.5)
+```
+
+\vspace{3cm}
+
+## Question 1: Why the gradient?
+
+In the univariate case: $x^{(k+1)} = x^{(k)} - \alpha f'(x^{(k)})$
+
+```{r, echo=F, fig.align='left', fig.width=4, fig.height=3.5}
+fx <- function(x){
+  x^4/4 - sin(x) + 7
+}
+gridpts <- seq(-3, 3, 0.01)
+plot(gridpts, fx(gridpts), type="l",
+     xlab = "x", ylab = "f(x)", cex.lab=0.75, cex.axis=0.5)
+```
+
+In the univariate case, there are only two possible directions, and the derivative tells us which way to go!
+
+## Why the gradient? Multivariate case
+
+Example: ${\bf x} = (x_1, x_2)^T$, and $f({\bf x}) = 5x_1^2 + 0.5x_2^2$
+
+Suppose we are at point ${\bf x}^{(0)} = (1, 1)$
+
+```{r, echo=F, fig.align='left', fig.width=3, fig.height=3}
+plot(x = 1, y = 1, pch=16, xlab="x1", ylab = "x2", xlim = c(0, 2), ylim=c(0, 2))
+```
+
+**Question:** How many directions could we move?
+
+## Why the gradient? Multivariate case
+
+Example: ${\bf x} = (x_1, x_2)^T$, and $f({\bf x}) = 5x_1^2 + 0.5x_2^2$
+
+Suppose we are at point ${\bf x}^{(0)} = (1, 1)$
+
+```{r, echo=F, fig.align='left', fig.width=3, fig.height=3}
+plot(x = 1, y = 1, pch=16, xlab="x1", ylab = "x2", xlim = c(0, 2), ylim=c(0, 2))
+```
+
+**Question:** What criterion should I use to determine the direction of movement?
+
+## Recap: what is a derivative?
+
+Suppose we have a differentiable function $f: \mathbb{R} \to \mathbb{R}$. What does the *derivative* $f'$ tell us?
+
+\vspace{5cm}
+
+## Derivatives for functions of multiple variables
+
+**Partial derivative:** rate of change in $f$ when moving along one of the axes
+
+Example: $f({\bf x}) = 5 x_1^2 + 0.5 x_2^2$
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+```{r, echo=F, fig.align='left', fig.width=2.75, fig.height=2.75}
+plot(x = 1, y = 1, pch=16, xlab="x1", ylab = "x2", xlim = c(0, 2), ylim=c(0, 2),
+     cex.lab=0.75, cex.axis=0.5)
+```
+
+:::
+
+::: {.column width="50%"}
+
+```{r, echo=F, fig.align='left', fig.width=2.75, fig.height=2.75}
+plot(x = 1, y = 1, pch=16, xlab="x1", ylab = "x2", xlim = c(0, 2), ylim=c(0, 2),
+     cex.lab=0.75, cex.axis=0.5)
+```
+
+:::
+
+::::
+
+\vspace{3cm}
+
+## Directional derivatives
+
+At point ${\bf x}$, and want to know how fast $f({\bf x})$ changes in direction of unit vector ${\bf u}$
+
+```{r, echo=F, fig.align='left', fig.width=3, fig.height=3}
+plot(x = 1, y = 1, pch=16, xlab="x1", ylab = "x2", xlim = c(0, 2), ylim=c(0, 2),
+     cex.lab=0.75, cex.axis=0.5)
+```
+
+**Directional derivative:** $D_{\bf u} f({\bf x}) = \lim \limits_{h \to 0} \dfrac{f({\bf x} + h {\bf u}) - f({\bf x})}{h}$
+
+## Directional derivatives
+
+**Directional derivative:** $D_{\bf u} f({\bf x}) = \lim \limits_{h \to 0} \dfrac{f({\bf x} + h {\bf u}) - f({\bf x})}{h}$
+
+Turns out:
+
+$$D_u f({\bf x}) = \nabla f({\bf x})^T {\bf u}$$
+
+**Question:** In which direction ${\bf u}$ is $D_{\bf u} f({\bf x})$ maximized?
+
+\vspace{4cm}
+
+## Directional derivatives
+
+**Directional derivative:** $D_{\bf u} f({\bf x}) = \lim \limits_{h \to 0} \dfrac{f({\bf x} + h {\bf u}) - f({\bf x})}{h}$
+
+Turns out:
+
+$$D_u f({\bf x}) = \nabla f({\bf x})^T {\bf u}$$
+
+* Direction of greatest **increase** in $f$ is $\nabla f({\bf x})$
+* Direction of greatest **decrease** in $f$ is $-\nabla f({\bf x})$
+
+\bigskip 
+
+So: ${\bf x} -\alpha \nabla f({\bf x})$ is movement in direction of *greatest decrease* in $f$
+
+
+## Question 2: How far should we move?
+
+$${\bf x}^{(k+1)} = {\bf x}^{(k)} - \alpha \nabla f({\bf x}^{(k)})$$
+
+* $\alpha$ too big: sequence diverges
+* $\alpha$ too small: takes too many iterations
+
+**Question:** How would you decide on a "good" value of $\alpha$ to use at each step?
+
+\vspace{3cm}
+
+## Question 2: How far should we move?
+
+$${\bf x}^{(k+1)} = {\bf x}^{(k)} - \alpha \nabla f({\bf x}^{(k)})$$
+
+* $\alpha$ too big: sequence diverges
+* $\alpha$ too small: takes too many iterations
+
+**Idea:** maximize benefit:
+
+$$\min \limits_{\alpha > 0} f({\bf x}^{(k)} - \alpha \nabla f({\bf x}^{(k)}))$$
+
+\vspace{3cm}
+
+## Line search
+
+$$\min \limits_{\alpha > 0} f({\bf x}^{(k)} - \alpha \nabla f({\bf x}^{(k)}))$$
+
+* Exact minimization is expensive and unnecessary
+
+\bigskip
+
+* Instead: try a limited number of $\alpha$ values until $f({\bf x}^{(k)} - \alpha \nabla f({\bf x}^{(k)}))$ is "good enough"
+
+\bigskip
+
+**Question:** What is "good enough"?
+
+## Requirement for $\alpha$: initial idea
+
+**Idea:** Choose $\alpha$ such that
+
+$$f({\bf x}^{(k)} - \alpha \nabla f({\bf x}^{(k)})) < f({\bf x}^{(k)})$$
+
+**Counterexample:** Allows this sort of behavior:
+
+```{r, echo=F, fig.align='left', fig.width=3, fig.height=3}
+fx <- function(x){
+  x^4/4 - sin(x) + 7
+}
+gridpts <- seq(-3, 3, 0.01)
+plot(gridpts, fx(gridpts), type="l",
+     xlab = "x", ylab = "f(x)", cex.lab=0.75, cex.axis=0.5)
+```
+
+## Sufficient decrease condition
+
+**Idea:** Decrease has to be "big enough"
+
+Step size $\alpha$ must satisfy
+
+
+$$f({\bf x}^{(k)} - \alpha \nabla f({\bf x}^{(k)})) \leq f({\bf x}^{(k)}) - c_1 \alpha ||\nabla f({\bf x}^{(k)})||^2$$
+
+for some $c_1 \in (0, 1)$. (In practice, $c_1$ is pretty small, e.g. $10^{-4}$)
+
+## Backtracking line search
+
+Simple, common way to choose $\alpha$ which often works:
+
+1. Start with initial value of $\alpha$ (often $\alpha = 1$)
+2. Check sufficient decrease condition:
+$$f({\bf x}^{(k)} - \alpha \nabla f({\bf x}^{(k)})) \overset{?}{\leq} f({\bf x}^{(k)}) - c_1 \alpha ||\nabla f({\bf x}^{(k)})||^2$$
+3. If sufficient decrease condition satisfied, use current value of $\alpha$
+4. Otherwise, $\alpha = 0.5 \alpha$ and go back to step 2
+
+
+## Your turn
+
+Practice questions on the course website:
+
+[https://sta379-s25.github.io/practice_questions/pq_14.html](https://sta379-s25.github.io/practice_questions/pq_14.html)
+
+* Try backtracking line search
+* Start in class. You are welcome to work with others
+* Practice questions are to help you practice. They are not submitted and not graded
+* Solutions are posted on the course website
