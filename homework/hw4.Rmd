@@ -183,15 +183,6 @@ std::rotate(idx.begin(),idx.begin()+i, idx.begin()+i+1);
 
 **Important:** `std::iota` and `std::rotate` modify the vector `idx` directly; you don't have to reassign the results to `idx`.
 
-We can also iterate over the entries of `idx` with a slightly different for loop:
-
-```{Rcpp, eval=F}
-for(const int& i : idx){
-  // do stuff...
-}
-```
-
-
 
 :::{.question}
 #### Question 2 (.cpp file)
