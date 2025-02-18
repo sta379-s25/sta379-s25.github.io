@@ -1,0 +1,208 @@
+---
+title: "Behavior of gradient descent: solutions"
+format: html
+---
+
+```{r message=F, warning=F}
+library(plotly)
+library(Stat2Data)
+data("MedGPA")
+
+lm(MCAT ~ GPA, data = MedGPA)
+```
+
+```{r}
+f <- function(beta){
+  sum((MedGPA$MCAT - beta[1]- beta[2]*MedGPA$GPA)^2)
+}
+
+x <- seq(3.5, 4.4, by=0.01)
+y <- seq(8.6, 9.5, by=0.01)
+z <- matrix(nrow=length(x), ncol=length(y))
+for(i in 1:nrow(z)){
+  for(j in 1:ncol(z)){
+    z[i,j] <- f(c(x[i], y[j]))
+  }
+}
+
+
+plot_ly() |>
+  add_surface(x = x, y = y, z = t(z))
+```
+
+```{r}
+plot_ly() |>
+  add_contour(x = x, y = y, z = t(z))
+```
+
+1. The function forms a long, narrow valley near the minimum. Small changes in $\beta_1$ lead to much bigger changes in $f$ than small changes in $\beta_0$
+
+
+2. 
+
+```{r}
+X <- cbind(1, MedGPA$GPA)
+
+fp <- function(beta){
+  c(-2*t(X) %*% (MedGPA$MCAT - X %*% beta))
+}
+
+l2_norm <- function(x){
+  sqrt(sum(x^2))
+}
+
+xk <- c(0, 0)
+c1 <- 0.0001
+grad_size <- 1
+iter_count <- 0
+
+update_vals <- xk
+
+while(grad_size > 0.001){
+  alpha <- 1
+  
+  # reduce alpha until sufficient decrease condition is satisfied
+  while(f(xk - alpha*fp(xk)) > f(xk) - c1*alpha*l2_norm(fp(xk))^2){
+    alpha <- 0.5*alpha
+  }
+  
+  xk <- xk - alpha*fp(xk)
+  update_vals <- rbind(update_vals, xk)
+  iter_count <- iter_count + 1
+  grad_size <- l2_norm(fp(xk))
+}
+
+iter_count
+```
+
+3.
+
+```{r}
+plot_ly() |>
+  add_contour(x = x, y = y, z = t(z)) |>
+  add_paths(x = update_vals[1000:3000,1], y = update_vals[1000:3000,2])
+```
+
+Likewise, we can visualize the path on the surface plot:
+
+```{r}
+plot_ly() |>
+  add_surface(x = x, y = y, z = t(z)) |>
+  add_paths(x = update_vals[1000:3000,1], y = update_vals[1000:3000,2],
+            z = apply(update_vals[1000:3000,], 1, f))
+```
+
+4.
+
+```{r}
+X <- cbind(1, MedGPA$GPA)
+
+fp <- function(beta){
+  c(-2*t(X) %*% (MedGPA$MCAT - X %*% beta))
+}
+
+l2_norm <- function(x){
+  sqrt(sum(x^2))
+}
+
+xk <- c(4.4, 9.5)
+c1 <- 0.0001
+grad_size <- 1
+iter_count <- 0
+
+update_vals <- xk
+
+while(grad_size > 0.001){
+  alpha <- 1
+  
+  # reduce alpha until sufficient decrease condition is satisfied
+  while(f(xk - alpha*fp(xk)) > f(xk) - c1*alpha*l2_norm(fp(xk))^2){
+    alpha <- 0.5*alpha
+  }
+  
+  xk <- xk - alpha*fp(xk)
+  update_vals <- rbind(update_vals, xk)
+  iter_count <- iter_count + 1
+  grad_size <- l2_norm(fp(xk))
+}
+
+iter_count
+```
+
+5.
+
+```{r}
+plot_ly() |>
+  add_surface(x = x, y = y, z = t(z)) |>
+  add_paths(x = update_vals[,1], y = update_vals[,2],
+            z = apply(update_vals, 1, f))
+```
+
+6.
+
+```{r}
+plot(update_vals[100:200,], type="l")
+```
+
+7.
+
+```{r}
+lm(MCAT ~ scale(GPA), data = MedGPA)
+
+scaled_GPA <- scale(MedGPA$GPA)
+f <- function(beta){
+  sum((MedGPA$MCAT - beta[1]- beta[2]*scaled_GPA)^2)
+}
+
+X <- cbind(1, scaled_GPA)
+
+fp <- function(beta){
+  c(-2*t(X) %*% (MedGPA$MCAT - X %*% beta))
+}
+
+xk <- c(0, 0)
+c1 <- 0.0001
+grad_size <- 1
+iter_count <- 0
+
+update_vals <- xk
+
+while(grad_size > 0.001){
+  alpha <- 1
+  
+  # reduce alpha until sufficient decrease condition is satisfied
+  while(f(xk - alpha*fp(xk)) > f(xk) - c1*alpha*l2_norm(fp(xk))^2){
+    alpha <- 0.5*alpha
+  }
+  
+  xk <- xk - alpha*fp(xk)
+  update_vals <- rbind(update_vals, xk)
+  iter_count <- iter_count + 1
+  grad_size <- l2_norm(fp(xk))
+}
+
+iter_count
+```
+
+
+8.
+
+```{r}
+x <- seq(35.7, 37, by=0.01)
+y <- seq(2, 3.1, by=0.01)
+
+z <- matrix(nrow=length(x), ncol=length(y))
+for(i in 1:nrow(z)){
+  for(j in 1:ncol(z)){
+    z[i,j] <- f(c(x[i], y[j]))
+  }
+}
+
+plot_ly() |>
+  add_surface(x = x, y = y, z = t(z)) |>
+  add_paths(x = update_vals[13:47,1], y = update_vals[13:47,2],
+            z = apply(update_vals[13:47,], 1, f))
+```
+
+
+

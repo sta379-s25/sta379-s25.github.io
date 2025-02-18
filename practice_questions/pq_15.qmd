@@ -1,0 +1,313 @@
+---
+title: "Practice Questions: Behavior of gradient descent"
+format: html
+---
+
+## Motivating problem: least-squares linear regression
+
+The `MedGPA` dataset from the `Stat2Data` package contains data on med school applications for 55 college students, including the following variables:
+
+* `GPA`: student's undergraduate GPA
+* `MCAT`: student's MCAT score
+
+Suppose we want to fit a linear model to predict MCAT score from GPA. In R:
+
+```{r, message=F}
+library(Stat2Data)
+data("MedGPA")
+
+lm(MCAT ~ GPA, data = MedGPA)
+```
+
+The linear regression model chooses $\beta_0$ and $\beta_1$ to minimize the residual sum of squares:
+
+$$f(\beta_0, \beta_1) = \sum \limits_{i=1}^n (\text{MCAT}_i - \beta_0 - \beta_1 \text{GPA}_i)^2$$
+
+Let's begin by visualizing this function $f(\beta_0, \beta_1)$ near the minimum $(\widehat{\beta}_0, \widehat{\beta}_1) = (3.923, \ 9.104)$.
+
+### Visualizations
+
+The following code will create a 3-dimensional plot of the function $f$; you will need the `plotly` package installed:
+
+```{r, eval=F}
+library(Stat2Data)
+library(plotly)
+
+f <- function(beta){
+  sum((MedGPA$MCAT - beta[1]- beta[2]*MedGPA$GPA)^2)
+}
+
+x <- seq(3.5, 4.4, by=0.01)
+y <- seq(8.6, 9.5, by=0.01)
+z <- matrix(nrow=length(x), ncol=length(y))
+for(i in 1:nrow(z)){
+  for(j in 1:ncol(z)){
+    z[i,j] <- f(c(x[i], y[j]))
+  }
+}
+
+
+plot_ly() |>
+  add_surface(x = x, y = y, z = t(z))
+```
+
+When you run the code in RStudio, the plot will appear in the Viewer window, and you can interact with it using your mouse.
+
+We can also create a contour plot:
+
+```{r, eval=F}
+plot_ly() |>
+  add_contour(x = x, y = y, z = t(z))
+```
+
+
+1. **Question 1:** Using the surface and contour plots, what does the shape of the function look like near the minimum?
+
+
+## Gradient descent with backtracking line search
+
+While we can get a closed form solution for $\widehat{\beta}_0$ and $\widehat{\beta}_1$, let's suppose we wanted to use gradient descent. Recall that gradient descent iteratively moves towards the minimum by the update rule
+
+$${\bf x}^{(k+1)} = {\bf x}^{(k)} - \alpha_k \nabla f({\bf x}^{(k)})$$
+
+where the step size $\alpha_k$ at iteration $k$ is chosen via backtracking line search:
+
+1. Start with initial value of $\alpha$ (often $\alpha = 1$)
+2. Check sufficient decrease condition:
+$$f({\bf x}^{(k)} - \alpha \nabla f({\bf x}^{(k)})) \overset{?}{\leq} f({\bf x}^{(k)}) - c_1 \alpha ||\nabla f({\bf x}^{(k)})||^2$$
+3. If sufficient decrease condition satisfied, $\alpha_k = \alpha$
+4. Otherwise, $\alpha = 0.5 \alpha$ and go back to step 2
+
+
+### Example: least-squares linear regression
+
+We have found previously that the gradient for the residual sum of squares is given by
+
+$$\nabla f(\beta) = -2{\bf X}_D^T({\bf y} - {\bf X}_D \beta)$$
+
+Here is example code to calculate the gradient for the `MedGPA` example:
+
+```{r, eval=F}
+X <- cbind(1, MedGPA$GPA)
+
+fp <- function(beta){
+  c(-2*t(X) %*% (MedGPA$MCAT - X %*% beta))
+}
+```
+
+
+And here is skeleton code for gradient descent with backtracking line search (note: I have focused on readability rather than efficiency here):
+
+```{r, eval=F}
+l2_norm <- function(x){
+  sqrt(sum(x^2))
+}
+
+xk <- c(0, 0)
+c1 <- 0.0001
+grad_size <- 1
+iter_count <- 0
+
+update_vals <- xk
+
+while(grad_size > 0.001){
+  alpha <- 1
+  
+  # reduce alpha until sufficient decrease condition is satisfied
+  while(...){
+    ...
+  }
+  
+  xk <- ... # update the value of xk
+  update_vals <- rbind(update_vals, xk)
+  iter_count <- iter_count + 1
+  grad_size <- l2_norm(fp(xk))
+}
+```
+
+
+
+2. **Question 2:** Fill in the code above to use gradient descent with backtracking line search to estimate the linear regression coefficients.
+    * Begin at $(0, 0)$
+    * Set $c_1 = 0.0001$ in the backtracking line search
+    * Stop when $||\nabla f(\beta)|| < 0.001$
+    * Keep track of the updates at each iteration; e.g., store them in a matrix
+    * In total, you should have 6517 iterations
+
+### Visualization
+
+If you stored the gradient descent updates in a $6517 \times 2$ matrix called `update_vals`, the following code would add part of the gradient descent path to the contour plot you made in question 1 (starting at the 1000th iteration, because this is where the path appears in the limits of the plot from question 1):
+
+```{r, eval=F}
+plot_ly() |>
+  add_contour(x = x, y = y, z = t(z)) |>
+  add_paths(x = update_vals[1000:3000,1], y = update_vals[1000:3000,2])
+```
+
+Likewise, we can visualize the path on the surface plot:
+
+```{r, eval=F}
+plot_ly() |>
+  add_surface(x = x, y = y, z = t(z)) |>
+  add_paths(x = update_vals[1000:3000,1], y = update_vals[1000:3000,2],
+            z = apply(update_vals[1000:3000,], 1, f))
+```
+
+3. **Question 3:** Make the plots adding the gradient descent path to the contour and surface plots. Describe the movement towards the minimum. 
+
+### Starting at a different place?
+
+Perhaps gradient descent is taking a long time to converge because of where we started; after all, (0, 0) isn't really that close to the true minimum.
+
+Let's suppose that instead, we start at $(4.4, \ 9.5)$:
+
+```{r, eval=F}
+l2_norm <- function(x){
+  sqrt(sum(x^2))
+}
+
+xk <- c(4.4, 9.5)
+c1 <- 0.0001
+grad_size <- 1
+iter_count <- 0
+
+update_vals <- xk
+
+while(grad_size > 0.001){
+  alpha <- 1
+  
+  # reduce alpha until sufficient decrease condition is satisfied
+  while(...){
+    ...
+  }
+  
+  xk <- ... # update the value of xk
+  update_vals <- rbind(update_vals, xk)
+  iter_count <- iter_count + 1
+  grad_size <- l2_norm(fp(xk))
+}
+```
+
+
+4. **Question 4:** Re-run gradient descent beginning at $(4.4, \ 9.5)$. How long does it take to converge?
+
+It still takes thousands of iterations! Why? Let's look at the surface plot again, with the new gradient descent path:
+
+```{r, eval=F}
+plot_ly() |>
+  add_surface(x = x, y = y, z = t(z)) |>
+  add_paths(x = update_vals[,1], y = update_vals[,2],
+            z = apply(update_vals, 1, f))
+```
+
+5. **Question 5:** Make the plot adding the new gradient descent path to the surface plot. What happens?
+
+## So why is gradient descent slow in this case?
+
+In general, gradient descent struggles to move along long, narrow valleys. We can see that when gradient descent starts above such a valley, it quickly descends the valley walls, but is slow moving along the valley floor. (The explanation for why compass search requires many iterations in this example is similar).
+
+
+This naturally leads to another question: *why exactly does it take gradient descent a long time to move along a valley*? Looking at the plots, it feels like once we are in a valley, we should just be able to jump to the end of the valley in a couple steps.
+
+However, gradient descent doesn't work that way. To see why, let's make another plot:
+
+6. **Question 6:** Run the following code to plot 100 iterations of the gradient descent updates once it is in the valley. What do you notice about the gradient descent path?
+
+```{r, eval=F}
+plot(update_vals[100:200,], type="l")
+```
+
+**Moral of the story:** By following the direction of steepest descent, gradient descent is forced to take a zig-zagging path (we will prove why in class), and requires many iterations in long, narrow valleys.
+
+
+## What can we do to improve speed?
+
+In class, we will introduce a variety of modifications to the basic gradient descent procedure used here. There is also another modification we can make: **scaling**.
+
+Scaling the explanatory variables (subtracting the mean and dividing by the standard deviation, i.e. a z-score transform) is a common pre-processing step when fitting machine learning models, which often involve gradient-based optimization.
+
+The following code fits a linear regression with the scaled GPA, and sets up the RSS and gradient functions for gradient descent:
+
+
+```{r}
+lm(MCAT ~ scale(GPA), data = MedGPA)
+```
+
+```{r eval=F}
+scaled_GPA <- scale(MedGPA$GPA)
+f <- function(beta){
+  sum((MedGPA$MCAT - beta[1]- beta[2]*scaled_GPA)^2)
+}
+
+X <- cbind(1, scaled_GPA)
+
+fp <- function(beta){
+  c(-2*t(X) %*% (MedGPA$MCAT - X %*% beta))
+}
+```
+
+7. **Question 7:** Fill in the following code to perform gradient descent with backtracking line search, using the scaled GPA. How many iterations were required?
+
+```{r, eval=F}
+l2_norm <- function(x){
+  sqrt(sum(x^2))
+}
+
+xk <- c(0, 0)
+c1 <- 0.0001
+grad_size <- 1
+iter_count <- 0
+
+update_vals <- xk
+
+while(grad_size > 0.001){
+  alpha <- 1
+  
+  # reduce alpha until sufficient decrease condition is satisfied
+  while(...){
+    ...
+  }
+  
+  xk <- ... # update the value of xk
+  update_vals <- rbind(update_vals, xk)
+  iter_count <- iter_count + 1
+  grad_size <- l2_norm(fp(xk))
+}
+```
+
+
+### Why does scaling help?
+
+Using the scaled GPA, gradient descent converges in much fewer iterations! Why? It has to do with the shape of the function we are trying to minimize:
+
+```{r, eval=F}
+x <- seq(35.7, 37, by=0.01)
+y <- seq(2, 3.1, by=0.01)
+
+z <- matrix(nrow=length(x), ncol=length(y))
+for(i in 1:nrow(z)){
+  for(j in 1:ncol(z)){
+    z[i,j] <- f(c(x[i], y[j]))
+  }
+}
+
+plot_ly() |>
+  add_surface(x = x, y = y, z = t(z)) |>
+  add_paths(x = update_vals[13:47,1], y = update_vals[13:47,2],
+            z = apply(update_vals[13:47,], 1, f))
+```
+
+
+8. **Question 8:** How is the shape of $f$ different when we scale GPA?
+
+## If you are done early...
+
+The contours of 
+
+$$f(\beta_0, \beta_1) = \sum \limits_{i=1}^n (\text{MCAT}_i - \beta_0 - \beta_1 \text{GPA}_i)^2$$
+
+are ellipses. See if you can prove this. How does scaling GPA change the eccentricity of the ellipse?
+
+
+
+

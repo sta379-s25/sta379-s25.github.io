@@ -1,0 +1,189 @@
+---
+title: "Lecture 15: Gradient descent -- visualization"
+author: "Ciaran Evans"
+output: beamer_presentation
+editor_options: 
+  chunk_output_type: console
+---
+
+## Last time
+
+Gradient descent: ${\bf x}^{(k+1)} = {\bf x}^{(k)} - \alpha_k \nabla f({\bf x}^{(k)})$
+
+* Why the gradient?
+
+\vspace{5cm}
+
+## Last time
+
+Gradient descent: ${\bf x}^{(k+1)} = {\bf x}^{(k)} - \alpha_k \nabla f({\bf x}^{(k)})$
+
+* Why the gradient? $-\nabla f({\bf x})$ is the **direction of steepest decrease** in $f$
+
+\bigskip
+
+* How do we choose step size $\alpha_k$?
+
+\vspace{5cm}
+
+## Last time
+
+Gradient descent: ${\bf x}^{(k+1)} = {\bf x}^{(k)} - \alpha_k \nabla f({\bf x}^{(k)})$
+
+* Why the gradient? $-\nabla f({\bf x})$ is the **direction of steepest decrease** in $f$
+
+\bigskip
+
+* How do we choose step size $\alpha_k$? **maximize benefit**
+
+    * Would like $\alpha_k$ to minimize $f({\bf x}^{(k)} - \alpha \nabla f({\bf x}^{(k)}))$
+    * Exact minimization is expensive and unnecessary; instead, find "good enough" $\alpha_k$ with backtracking line search
+    
+\vspace{4cm}
+
+## Today: behavior of gradient descent
+
+**Motivating example:** Data on med school admissions for 55 students
+
+* `GPA`: student's undergraduate GPA
+* `MCAT`: student's MCAT score
+
+Function to minimize:
+
+$$f(\beta_0, \beta_1) = \sum \limits_{i=1}^n (\text{MCAT}_i - \beta_0 - \beta_1 \text{GPA}_i)^2$$
+
+* Compass search beginning at (0, 0): 5282 iterations
+* Gradient descent with backtracking linear search beginning at (0, 0): 6517 iterations
+
+**Motivating question:** Why so many iterations?
+
+## Preliminaries: plotting a function of two variables
+
+$$f(x, y) = x^2 + y^2$$
+
+* Two inputs: $x$ and $y$
+* One output value for each $(x, y)$: $z =f(x, y)$
+* In total: function described by 3 coordinates, $(x, y, z)$
+
+```{r, echo=F, message=F, warning=F, eval=F}
+library(plotly)
+x <- seq(-5, 5, by=0.01)
+y <- seq(-5, 5, by=0.01)
+z <- matrix(nrow=length(x), ncol=length(y))
+for(i in 1:nrow(z)){
+  for(j in 1:ncol(z)){
+    z[i,j] <- x[i]^2 + y[j]^2
+  }
+}
+
+plot_ly(x = x, y = y, z = t(z)) |>
+  add_surface(colorscale = list(c(0, 0.1, 0.2, 0.5, 1), c('blue', 'turquoise', 'yellow', 'orange', 'red'))
+)
+```
+
+
+## Preliminaries: plotting a function of two variables
+
+$$f(x, y) = x^2 + y^2$$
+
+![](~/Documents/Teaching/sta379-s25/sta379-s25.github.io/slides/lecture_15_plot1.png)
+
+## Preliminaries: plotting a function of two variables
+
+$$f(x, y) = x^2 + y^2$$
+
+**Question:** What will happen to the shape if we instead plot $5x^2 + 0.5y^2$?
+
+![](~/Documents/Teaching/sta379-s25/sta379-s25.github.io/slides/lecture_15_plot1.png)
+
+## Preliminaries: plotting a function of two variables
+
+$$f(x, y) = 5x^2 + 0.5y^2$$
+
+```{r, echo=F, message=F, warning=F, eval=F}
+library(plotly)
+x <- seq(-3, 3, by=0.01)
+y <- seq(-5, 5, by=0.01)
+z <- matrix(nrow=length(x), ncol=length(y))
+for(i in 1:nrow(z)){
+  for(j in 1:ncol(z)){
+    z[i,j] <- 5*x[i]^2 + 0.5*y[j]^2
+  }
+}
+
+plot_ly(x = x, y = y, z = t(z)) |>
+  add_surface(colorscale = list(c(0, 0.1, 0.2, 0.5, 1), c('blue', 'turquoise', 'yellow', 'orange', 'red'))
+)
+```
+
+![](~/Documents/Teaching/sta379-s25/sta379-s25.github.io/slides/lecture_15_plot2.png)
+
+## Preliminaries: contour plots
+
+**Definition:** The *contour* of $f(x, y)$ at $c$ is the set of all points $(x, y)$ for which $f(x, y) = c$
+
+Example: $f(x, y) = x^2 + y^2$
+
+```{r, echo=F, message=F, warning=F, eval=F}
+library(plotly)
+x <- seq(-5, 5, by=0.01)
+y <- seq(-5, 5, by=0.01)
+z <- matrix(nrow=length(x), ncol=length(y))
+for(i in 1:nrow(z)){
+  for(j in 1:ncol(z)){
+    z[i,j] <- x[i]^2 + y[j]^2
+  }
+}
+
+plot_ly(x = x, y = y, z = t(z)) |>
+  add_contour(colorscale = list(c(0, 0.1, 0.2, 0.5, 1), c('blue', 'turquoise', 'yellow', 'orange', 'red'))
+)
+```
+
+![](~/Documents/Teaching/sta379-s25/sta379-s25.github.io/slides/lecture_15_plot3.png)
+
+
+## Preliminaries: contour plots
+
+Example: $f(x, y) = 5x^2 + 0.5y^2$
+
+```{r, echo=F, message=F, warning=F, eval=F}
+library(plotly)
+x <- seq(-3, 3, by=0.01)
+y <- seq(-3, 3, by=0.01)
+z <- matrix(nrow=length(x), ncol=length(y))
+for(i in 1:nrow(z)){
+  for(j in 1:ncol(z)){
+    z[i,j] <- 5*x[i]^2 + 0.5*y[j]^2
+  }
+}
+
+plot_ly(x = x, y = y, z = t(z)) |>
+  add_contour(colorscale = list(c(0, 0.1, 0.2, 0.5, 1), c('blue', 'turquoise', 'yellow', 'orange', 'red'))
+)
+```
+
+![](~/Documents/Teaching/sta379-s25/sta379-s25.github.io/slides/lecture_15_plot4.png)
+
+## Another example
+
+$$f(x, y) = (x^2 + y - 11)^2 + (x + y^2 - 7)^2$$
+
+**Question:** What do you notice about this function?
+
+![](~/Documents/Teaching/sta379-s25/sta379-s25.github.io/slides/lecture_15_plot5.png)
+
+## Another example
+
+$$f(x, y) = (x^2 + y - 11)^2 + (x + y^2 - 7)^2$$
+![](~/Documents/Teaching/sta379-s25/sta379-s25.github.io/slides/lecture_15_plot6.png)
+
+
+## Activity
+
+Activity on the course website:
+
+[https://sta379-s25.github.io/practice_questions/pq_15.html](https://sta379-s25.github.io/practice_questions/pq_15.html)
+
+* Visualize shape of loss function for regression problem
+* Explore how shape of loss function impacts performance of gradient descent
