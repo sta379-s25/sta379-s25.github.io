@@ -1,0 +1,319 @@
+---
+title: "Homework 5"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+**Note:** To give you time to work on Project 1, this homework is somewhat shorter than previous assignments
+
+**Due:** Monday March 3, 10pm
+
+**Submission:** For this assignment, you will submit two files:
+
+* A knitted html or pdf file (from an R Markdown or Quarto document) showing your code, results, and answers for questions 1-2 (submitted to Canvas)
+* A pdf containing your written answers to questions 3-5 (submitted to Canvas)
+
+**Grading:** There are 5 questions on this assignment. You will receive a score out of 5 for the number of questions mastered. To master a question, you must satisfy the following requirements:
+
+* You must comment your code
+* Your written solutions must be complete and correct, with no missing steps or mistakes
+* Responses to questions asking for description or explanation must be complete, thorough, and correct
+* Your work must abide by the academic honesty requirements in the syllabus 
+
+If you make an honest effort to answer all questions, but you do not master all of the questions on your first submission, you will have one resubmission attempt after receiving feedback.
+
+# Robust regression, revisited
+
+In HW 4, you saw robust regression as a method for reducing the influence of outliers on our estimated regression coefficients. Suppose we have the model
+
+$$y_i = \beta_0 + \beta_1 X_{i,1} + \beta_2 X_{i,2} + \cdots + \beta_p X_{i,p} + \varepsilon_i$$
+
+Recall that robust regression minimizes
+
+$$L(\beta) = \sum \limits_{i=1}^n \rho(y_i - \beta_0 - \beta_1 X_{i,1} - \beta_2 X_{i,2} - \cdots - \beta_p X_{i,p})$$
+
+where the Huber loss function $\rho$ is given by
+
+$$\rho(y - \widehat{y}) = \begin{cases} \frac{1}{2} (y - \widehat{y})^2 & |y - \widehat{y}| \leq \gamma \\ \gamma |y - \widehat{y}| - \frac{1}{2}\gamma^2 & \text{else} \end{cases}$$
+
+On HW 4, you used gradient descent to estimate coefficients for the robust regression. However, your estimates were slightly different than the results from the `rlm` function in R, because you used $\gamma = 1$, whereas `rlm` estimates $\gamma$ simultaneously.
+
+### How do we estimate $\gamma$?
+
+The parameter $\gamma$ is a tuning parameter in the Huber loss function, and it controls the switch from quadratic to linear loss for the residuals. How should we think about choosing $\gamma$?
+
+Intuitively, $\gamma$ should be related to the variability of the residuals $y_i - \widehat{y}_i$. For example, if $y_i - \widehat{y}_i \in (-500, 500)$ and we set $\gamma = 1$, then effectively we are using a linear loss for all observations. On the other hand, if $y_i - \widehat{y}_i \in (-0.001, 0.001)$ and we set $\gamma = 1$, then we will end up using a quadratic loss for all observations (and just do ordinary least squares regression).
+
+A common rule of thumb is to use 
+
+$$\widehat{\gamma} = \frac{\text{median}\{|y_i - \widehat{y}_i|\}}{0.6745} \cdot 1.345$$
+
+Why this value for $\gamma$? Well, for a Normal distribution, $\dfrac{\text{median}\{|y_i - \widehat{y}_i|\}}{0.6745}$ is a robust measure of the standard deviation. Here is an example:
+
+```{r}
+# true sd = 1; robust estimator involving median absolute value is very close
+median(abs(rnorm(10000, sd=1)))/0.6745
+
+# true sd = 2; robust estimator involving median absolute value is very close
+median(abs(rnorm(10000, sd=2)))/0.6745
+```
+
+The 1.345 is just a choice for the number of standard deviations; within 1.345 standard deviations we use the squared loss, and beyond 1.345 standard deviations we use the absolute loss.
+
+### Iteratively reweighted least squares (IRLS)
+
+You will notice that the estimate
+
+$$\widehat{\gamma} = \frac{\text{median}\{|y_i - \widehat{y}_i|\}}{0.6745} \cdot 1.345$$
+
+requires us calculate $\widehat{y}_i = \widehat{\beta}_0 + \widehat{\beta}_1 X_{i,1} + \cdots + \widehat{\beta}_p X_{i,p}$, which requires $\widehat{\beta}$. However, calculating the $\widehat{\beta}$ requires us to have a value for $\gamma$! So what do we do?
+
+The answer, of course, is iterate. We could include a step to estimate $\gamma$ in our gradient descent, but there is another way to fit a robust regression that leverages the weighted least squares solution that you derived on HW 4. This is called **iteratively reweighted least squares**.
+
+Let $\psi(u) = \rho'(u)$ denote the derivative of the Huber loss function. Your gradient vector for HW 4 can be re-written as
+
+$$\nabla L(\beta) = - \sum \limits_{i=1}^n \psi(y_i - \beta^T {\bf x}_i) {\bf x}_i,$$
+
+where 
+
+$$\beta = \begin{pmatrix} \beta_0 \\ \beta_1 \\ \vdots \\ \beta_p \end{pmatrix} \hspace{1cm} {\bf x}_i = \begin{pmatrix} 1 \\ X_{i,1} \\ \vdots \\ X_{i,p} \end{pmatrix}$$
+
+and
+
+$$\psi(u) = \begin{cases} u & |u| \leq \gamma \\ \gamma \ \text{sign}(u) & |u| > \gamma \end{cases}$$
+Letting $v_i = \dfrac{\psi(y_i - \beta^T {\bf x}_i)}{y_i - \beta^T {\bf x}_i}$, then $\widehat{\beta}$ solve
+
+$$\sum \limits_{i=1}^n v_i (y_i - \beta^T {\bf x}_i) {\bf x}_i = 0$$
+
+This means that the solution to robust regression with the Huber loss function is equivalent to a weighted least squares problem!
+
+### The IRLS procedure
+
+To estimate the coefficients $\beta$ which minimize 
+
+$$L(\beta) = \sum \limits_{i=1}^n \rho(y_i - \beta_0 - \beta_1 X_{i,1} - \beta_2 X_{i,2} - \cdots - \beta_p X_{i,p})$$
+
+do the following.
+
+1. Begin with initial estimates $\widehat{\beta}^{(0)}$; often we initialize by fitting ordinary least squares
+2. Calculate estimate $\widehat{\gamma}$:
+
+$$\widehat{\gamma} = \frac{\text{median}\{|y_i - \widehat{\beta}_0^{(0)} - \widehat{\beta}_1^{(0)} X_{i,1} - \cdots - \widehat{\beta}_p^{(0)} X_{i,p}|\}}{0.6745} \cdot 1.345$$
+
+3. Calculate the weights. For the function $\psi$ (the derivative of the Huber loss function $\rho$), use $\widehat{\gamma}$.
+
+$$w_i = \left( \frac{\psi(y_i - \widehat{\beta}_0^{(0)} - \widehat{\beta}_1^{(0)} X_{i,1} - \cdots - \widehat{\beta}_p^{(0)} X_{i,p})}{y_i - \widehat{\beta}_0^{(0)} - \widehat{\beta}_1^{(0)} X_{i,1} - \cdots - \widehat{\beta}_p^{(0)} X_{i,p}} \right)^2$$
+
+4. Perform weighted least squares, with ${\bf W} = \text{diag}(w_1,...,w_n)$ to update $\beta$:
+
+$$\widehat{\beta}^{(1)} = ({\bf X}_D^T {\bf W} {\bf X}_D)^{-1} {\bf X}_D^T {\bf W} {\bf y}$$
+
+5. Go back to step 2 and repeat, iteratively updating $\widehat{\gamma}$, the $w_i$, and $\widehat{\beta}$
+
+6. Stop when $||\widehat{\beta}^{(k+1)} - \widehat{\beta}^{(k)}||$ is small enough
+
+The IRLS procedure is used to fit robust regression models by the `rlm` function in R. Here is the result, using the occupational prestige data discussed on HW 4:
+
+```{r message=F, warning=F}
+library(MASS)
+library(car)
+rlm(prestige ~ income + education, data = Duncan)
+```
+
+The scale estimate of 9.89 is the final estimate $\text{median}\{|y_i - \widehat{y}_i|\}/0.6745$. Note that IRLS converges very quickly here, and does not suffer from the same issues of scaling as gradient descent did. This is because weighted least squares does not suffer from scaling issues in the same way.
+
+```{r, echo=F, eval=F}
+# huber influence function
+huber_psi <- function(u, gamma = 1){
+  ifelse(abs(u) <= gamma, u, gamma * sign(u))
+}
+
+cur_beta <- lm(prestige ~ income + education, data = Duncan) |> coef()
+y <- Duncan$prestige
+X <- cbind(1, Duncan$income, Duncan$education)
+
+beta_diff <- 1
+iterations <- 0
+while(beta_diff > 0.0001){
+  old_beta <- cur_beta
+  e <- y - c(X %*% cur_beta)
+  s_est <- median(abs(e))/0.6745
+  W <- diag(huber_psi(e, gamma=1.345*s_est))/e
+  cur_beta <- solve(t(X) %*% W %*% X) %*% t(X) %*% W %*% y
+  beta_diff <- sqrt(sum((cur_beta - old_beta)^2))
+  iterations <- iterations + 1
+}
+
+cur_beta
+s_est
+```
+
+
+:::{.question}
+#### Question 1 (.html)
+
+Instead of using the `rlm` function, implement the IRLS procedure described above to fit the robust regression model to the occupational prestige data. Begin with the coefficient estimates from OLS:
+
+```{r}
+coef(lm(prestige ~ income + education, data = Duncan))
+```
+
+Stop when $||\widehat{\beta}^{(k+1)} - \widehat{\beta}^{(k)}|| < 0.0001$. Your estimates and iterations should match the `rlm` output above.
+
+:::
+
+
+```{r, include=F, eval=F}
+n <- 50
+x <- rnorm(n)
+y <- 0.5 + x + rnorm(n, sd=0.5)
+x[(n-1):n] <- c(1.5, 2)
+y[(n-1):n] <- c(4, 5)
+
+plot(x, y)
+
+nsim <- 1000
+beta_ols <- rep(NA, nsim)
+beta_ols_small <- rep(NA, nsim)
+beta_robust <- rep(NA, nsim)
+for(i in 1:nsim){
+  n <- 50
+  x <- rnorm(n)
+  y <- 0.5 + x + rnorm(n, sd=0.5)
+  x[(n-1):n] <- c(1.5, 2)
+  y[(n-1):n] <- c(4, 5)
+  beta_ols[i] <- coef(lm(y ~ x))[2]
+  beta_ols_small[i] <- coef(lm(y[1:(n-2)] ~ x[1:(n-2)]))[2]
+  beta_robust[i] <- coef(rlm(y ~ x))[2]
+}
+
+(mean(beta_ols) - 1)^2 + var(beta_ols)
+(mean(beta_ols_small) - 1)^2 + var(beta_ols_small)
+(mean(beta_robust) - 1)^2 + var(beta_robust)
+```
+
+
+### Why use robust regression??
+
+A standard assumption of regression models is that all observations are generated from the same process. If we have some observations which don't follow the same general trend as the others, it is possible that they are the result of errors or contamination. And even if the outliers are not mistakes, they can still pull the fit of the regression model away from the general trend observed in the non-outlier points.
+
+Robust regression provides an option for handling outliers by mitigating their effects on the fitted model. As an example, consider the following small simulation, in which points are generated from a linear regression model, and the final two points are outliers:
+
+```{r}
+set.seed(38)
+n <- 50
+x <- rnorm(n)
+y <- 0.5 + x + rnorm(n, sd=0.5)
+x[(n-1):n] <- c(1.5, 2)
+y[(n-1):n] <- c(5, 6)
+
+plot(x, y)
+plot(lm(y ~ x), which=4)
+```
+
+From the plot, we can see that these two points have larger residuals than we would expect, and show up as potentially influential in the Cook's distance. 
+
+For this simulated data, $\beta_0 = 0.5$ and $\beta_1 = 1$. Fitting the least-squares and robust linear regression models, we see that the robust regression estimates are closer to the true values:
+
+```{r}
+coef(lm(y ~ x))
+coef(rlm(y ~ x))
+```
+
+In this question, you will conduct a small simulation study to compare robust regression to OLS in the presence of outliers.
+
+
+
+:::{.question}
+#### Question 2 (.html)
+
+In statistics, we commonly measure the quality of an estimator by its *mean squared error* (MSE). For example, suppose we wish to estimate $\beta_1$ in the model above. The MSE of an estimator $\widehat{\beta}_1$ is given by
+
+$$MSE(\widehat{\beta}_1) = \text{Bias}^2(\widehat{\beta}_1) + Var(\widehat{\beta}_1) = (\mathbb{E}(\widehat{\beta}_1) - \beta_1 )^2 + Var(\widehat{\beta}_1)$$
+
+In general, we prefer estimators with a lower MSE.
+
+Adapting the code provided, repeat the simulation many times, storing the estimates of $\beta_1$ from OLS and robust regression. Use these to approximate the MSE for the OLS and robust regression estimators of $\beta_1$. Which method -- OLS or robust regression -- does a better job in this example?
+
+:::
+
+
+# Gradient descent level curves
+
+In class activities and HW 4, you have seen how gradient descent can be slow when traversing long, narrow valleys in the function we are trying to minimize. You also saw that scaling the explanatory variables can help avoid these valleys, speeding up gradient descent. In this portion of the assignment, you will demonstrate mathematically why these valleys occur for linear regression problems, and why scaling helps.
+
+In the class activity, you saw how the contours for a linear regression look like ellipses:
+
+```{r, echo=F, message=F}
+library(plotly)
+x <- seq(-3, 3, by=0.01)
+y <- seq(-3, 3, by=0.01)
+z <- matrix(nrow=length(x), ncol=length(y))
+for(i in 1:nrow(z)){
+  for(j in 1:ncol(z)){
+    z[i,j] <- 5*x[i]^2 + 0.5*y[j]^2
+  }
+}
+
+plot_ly(x = x, y = y, z = t(z)) |>
+  add_contour(colorscale = list(c(0, 0.1, 0.2, 0.5, 1), c('blue', 'turquoise', 'yellow', 'orange', 'red'))
+)
+```
+
+Recall that the general formula for an ellipse in the $(x,y)$ plane is
+
+$$Ax^2 + Bxy + Cy^2 + Dx + Ey + F = 0$$
+
+The contour at value $c$ for a simple linear regression model fit with ordinary least squares is
+
+$$\sum \limits_{i=1}^n (Y_i - \beta_0 - \beta_1 X_i)^2 = c$$
+
+:::{.question}
+#### Question 3 (written)
+
+By rearranging and combining terms, show that the contours for simple linear regression with ordinary least squares are ellipses in the $(\beta_0, \beta_1)$ plane.
+
+:::
+
+The shape of an ellipse is captured in part by its *eccentricity*, which is related to the length of the major and minor axes. An eccentricity of 0 is a circle, while an eccentricity close to 1 is very long and narrow. The eccentricity of the general ellipse in the equation above is given by
+
+$$\sqrt{1 - \frac{((A + C) - \sqrt{(A - C)^2 + B^2})^2}{((A + C) + \sqrt{(A - C)^2 + B^2})^2}}$$
+
+
+:::{.question}
+#### Question 4 (written)
+
+Using your answer to question 3, show that the OLS contours are a circle if both
+
+$$\sum \limits_{i=1}^n X_i^2 = n$$
+
+and 
+
+$$\sum \limits_{i=1}^n X_i = 0$$
+
+:::
+
+Now let's think about scaling; let 
+
+$$X_i^* = \frac{X_i - \overline{X}}{\widehat{\sigma}_x}$$
+
+with $\overline{X} = \frac{1}{n} \sum \limits_{i=1}^n X_i$ and $\widehat{\sigma}_x^2 = \frac{1}{n} \sum \limits_{i=1}^n (X_i - \overline{X})^2$.
+
+
+:::{.question}
+#### Question 5 (written)
+
+Using your answer to question 4, show that 
+
+$$\sum \limits_{i=1}^n (X_i^*)^2 = n$$
+
+and 
+
+$$\sum \limits_{i=1}^n X_i^* = 0$$
+
+Thus, OLS with the scaled variables has circular contours.
+
+:::

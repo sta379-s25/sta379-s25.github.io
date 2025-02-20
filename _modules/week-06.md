@@ -10,10 +10,13 @@ February 17
   
 
 February 19
-: Gradient descent -- visualization
-  : [slides (pdf)](https://sta379-s25.github.io/slides/lecture_15.pdf), [practice questions](https://sta379-s25.github.io/practice_questions/pq_15.html), [practice question solutions](https://sta379-s25.github.io/practice_questions/pq_15_solutions.html)
+: No class (weather)
 
 February 21
-: Gradient descent -- modifications
-
+: Gradient descent -- visualization
+  : [slides (pdf)](https://sta379-s25.github.io/slides/lecture_15.pdf), [practice questions](https://sta379-s25.github.io/practice_questions/pq_15.html), [practice question solutions](https://sta379-s25.github.io/practice_questions/pq_15_solutions.html)
+  
 : [Algorithms for Optimization](https://algorithmsbook.com/optimization/files/optimization.pdf) Chapter 5
+
+: **Homework 5 released**{: .label .label-yellow }
+  : [HW 5](https://sta379-s25.github.io/homework/hw5.html)
