@@ -7,16 +7,16 @@ output:
 link-citations: yes
 ---
 
-**Note:** To give you time to work on Project 1, this homework is somewhat shorter than previous assignments
+**Note:** To give you time to work on Project 1, this homework is shorter than previous assignments
 
 **Due:** Monday March 3, 10pm
 
 **Submission:** For this assignment, you will submit two files:
 
 * A knitted html or pdf file (from an R Markdown or Quarto document) showing your code, results, and answers for questions 1-2 (submitted to Canvas)
-* A pdf containing your written answers to questions 3-5 (submitted to Canvas)
+* A pdf containing your written answers to questions 3-5 (submitted to Canvas) (if you choose to complete these)
 
-**Grading:** There are 5 questions on this assignment. You will receive a score out of 5 for the number of questions mastered. To master a question, you must satisfy the following requirements:
+**Grading:** There are 5 questions on this assignment. Questions 1 and 2 are required, and your grade will be based on these two questions. Questions 3-5 are optional; if you submit them, I will give you feedback, but you do not have to do them.
 
 * You must comment your code
 * Your written solutions must be complete and correct, with no missing steps or mistakes
@@ -272,7 +272,7 @@ The contour at value $c$ for a simple linear regression model fit with ordinary 
 $$\sum \limits_{i=1}^n (Y_i - \beta_0 - \beta_1 X_i)^2 = c$$
 
 :::{.question}
-#### Question 3 (written)
+#### Question 3 (written) (optional)
 
 By rearranging and combining terms, show that the contours for simple linear regression with ordinary least squares are ellipses in the $(\beta_0, \beta_1)$ plane.
 
@@ -284,7 +284,7 @@ $$\sqrt{1 - \frac{((A + C) - \sqrt{(A - C)^2 + B^2})^2}{((A + C) + \sqrt{(A - C)
 
 
 :::{.question}
-#### Question 4 (written)
+#### Question 4 (written) (optional)
 
 Using your answer to question 3, show that the OLS contours are a circle if both
 
@@ -304,7 +304,7 @@ with $\overline{X} = \frac{1}{n} \sum \limits_{i=1}^n X_i$ and $\widehat{\sigma}
 
 
 :::{.question}
-#### Question 5 (written)
+#### Question 5 (written) (optional)
 
 Using your answer to question 4, show that 
 
