@@ -6,6 +6,18 @@ editor_options:
   chunk_output_type: console
 ---
 
+## Logistics
+
+* HW 4 due Monday, February 24
+
+\bigskip
+
+* HW 5 is deliberately short, and several of the questions are optional
+
+\bigskip
+
+* Project 1 is due Friday, March 7
+
 ## Last time
 
 Gradient descent: ${\bf x}^{(k+1)} = {\bf x}^{(k)} - \alpha_k \nabla f({\bf x}^{(k)})$
