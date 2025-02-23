@@ -33,7 +33,7 @@ Let $f({\bf x})$ be some function we are trying to minimize, and ${\bf x} \in \m
 
 **Step 0:** Construct an initial simplex, $\mathcal{S}$. A *simplex* in $d$-dimensions is a set of $d+1$ points, which generalizes the idea of a triangle to higher dimensions. If ${\bf x} \in \mathbb{R}^2$, the simplex will be a triangle (like on the class slides). If ${\bf x} \in \mathbb{R}^3$, the simplex will be a tetrahedron. For this assignment, you do not have to construct the initial simplex; I will provide the initial simplex in examples in the unit tests.
 
-Write $\mathcal{S} = \{{\bf x}_1,..., {\bf x}_{d+1}\}$.
+Write $\mathcal{S} = \{ {\bf x}_1,..., {\bf x}_{d+1} \}$.
 
 **Step 1:** Evaluate $f({\bf x}_i)$ at each of the current points in $\mathcal{S}$.
 
