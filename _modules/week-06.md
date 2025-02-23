@@ -20,3 +20,6 @@ February 21
 
 : **Homework 5 released**{: .label .label-yellow }
   : [HW 5](https://sta379-s25.github.io/homework/hw5.html)
+  
+: **Challenge 4 released**{: .label .label-blue }
+  : [Challenge 4](https://sta379-s25.github.io/challenges/challenge_4.html)

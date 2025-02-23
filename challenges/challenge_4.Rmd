@@ -1,0 +1,114 @@
+---
+title: "Challenge 4: Nelder-Mead method"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+**Due:** Friday March 28, 10:00am
+
+**Submission:** For this assignment, you will submit one file:
+
+* A C++ script (`challenge4_code.cpp`) containing your C++ implementation of the Nelder-Mead algorithm
+
+**Requirements:** Your grade will be based on correctly implementing the Nelder-Mead method in C++
+
+* Your code must pass all specified unit tests, *as written* (you may not modify the unit tests which I provide)
+* Your code must meet all requirements described in the questions below (matching the requested inputs and outputs)
+* You must comment your code
+* Your work must abide by the academic honesty requirements in the syllabus 
+
+If you make an honest effort, but you do not master the challenge on your first submission, you will have one resubmission attempt after receiving feedback.
+
+
+## The Nelder-Mead method
+
+The Nelder-Mead method is a derivative-free optimization method that optimizes a function using only the values of the function at a set of test points. The method constructs a simplex (in two dimensions, this is a triangle), and moves the simplex around the parameter space through a series of expansions, contractions, and reflections. The method itself is heuristic, and based on the idea that we should move in a direction *away* from the current worst point on the simplex. It does, however, often work reasonably well in practice. In contrast to pattern search methods like compass search, it can also consider a more flexible range of directions and can expand or contract the "step size" by expanding or contracting the simplex.
+
+### Formal description of the algorithm
+
+Let $f({\bf x})$ be some function we are trying to minimize, and ${\bf x} \in \mathbb{R}^d$ the $d$-dimensional vector of inputs to the function.
+
+**Step 0:** Construct an initial simplex, $\mathcal{S}$. A *simplex* in $d$-dimensions is a set of $d+1$ points, which generalizes the idea of a triangle to higher dimensions. If ${\bf x} \in \mathbb{R}^2$, the simplex will be a triangle (like on the class slides). If ${\bf x} \in \mathbb{R}^3$, the simplex will be a tetrahedron. For this assignment, you do not have to construct the initial simplex; I will provide the initial simplex in examples in the unit tests.
+
+Write $\mathcal{S} = \{{\bf x}_1,..., {\bf x}_{d+1}\}$.
+
+**Step 1:** Evaluate $f({\bf x}_i)$ at each of the current points in $\mathcal{S}$.
+
+* Let ${\bf x}_l$ denote the point with the lowest value of $f$
+* Let ${\bf x}_h$ denote the point with the highest value of $f$
+* Let ${\bf x}_s$ denote the point with the *second*-highest value of $f$
+
+**Step 2:** Calculate the centroid, ${\bf x}_c$. The centroid is simply the element-wise average of all the points in $\mathcal{S}$ *except* ${\bf x}_h$
+
+**Step 3:** (Reflection) Compute the reflected point, ${\bf x}_r$:
+
+$${\bf x}_r = {\bf x}_c + ({\bf x}_c - {\bf x}_h)$$
+
+*If* $f({\bf x}_l) \leq f({\bf x}_r) < f({\bf x}_s)$: replace ${\bf x}_h$ with ${\bf x}_r$ in $\mathcal{S}$, and return to Step 1
+
+**Step 4:** (Expansion) If $f({\bf x}_r) < f({\bf x}_l)$, compute the expanded point, ${\bf x}_e$:
+
+$${\bf x}_e = {\bf x}_c + 2({\bf x}_c - {\bf x}_h)$$
+
+* If $f({\bf x}_e) < f({\bf x}_r)$: replace ${\bf x}_h$ with ${\bf x}_e$ in $\mathcal{S}$, and return to Step 1
+* Otherwise: replace ${\bf x}_h$ with ${\bf x}_r$ in $\mathcal{S}$, and return to Step 1
+
+**Step 5:** (Contract outside) If $f({\bf x}_s) \leq f({\bf x}_r) < f({\bf x}_h)$, computed the contracted outside point
+
+$${\bf x}_{\text{c.o.}} = {\bf x}_c + 0.5({\bf x}_c - {\bf x}_h)$$
+
+* If $f({\bf x}_\text{c.o.}) < f({\bf x}_r)$, replace ${\bf x}_h$ with ${\bf x}_\text{c.o.}$ in $\mathcal{S}$ and return to Step 1
+* Otherwise: go to step 7 (shrink)
+
+**Step 6:** (Contract inside) If we reach this step, it means that $f({\bf x}_r) \geq f({\bf x}_h)$, in which case we compute the contracted inside point
+
+$${\bf x}_{\text{c.i.}} = {\bf x}_c + 0.5({\bf x}_h - {\bf x}_c)$$
+
+* $f({\bf x}_\text{c.i.}) < f({\bf x}_h)$, replace ${\bf x}_h$ with ${\bf x}_\text{c.i.}$ in $\mathcal{S}$ and return to Step 1
+* Otherwise: go to step 7 (shrink)
+
+**Step 7:** (Shrink) If nothing else has worked, we shrink all the simplex points towards the best vertex. For all ${\bf x}_k \in \mathcal{S}$ *except* ${\bf x}_l$: 
+
+* calculate ${\bf x}_k^* = 0.5({\bf x}_k + {\bf x}_l)$
+* replace ${\bf x}_k$ in $\mathcal{S}$ with ${\bf x}_k^*$
+
+
+**Step 8:** (Stopping) Stop when the sample standard deviation of function values for the simplex is small enough:
+
+$$\sqrt{\frac{1}{d} \sum \limits_{i=1}^{d+1} (f({\bf x}_i) - \overline{f})^2} < \varepsilon$$
+
+where $\varepsilon$ is some small number, and $\overline{f} =\frac{1}{d+1} \sum \limits_{i=1}^{d+1} f({\bf x}_i)$; or when a maximum number of iterations has been reached.
+
+
+:::{.question}
+#### Question 1 (code)
+
+Write a C++ function called `nelder_meadC` which satisfies the following requirements:
+
+Inputs:
+
+* `f`: a `Function` (from R) that we want to optimize. (This would be a function that takes in a vector and returns a double, like computing the residual sum of squares. Remember you will need to cast the output to a double in C++, just like in HW 4)
+* `S`: an `arma::mat` object representing the initial simplex. Each row of the matrix is one of the points in the simplex
+* `max_iter`: an `int`, the maximum number of iterations to run the algorithm. Default: 1000
+* `eps`: a `double`, the threshold $\varepsilon$ for the standard deviation of the function values of the simplex described above. Default: 0.000001
+
+Output: a `List`, containing the following named entries:
+
+* `x`: the point on the simplex with the lowest value of $f$ when the procedure finishes
+* `simplex`: the final simplex when the procedure terminates, with the rows ordered by the value of $f$ in ascending order
+* `iterations`: the number of iterations taken by the method
+
+Additional requirements: 
+
+* You may not use any existing Nelder-Mead functions to write your code
+
+**Test cases:** See the unit tests in `challenge4_tests.R`
+:::
+
+
+
+
+
