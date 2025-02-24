@@ -1,0 +1,50 @@
+---
+title: "Momentum practice questions: solutions"
+format: html
+---
+
+```{r}
+library(Stat2Data)
+data("MedGPA")
+
+X <- cbind(1, MedGPA$GPA)
+
+f <- function(beta){
+  odds <- exp(beta[1] + beta[2]*MedGPA$GPA)
+  p <- odds/(1 + odds)
+  -1*sum(dbinom(MedGPA$Acceptance, 1, p, log=T))
+}
+
+fp <- function(beta){
+  odds <- exp(beta[1] + beta[2]*MedGPA$GPA)
+  p <- odds/(1 + odds)
+  c(-2*t(X) %*% (MedGPA$Acceptance - p))
+}
+
+l2_norm <- function(x){
+  sqrt(sum(x^2))
+}
+
+xk <- c(0, 0)
+alpha <- 0.01
+beta <- 0.9
+grad_size <- 1
+iter_count <- 0
+
+update_vals <- xk
+vk <- -alpha*fp(xk)
+
+while(grad_size > 0.001){
+  xk <- xk + vk
+  vk <- beta*vk - alpha*fp(xk)
+  update_vals <- rbind(update_vals, xk)
+  iter_count <- iter_count + 1
+  grad_size <- l2_norm(fp(xk))
+}
+
+iter_count
+
+plot(update_vals, type="l",
+     xlab = "Beta0", ylab="Beta1")
+```
+

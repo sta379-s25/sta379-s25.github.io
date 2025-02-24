@@ -1,0 +1,111 @@
+---
+title: "Practice Questions: Momentum"
+format: html
+---
+
+## Motivating problem: logistic regression
+
+The `MedGPA` dataset from the `Stat2Data` package contains data on med school applications for 55 college students, including the following variables:
+
+* `GPA`: student's undergraduate GPA
+* `Acceptance`: whether the student was accepted
+
+We would like to build a model to predict acceptance using college GPA. Because acceptance is a binary variable, a **logistic regression** model is appropriate.
+
+Let $p_i = P(\text{Acceptance}_i = 1)$ be the probability of acceptance for the $i$th individual in the data. Then, the logistic regression model is
+
+$$\log \left(\frac{p_i}{1 - p_i} \right) = \beta_0 + \beta_1 \text{GPA}_i$$
+
+In R:
+
+```{r, message=F}
+library(Stat2Data)
+data("MedGPA")
+
+glm(Acceptance ~ GPA, data = MedGPA, family = binomial)
+```
+
+The logistic regression model here estimates $\beta_0$ and $\beta_1$ by minimizing the following function:
+
+$$f(\beta_0, \beta_1) = - \sum \limits_{i=1}^n \left \lbrace \text{Acceptance}_i(\beta_0 + \beta_1 \text{GPA}_i) - \log(1 + e^{\beta_0 + \beta_1 \text{GPA}_i}) \right\rbrace$$
+
+The function `f` below calculates this for an input vector $\beta = (\beta_0, \beta_1)$, while the function `fp` calculates the gradient vector:
+
+```{r}
+X <- cbind(1, MedGPA$GPA)
+
+f <- function(beta){
+  odds <- exp(beta[1] + beta[2]*MedGPA$GPA)
+  p <- odds/(1 + odds)
+  -1*sum(dbinom(MedGPA$Acceptance, 1, p, log=T))
+}
+
+fp <- function(beta){
+  odds <- exp(beta[1] + beta[2]*MedGPA$GPA)
+  p <- odds/(1 + odds)
+  c(-2*t(X) %*% (MedGPA$Acceptance - p))
+}
+```
+
+### Gradient descent
+
+Here is an implementation of gradient descent with backtracking line search:
+
+```{r}
+l2_norm <- function(x){
+  sqrt(sum(x^2))
+}
+
+xk <- c(0, 0)
+c1 <- 0.0001
+grad_size <- 1
+iter_count <- 0
+
+while(grad_size > 0.001){
+  alpha <- 1
+  
+  # reduce alpha until sufficient decrease condition is satisfied
+  while(f(xk - alpha*fp(xk)) > f(xk) - c1*alpha*l2_norm(fp(xk))^2){
+    alpha <- 0.5*alpha
+  }
+  
+  xk <- xk - alpha*fp(xk)
+  iter_count <- iter_count + 1
+  grad_size <- l2_norm(fp(xk))
+}
+
+xk
+iter_count
+```
+
+
+## Heavy ball momentum
+
+Whereas basic gradient descent always moves in the direction of steepest descent, there are many adaptations and modifications. One is so-called "heavy ball" momentum: for $0 \leq \beta < 1$,
+
+* ${\bf v}^{(0)} = - \alpha \nabla f({\bf x}^{(0)})$
+* ${\bf x}^{(k)} = - \alpha \nabla f({\bf x}^{(k)}) + \beta {\bf v}^{(k-1)}$
+* ${\bf x}^{(k+1)} = {\bf x}^{(k)} + {\bf v}^{(k)}$
+
+1. Fill in the following code to fit the logistic regression model with heavy ball momentum, using specified values of $\alpha$ and $\beta$. How many iterations were required?
+
+```{r eval=F}
+xk <- c(0, 0)
+alpha <- 0.01
+beta <- 0.9
+grad_size <- 1
+iter_count <- 0
+
+vk <- ...
+
+while(grad_size > 0.001){
+  xk <- ...
+  vk <- ...
+  iter_count <- iter_count + 1
+  grad_size <- l2_norm(fp(xk))
+}
+```
+
+2. Plot the path of the updates at each iteration; how does it compare with a gradient descent path?
+
+

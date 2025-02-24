@@ -1,0 +1,843 @@
+---
+title: "Lecture 16: Gradient descent -- modifications"
+author: "Ciaran Evans"
+output: beamer_presentation
+editor_options: 
+  chunk_output_type: console
+---
+
+## Recall: gradient descent
+
+* **Goal:** Minimize $f({\bf x})$
+
+\bigskip
+
+* Iterative updates: ${\bf x}^{(k+1)} = {\bf x}^{(k)} - \alpha_k \nabla f({\bf x}^{(k)})$
+
+\bigskip
+
+* Choosing step size $\alpha_k$: 
+    * one option is backtracking line search with sufficient decrease condition
+
+## Limitations of gradient descent
+
+**Motivating example:** Data on med school admissions for 55 students
+
+* `GPA`: student's undergraduate GPA
+* `MCAT`: student's MCAT score
+
+Function to minimize:
+
+$$f(\beta_0, \beta_1) = \sum \limits_{i=1}^n (\text{MCAT}_i - \beta_0 - \beta_1 \text{GPA}_i)^2$$
+
+* Gradient descent with backtracking linear search beginning at (0, 0): 6517 iterations
+
+**Question:** from the activity last time, why does gradient descent need so many iterations here?
+
+## Limitations of gradient descent
+
+Gradient descent struggles to traverse long, narrow valleys
+
+```{r, echo=F, message=F, warning=F, fig.width=5, fig.height=4}
+library(Stat2Data)
+library(tidyverse)
+
+data("MedGPA")
+
+f <- function(beta){
+  sum((MedGPA$MCAT - beta[1]- beta[2]*MedGPA$GPA)^2)
+}
+
+x <- seq(4.2, 4.23, by=0.0001)
+y <- seq(9.018, 9.026, by=0.0001)
+z <- matrix(nrow=length(x), ncol=length(y))
+for(i in 1:nrow(z)){
+  for(j in 1:ncol(z)){
+    z[i,j] <- f(c(x[i], y[j]))
+  }
+}
+
+
+
+
+
+X <- cbind(1, MedGPA$GPA)
+
+fp <- function(beta){
+  c(-2*t(X) %*% (MedGPA$MCAT - X %*% beta))
+}
+
+l2_norm <- function(x){
+  sqrt(sum(x^2))
+}
+
+xk <- c(4.4, 9.5)
+c1 <- 0.0001
+grad_size <- 1
+iter_count <- 0
+
+update_vals <- xk
+
+while(grad_size > 0.001){
+  alpha <- 1
+  
+  # reduce alpha until sufficient decrease condition is satisfied
+  while(f(xk - alpha*fp(xk)) > f(xk) - c1*alpha*l2_norm(fp(xk))^2){
+    alpha <- 0.5*alpha
+  }
+  
+  xk <- xk - alpha*fp(xk)
+  update_vals <- rbind(update_vals, xk)
+  iter_count <- iter_count + 1
+  grad_size <- l2_norm(fp(xk))
+}
+
+
+contour(x, y, z, xaxt='n', yaxt='n')
+points(update_vals[100:150,], type="l", col="orange")
+```
+
+**Question:** What do you notice about the gradient descent path?
+
+## Limitations of gradient descent
+
+We should expect gradient descent to have a zig-zag path; this makes long, narrow valleys slow.
+
+* ${\bf x}^{(k+1)} = {\bf x}^{(k)} - \alpha_k \nabla f({\bf x}^{(k)})$
+
+* Suppose $\alpha_k$ is chosen to minimize
+$$f({\bf x}^{(k)} - \alpha_k \nabla f({\bf x}^{(k)}))$$
+
+**Claim:** $\nabla f({\bf x}^{(k+1)})$ is **orthogonal** (perpendicular) to $\nabla f({\bf x}^{(k)})$
+
+\vspace{4cm}
+
+
+## Overview: modifications of gradient descent
+
+**Basic idea:** don't always move in the direction of steepest descent
+
+* Momentum methods: direction of movement is combination of current gradient and previous gradients
+
+\bigskip
+
+* Subgradient methods: step size is different for each entry in gradient vector
+
+\bigskip
+
+* Second-order methods: use information about curvature of function (second derivative), not just gradient
+
+\bigskip
+
+It would be impossible to cover all of the possible modifications. My goal is to give you an introduction to some of the common ideas, and their motivation.
+
+## Momentum: motivation
+
+```{r, include=F}
+f <- function(x){
+  0.3*x^4 - 0.1*x^3 - 2*x^2 - 3*x
+}
+
+fp <- function(x){
+  1.2*x^3 - 0.3*x^2 - 4*x - 3
+}
+
+xk <- -2.8
+c1 <- 0.0001
+
+alpha <- 0.05
+xs <- c(xk)
+
+for(i in 1:100){
+  # alpha <- 1
+  # 
+  # # reduce alpha until sufficient decrease condition is satisfied
+  # while(f(xk - alpha*fp(xk)) > f(xk) - c1*alpha*abs(fp(xk))^2){
+  #   alpha <- 0.5*alpha
+  # }
+  
+  xk <- xk - alpha*fp(xk)
+  xs <- c(xs, xk)
+  #print(xk)
+}
+```
+
+Suppose we wish to minimize this function:
+
+```{r, echo=F, fig.width=4, fig.height=3.5}
+grid_pts <- seq(-3, 3, 0.01)
+plot(grid_pts, f(grid_pts), type="l",
+     xlab = "x", ylab="f(x)",
+     cex.axis=0.5, cex.lab=0.75)
+```
+
+## Momentum: motivation
+
+We start at $x^{(0)} = -2.8$:
+
+```{r, echo=F, fig.width=4, fig.height=3.5}
+grid_pts <- seq(-3, 3, 0.01)
+plot(grid_pts, f(grid_pts), type="l",
+     xlab = "x", ylab="f(x)",
+     cex.axis=0.5, cex.lab=0.75)
+points(xs[1], f(xs[1]))
+```
+
+## Momentum: motivation
+
+And now we perform gradient descent. After the first iteration:
+
+```{r, echo=F, fig.width=4, fig.height=3.5}
+grid_pts <- seq(-3, 3, 0.01)
+plot(grid_pts, f(grid_pts), type="l",
+     xlab = "x", ylab="f(x)",
+     cex.axis=0.5, cex.lab=0.75)
+points(xs[1:2], f(xs[1:2]))
+```
+
+## Momentum: motivation
+
+And now we perform gradient descent. After the second iteration:
+
+```{r, echo=F, fig.width=4, fig.height=3.5}
+grid_pts <- seq(-3, 3, 0.01)
+plot(grid_pts, f(grid_pts), type="l",
+     xlab = "x", ylab="f(x)",
+     cex.axis=0.5, cex.lab=0.75)
+points(xs[1:3], f(xs[1:3]))
+```
+
+**Question:** Why is the second step smaller than the first step?
+
+## Momentum: motivation
+
+Several more iterations:
+
+```{r, echo=F, fig.width=4, fig.height=3.5}
+grid_pts <- seq(-3, 3, 0.01)
+plot(grid_pts, f(grid_pts), type="l",
+     xlab = "x", ylab="f(x)",
+     cex.axis=0.5, cex.lab=0.75)
+points(xs[1:10], f(xs[1:10]))
+```
+
+## Momentum: motivation
+
+Finally, after 50 iterations:
+
+```{r, echo=F, fig.width=4, fig.height=3.5}
+grid_pts <- seq(-3, 3, 0.01)
+plot(grid_pts, f(grid_pts), type="l",
+     xlab = "x", ylab="f(x)",
+     cex.axis=0.5, cex.lab=0.75)
+points(xs[1:50], f(xs[1:50]))
+```
+
+**Question:** At which part of this function is gradient descent slowest?
+
+
+## Momentum
+
+Gradient descent can be slow in flat areas. Idea: use the momentum from previous gradients.
+
+* Let $0 \leq \beta < 1$
+
+\bigskip
+
+* Update rule: 
+
+    * ${\bf x}^{(1)} = {\bf x}^{(0)} - \alpha \nabla f({\bf x}^{(0)})$
+    
+    \bigskip
+    * ${\bf x}^{(2)} = {\bf x}^{(1)} - \alpha \nabla f({\bf x}^{(1)}) - \beta \alpha \nabla f({\bf x}^{(0)})$
+    
+    \bigskip
+    * ${\bf x}^{(3)} =$
+
+
+\vspace{4cm}
+
+
+## Momentum
+
+Gradient descent can be slow in flat areas. Idea: use the momentum from previous gradients.
+
+* Let $0 \leq \beta < 1$
+
+\bigskip
+
+* Update rule: 
+
+    * ${\bf x}^{(1)} = {\bf x}^{(0)} - \alpha \nabla f({\bf x}^{(0)})$
+    
+    \bigskip
+    * ${\bf x}^{(2)} = {\bf x}^{(1)} - \alpha \nabla f({\bf x}^{(1)}) - \beta \alpha \nabla f({\bf x}^{(0)})$
+    
+    \bigskip
+    * ${\bf x}^{(3)} = {\bf x}^{(2)} - \alpha \nabla f({\bf x}^{(2)}) - \beta \alpha \nabla f({\bf x}^{(1)}) - \beta^2 \alpha \nabla f({\bf x}^{(0)})$
+    
+\bigskip
+
+Written another way:
+
+\vspace{5cm}
+
+## Momentum
+
+* Let $0 \leq \beta < 1$
+
+\bigskip
+
+* ${\bf v}^{(0)} = - \alpha \nabla f({\bf x}^{(0)})$
+
+\bigskip
+
+* ${\bf x}^{(1)} = {\bf x}^{(0)} + {\bf v}^{(0)}$
+
+\bigskip
+
+* ${\bf x}^{(k)} = - \alpha \nabla f({\bf x}^{(k)}) + \beta {\bf v}^{(k-1)}$
+
+\bigskip
+
+* ${\bf x}^{(k+1)} = {\bf x}^{(k)} + {\bf v}^{(k)}$
+
+
+## Momentum in action
+
+Starting again at $x^{(0)} = -2.8$. After the first iteration:
+
+```{r, include=F}
+xk <- -2.8
+
+alpha <- 0.05
+beta <- 0.5
+xs <- c(xk)
+vk <- -alpha*fp(xk)
+
+for(i in 1:100){
+  
+  xk <- xk + vk
+  vk <- beta*vk - alpha*fp(xk)
+  xs <- c(xs, xk)
+  #print(xk)
+}
+```
+
+```{r, echo=F, fig.width=4, fig.height=3.5}
+grid_pts <- seq(-3, 3, 0.01)
+plot(grid_pts, f(grid_pts), type="l",
+     xlab = "x", ylab="f(x)",
+     cex.axis=0.5, cex.lab=0.75)
+points(xs[1:2], f(xs[1:2]))
+```
+
+## Momentum in action
+
+After the two iterations:
+
+```{r, echo=F, fig.width=4, fig.height=3.5}
+grid_pts <- seq(-3, 3, 0.01)
+plot(grid_pts, f(grid_pts), type="l",
+     xlab = "x", ylab="f(x)",
+     cex.axis=0.5, cex.lab=0.75)
+points(xs[1:3], f(xs[1:3]))
+```
+
+## Momentum in action
+
+After 10 iterations:
+
+```{r, echo=F, fig.width=4, fig.height=3.5}
+grid_pts <- seq(-3, 3, 0.01)
+plot(grid_pts, f(grid_pts), type="l",
+     xlab = "x", ylab="f(x)",
+     cex.axis=0.5, cex.lab=0.75)
+points(xs[1:11], f(xs[1:11]))
+```
+
+## Momentum in action
+
+After 20 iterations:
+
+```{r, echo=F, fig.width=4, fig.height=3.5}
+grid_pts <- seq(-3, 3, 0.01)
+plot(grid_pts, f(grid_pts), type="l",
+     xlab = "x", ylab="f(x)",
+     cex.axis=0.5, cex.lab=0.75)
+points(xs[1:21], f(xs[1:21]))
+```
+
+## Momentum in action
+
+\textcolor{blue}{Blue:} 100 iterations of gradient descent
+
+\textcolor{orange}{Orange:} 100 iterations of descent with momentum
+
+```{r, echo=F, fig.width=5, fig.height=4.5}
+f <- function(beta){
+  sum((MedGPA$MCAT - beta[1]- beta[2]*MedGPA$GPA)^2)
+}
+
+x <- seq(4.1, 4.25, by=0.0005)
+y <- seq(9.01, 9.05, by=0.0005)
+z <- matrix(nrow=length(x), ncol=length(y))
+for(i in 1:nrow(z)){
+  for(j in 1:ncol(z)){
+    z[i,j] <- f(c(x[i], y[j]))
+  }
+}
+
+
+X <- cbind(1, MedGPA$GPA)
+
+fp <- function(beta){
+  c(-2*t(X) %*% (MedGPA$MCAT - X %*% beta))
+}
+
+l2_norm <- function(x){
+  sqrt(sum(x^2))
+}
+
+xk <- c(4.25, 9.01)
+grad_size <- 1
+iter_count <- 0
+
+update_vals <- xk
+
+beta <- 0.9
+alpha <- 0.001
+vk <- -alpha*fp(xk)
+
+while(grad_size > 0.001){
+  
+  xk <- xk + vk
+  vk <- beta*vk - alpha*fp(xk)
+  update_vals <- rbind(update_vals, xk)
+  iter_count <- iter_count + 1
+  grad_size <- l2_norm(fp(xk))
+}
+
+
+
+xk <- c(4.25, 9.01)
+c1 <- 0.0001
+grad_size <- 1
+iter_count <- 0
+
+update_vals_grad <- xk
+
+while(grad_size > 0.001){
+  alpha <- 1
+
+  # reduce alpha until sufficient decrease condition is satisfied
+  while(f(xk - alpha*fp(xk)) > f(xk) - c1*alpha*l2_norm(fp(xk))^2){
+    alpha <- 0.5*alpha
+  }
+  
+  xk <- xk - alpha*fp(xk)
+  update_vals_grad <- rbind(update_vals_grad, xk)
+  iter_count <- iter_count + 1
+  grad_size <- l2_norm(fp(xk))
+}
+
+
+contour(x, y, z, xaxt='n', yaxt='n')
+points(update_vals_grad[1:100,], type="l", col="blue")
+points(update_vals[1:100,], type="l", col="orange")
+```
+
+## Another example
+
+Momentum can also help overcome local minima:
+
+```{r, echo=F, fig.width=4, fig.height=3.5}
+
+f <- function(x){
+  0.3 * x^4 - 0.1*x^3 - 2*x^2 - 0.8*x
+}
+
+fp <- function(x){
+  1.2*x^3 - 0.3*x^2 - 4*x - 0.8
+}
+
+xk <- -2.8
+c1 <- 0.0001
+
+alpha <- 0.05
+beta <- 0.7 # 0.5 doesn't work
+xs <- c(xk)
+vk <- -alpha*fp(xk)
+
+for(i in 1:100){
+  # alpha <- 1
+  # 
+  # # reduce alpha until sufficient decrease condition is satisfied
+  # while(f(xk - alpha*fp(xk)) > f(xk) - c1*alpha*abs(fp(xk))^2){
+  #   alpha <- 0.5*alpha
+  # }
+  
+  xk <- xk + vk
+  vk <- beta*vk - alpha*fp(xk)
+  xs <- c(xs, xk)
+  #print(xk)
+}
+
+
+grid_pts <- seq(-3, 3, 0.01)
+plot(grid_pts, f(grid_pts), type="l",
+     xlab = "x", ylab="f(x)",
+     cex.axis=0.5, cex.lab=0.75)
+points(xs[1:30], f(xs[1:30]))
+```
+
+## Drawback of momentum
+
+**Question:** What do you notice about the iterations near the minimum?
+
+```{r, echo=F, fig.width=4, fig.height=3.5}
+
+f <- function(x){
+  0.3*x^4 - 0.1*x^3 - 2*x^2 - 3*x
+}
+
+fp <- function(x){
+  1.2*x^3 - 0.3*x^2 - 4*x - 3
+}
+
+
+xk <- -2.8
+c1 <- 0.0001
+
+alpha <- 0.05
+beta <- 0.7 # 0.5 doesn't work
+xs <- c(xk)
+vk <- -alpha*fp(xk)
+
+for(i in 1:100){
+  # alpha <- 1
+  # 
+  # # reduce alpha until sufficient decrease condition is satisfied
+  # while(f(xk - alpha*fp(xk)) > f(xk) - c1*alpha*abs(fp(xk))^2){
+  #   alpha <- 0.5*alpha
+  # }
+  
+  xk <- xk + vk
+  vk <- beta*vk - alpha*fp(xk)
+  xs <- c(xs, xk)
+  #print(xk)
+}
+
+
+grid_pts <- seq(-3, 3, 0.01)
+plot(grid_pts, f(grid_pts), type="l",
+     xlab = "x", ylab="f(x)",
+     cex.axis=0.5, cex.lab=0.75)
+points(xs[1:30], f(xs[1:30]))
+```
+
+## Nesterov momentum
+
+"Heavy ball" momentum:
+
+* ${\bf v}^{(k)} = - \alpha \nabla f({\bf x}^{(k)}) + \beta {\bf v}^{(k-1)}$
+* ${\bf x}^{(k+1)} = {\bf x}^{(k)} + {\bf v}^{(k)}$
+
+\bigskip
+
+Nesterov momentum:
+
+* ${\bf v}^{(k)} = - \alpha \nabla f({\bf x}^{(k)} + \beta {\bf v}^{(k-1)}) + \beta {\bf v}^{(k-1)}$
+* ${\bf x}^{(k+1)} = {\bf x}^{(k)} + {\bf v}^{(k)}$
+
+## Nesterov momentum in action
+
+Descent with Nesterov momentum can slow itself down when it gets to the bottom:
+
+```{r, include=F}
+xk <- -2.8
+
+alpha <- 0.05
+beta <- 0.5
+xs <- c(xk)
+vk <- -alpha*fp(xk)
+
+for(i in 1:100){
+  
+  xk <- xk + vk
+  vk <- beta*vk - alpha*fp(xk + beta*vk)
+  xs <- c(xs, xk)
+  #print(xk)
+}
+```
+
+
+```{r, echo=F, fig.width=4, fig.height=3.5}
+grid_pts <- seq(-3, 3, 0.01)
+plot(grid_pts, f(grid_pts), type="l",
+     xlab = "x", ylab="f(x)",
+     cex.axis=0.5, cex.lab=0.75)
+points(xs[1:21], f(xs[1:21]))
+```
+
+## Nesterov momentum in action
+
+\textcolor{blue}{Blue:} Nesterov momentum
+
+\textcolor{orange}{Orange:} Heavy ball momentum
+
+```{r, echo=F, fig.width=5, fig.height=4.5}
+f <- function(beta){
+  sum((MedGPA$MCAT - beta[1]- beta[2]*MedGPA$GPA)^2)
+}
+
+x <- seq(4.1, 4.25, by=0.0005)
+y <- seq(9.01, 9.05, by=0.0005)
+z <- matrix(nrow=length(x), ncol=length(y))
+for(i in 1:nrow(z)){
+  for(j in 1:ncol(z)){
+    z[i,j] <- f(c(x[i], y[j]))
+  }
+}
+
+
+X <- cbind(1, MedGPA$GPA)
+
+fp <- function(beta){
+  c(-2*t(X) %*% (MedGPA$MCAT - X %*% beta))
+}
+
+l2_norm <- function(x){
+  sqrt(sum(x^2))
+}
+
+xk <- c(4.25, 9.01)
+grad_size <- 1
+iter_count <- 0
+
+update_vals <- xk
+
+beta <- 0.9
+alpha <- 0.001
+vk <- -alpha*fp(xk)
+
+while(grad_size > 0.001){
+  
+  xk <- xk + vk
+  vk <- beta*vk - alpha*fp(xk)
+  update_vals <- rbind(update_vals, xk)
+  iter_count <- iter_count + 1
+  grad_size <- l2_norm(fp(xk))
+}
+
+
+
+xk <- c(4.25, 9.01)
+grad_size <- 1
+iter_count <- 0
+
+update_vals_nest <- xk
+
+beta <- 0.9
+alpha <- 0.0008
+vk <- -alpha*fp(xk)
+
+while(grad_size > 0.001){
+  
+  xk <- xk + vk
+  vk <- beta*vk - alpha*fp(xk + beta*vk)
+  update_vals_nest <- rbind(update_vals_nest, xk)
+  iter_count <- iter_count + 1
+  grad_size <- l2_norm(fp(xk))
+}
+
+
+contour(x, y, z, xaxt='n', yaxt='n')
+points(update_vals[1:100,], type="l", col="orange")
+points(update_vals_nest[1:100,], type="l", col="blue")
+```
+
+```{r, include=F, eval=F}
+f <- function(beta){
+  sum((MedGPA$MCAT - beta[1]- beta[2]*MedGPA$GPA)^2)
+}
+
+x <- seq(4.1, 4.25, by=0.0005)
+y <- seq(9.01, 9.05, by=0.0005)
+z <- matrix(nrow=length(x), ncol=length(y))
+for(i in 1:nrow(z)){
+  for(j in 1:ncol(z)){
+    z[i,j] <- f(c(x[i], y[j]))
+  }
+}
+
+
+X <- cbind(1, MedGPA$GPA)
+
+fp <- function(beta){
+  c(-2*t(X) %*% (MedGPA$MCAT - X %*% beta))
+}
+
+l2_norm <- function(x){
+  sqrt(sum(x^2))
+}
+
+xk <- c(4.25, 9.01)
+grad_size <- 1
+iter_count <- 0
+
+update_vals <- xk
+
+beta <- 0.9
+alpha <- 0.001
+vk <- -alpha*fp(xk)
+
+while(grad_size > 0.001){
+  
+  xk <- xk + vk
+  vk <- beta*vk - alpha*fp(xk)
+  update_vals <- rbind(update_vals, xk)
+  iter_count <- iter_count + 1
+  grad_size <- l2_norm(fp(xk))
+}
+
+
+
+xk <- c(4.25, 9.01)
+grad_size <- 1
+iter_count <- 0
+
+update_vals <- xk
+
+beta <- 0.9
+#alpha <- 0.0008
+c1 <- 0.001
+vk <- -0.0001*fp(xk)
+
+while(grad_size > 0.001){
+  
+   # alpha <- 1
+  # 
+  # # reduce alpha until sufficient decrease condition is satisfied
+  # while(f(xk - alpha*fp(xk)) > f(xk) - c1*alpha*abs(fp(xk))^2){
+  #   alpha <- 0.5*alpha
+  # }
+  yk <- xk + beta*vk
+  alpha <- 1
+  while(f(yk - alpha*fp(yk)) > f(yk) - c1*alpha*l2_norm(fp(yk))^2){
+    alpha <- 0.5*alpha
+  }
+  
+  print(paste("alpha: ", alpha))
+  print(yk)
+  print(f(yk - alpha*fp(yk)))
+
+  vk <- beta*vk - alpha*fp(yk)
+  xk <- yk - alpha*fp(yk)
+  
+  
+  update_vals <- rbind(update_vals, xk)
+  iter_count <- iter_count + 1
+  grad_size <- l2_norm(fp(xk))
+}
+
+
+contour(x, y, z, xaxt='n', yaxt='n')
+points(update_vals[1:100,], type="l", col="blue")
+points(update_vals[1:100,], type="l", col="orange")
+```
+
+
+
+## Subgradient methods
+
+Gradient descent: ${\bf x}^{(k+1)} = {\bf x}^{(k)} - \alpha_k \nabla f({\bf x}^{(k)})$
+
+* The same step size $\alpha_k$ is applied to each element of the gradient $\nabla f({\bf x}^{(k)})$
+
+\bigskip
+
+* Example gradient from the MedGPA example: 
+
+$$\nabla f((4.1, 9.3)) = \begin{pmatrix} 146.1 \\ 521.7 \end{pmatrix}$$
+
+\bigskip
+
+**Question:** Why might we not want to use the same value of $\alpha_k$ for each element of the gradient?
+
+## Adagrad
+
+**Adagrad** (*ada*ptive sub*grad*ient) uses a different step size for each element of the gradient:
+
+$$x^{(k+1)}_i = x_i^{(k)} - \frac{\alpha}{\varepsilon + \sqrt{s_i^{(k)}}} \nabla f({\bf x}^{(k)})_i$$
+
+\bigskip
+
+$$s_i^{(k)} = \sum \limits_{j=1}^k (\nabla f({\bf x}^{(j)})_i)^2$$
+
+\vspace{4cm}
+
+
+## Adagrad
+
+```{r echo=F, fig.width=5, fig.height=4.5}
+f <- function(beta){
+  sum((MedGPA$MCAT - beta[1]- beta[2]*MedGPA$GPA)^2)
+}
+
+x <- seq(4.1, 4.25, by=0.0005)
+y <- seq(9.01, 9.05, by=0.0005)
+z <- matrix(nrow=length(x), ncol=length(y))
+for(i in 1:nrow(z)){
+  for(j in 1:ncol(z)){
+    z[i,j] <- f(c(x[i], y[j]))
+  }
+}
+
+
+X <- cbind(1, MedGPA$GPA)
+
+fp <- function(beta){
+  c(-2*t(X) %*% (MedGPA$MCAT - X %*% beta))
+}
+
+l2_norm <- function(x){
+  sqrt(sum(x^2))
+}
+
+xk <- c(4.25, 9.01)
+grad_size <- 1
+iter_count <- 0
+
+update_vals <- xk
+
+alpha <- 0.01
+sk <- fp(xk)^2
+
+while(grad_size > 0.001){
+  
+  xk <- xk - alpha/(1 + sqrt(sk)) * fp(xk)
+  sk <- sk + fp(xk)^2
+  
+  update_vals <- rbind(update_vals, xk)
+  iter_count <- iter_count + 1
+  grad_size <- l2_norm(fp(xk))
+}
+
+contour(x, y, z, xaxt='n', yaxt='n')
+points(update_vals[1:400,], type="l", col="blue")
+```
+
+
+## Your turn
+
+Practice questions on the course website:
+
+[https://sta379-s25.github.io/practice_questions/pq_16.html](https://sta379-s25.github.io/practice_questions/pq_16.html)
+
+* Try heavy ball momentum
+* Start in class. You are welcome to work with others
+* Practice questions are to help you practice. They are not submitted and not graded
+* Solutions are posted on the course website
+
+
