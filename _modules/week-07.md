@@ -9,7 +9,7 @@ February 24
 : [Algorithms for Optimization](https://algorithmsbook.com/optimization/files/optimization.pdf) Chapter 5  
 
 February 26
-: Second-order methods
+: Project work day
 
 February 28
 : Second-order methods
