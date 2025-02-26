@@ -84,9 +84,9 @@ $$\beta = \begin{pmatrix} \beta_0 \\ \beta_1 \\ \vdots \\ \beta_p \end{pmatrix} 
 and
 
 $$\psi(u) = \begin{cases} u & |u| \leq \gamma \\ \gamma \ \text{sign}(u) & |u| > \gamma \end{cases}$$
-Letting $v_i = \dfrac{\psi(y_i - \beta^T {\bf x}_i)}{y_i - \beta^T {\bf x}_i}$, then $\widehat{\beta}$ solve
+Letting $w_i = \dfrac{\psi(y_i - \beta^T {\bf x}_i)}{y_i - \beta^T {\bf x}_i}$, then $\widehat{\beta}$ solve
 
-$$\sum \limits_{i=1}^n v_i (y_i - \beta^T {\bf x}_i) {\bf x}_i = 0$$
+$$\sum \limits_{i=1}^n w_i (y_i - \beta^T {\bf x}_i) {\bf x}_i = 0$$
 
 This means that the solution to robust regression with the Huber loss function is equivalent to a weighted least squares problem!
 
@@ -105,7 +105,7 @@ $$\widehat{\gamma} = \frac{\text{median}\{|y_i - \widehat{\beta}_0^{(0)} - \wide
 
 3. Calculate the weights. For the function $\psi$ (the derivative of the Huber loss function $\rho$), use $\widehat{\gamma}$.
 
-$$w_i = \left( \frac{\psi(y_i - \widehat{\beta}_0^{(0)} - \widehat{\beta}_1^{(0)} X_{i,1} - \cdots - \widehat{\beta}_p^{(0)} X_{i,p})}{y_i - \widehat{\beta}_0^{(0)} - \widehat{\beta}_1^{(0)} X_{i,1} - \cdots - \widehat{\beta}_p^{(0)} X_{i,p}} \right)^2$$
+$$w_i = \frac{\psi(y_i - \widehat{\beta}_0^{(0)} - \widehat{\beta}_1^{(0)} X_{i,1} - \cdots - \widehat{\beta}_p^{(0)} X_{i,p})}{y_i - \widehat{\beta}_0^{(0)} - \widehat{\beta}_1^{(0)} X_{i,1} - \cdots - \widehat{\beta}_p^{(0)} X_{i,p}} $$
 
 4. Perform weighted least squares, with ${\bf W} = \text{diag}(w_1,...,w_n)$ to update $\beta$:
 
