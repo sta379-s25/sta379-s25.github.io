@@ -1,0 +1,107 @@
+---
+title: "Newton's method practice questions: solutions"
+format: html
+---
+
+```{r}
+f <- function(x){
+  x[1]^4/4 - sin(x[1]) + (x[1] + x[2])^2
+}
+
+fp <- function(x){
+  c(x[1]^3 - cos(x[1]) + 2*(x[1] + x[2]),
+    2*(x[1] + x[2]))
+}
+
+Hf <- function(x){
+  matrix(c(3*x[1]^2 + sin(x[1]) + 2, 2,
+           2, 2), nrow=2)
+}
+```
+
+1.
+
+```{r}
+x <- seq(-2, 2, by=0.005)
+y <- seq(-2, 2, by=0.005)
+z <- matrix(nrow=length(x), ncol=length(y))
+for(i in 1:nrow(z)){
+  for(j in 1:ncol(z)){
+    z[i,j] <- f(c(x[i], y[j]))
+  }
+}
+
+contour(x, y, z)
+
+xk <- c(-2, 0)
+points(xk[1], xk[2], pch=16, col="blue")
+```
+
+2.
+
+```{r}
+xk <- c(-2, 0)
+update_vals <- xk
+iter_count <- 0
+while(sqrt(sum(fp(xk)^2)) > 0.0001){
+  xk <- xk - c(solve(Hf(xk)) %*% fp(xk))
+  iter_count <- iter_count + 1
+  update_vals <- rbind(update_vals, xk)
+}
+
+xk
+iter_count
+```
+
+3.
+
+```{r}
+contour(x, y, z)
+points(update_vals, pch=16, col="blue")
+lines(update_vals, pch=16, col="blue")
+```
+
+4.
+
+```{r}
+xk <- c(-2, 0)
+update_vals_grad <- xk
+c1 <- 0.0001
+iter_count <- 0
+while(sqrt(sum(fp(xk)^2)) > 0.0001){
+  alpha <- 1
+  while(f(xk - alpha*fp(xk)) > f(xk) - c1*alpha*sum(fp(xk)^2)){
+    alpha <- 0.5*alpha
+  }
+  
+  xk <- xk - alpha*fp(xk)
+  update_vals_grad <- rbind(update_vals_grad, xk)
+  iter_count <- iter_count + 1
+}
+
+xk
+```
+
+5.
+
+```{r}
+iter_count
+```
+
+6.
+
+```{r}
+contour(x, y, z)
+points(update_vals, pch=16, col="blue")
+lines(update_vals, pch=16, col="blue")
+points(update_vals_grad, pch=16, col="orange")
+lines(update_vals_grad, col="orange")
+```
+
+
+
+
+
+
+
+

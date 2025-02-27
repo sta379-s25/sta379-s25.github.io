@@ -1,0 +1,261 @@
+---
+title: "Lecture 17: Newton's method"
+author: "Ciaran Evans"
+output: beamer_presentation
+editor_options: 
+  chunk_output_type: console
+---
+
+## Motivation
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+$$f(x) = \frac{x^4}{4} - \sin(x) + 7$$
+
+```{r, echo=F, fig.align='center', fig.width=2.8, fig.height=3}
+fx <- function(x){
+  x^4/4 - sin(x) + 7
+}
+gridpts <- seq(-3, 3, 0.01)
+plot(gridpts, fx(gridpts), type="l",
+     xlab = "x", ylab = "f(x)", cex.lab=0.75, cex.axis=0.75)
+```
+:::
+
+::: {.column width="50%"}
+
+$$f'(x) = x^3 - \cos(x) $$
+
+```{r, echo=F, fig.align='center', fig.width=2.8, fig.height=3}
+fp <- function(x){
+  x^3 - cos(x)
+}
+gridpts <- seq(-3, 3, 0.01)
+plot(gridpts, fp(gridpts), type="l",
+     xlab = "x", ylab = "f'(x)", cex.lab=0.75, cex.axis=0.75)
+```
+:::
+
+::::
+
+Want to minimize $f(x)$, i.e. solve $f'(x) = 0$. Challenge: no closed form.
+
+**Idea:** Approximate $f'$ with something *easy* to solve
+
+## Taylor expansion
+
+First-order Taylor expansion of function $g(x)$ around point $a$:
+
+$$g(x) \approx g(a) + (x - a)g'(a)$$
+
+**Question:** What is required of $x$ for this approximation to be reasonable?
+
+\vspace{4cm}
+
+## Taylor expansion
+
+First-order Taylor expansion of function $g(x)$ around point $a$:
+
+$$g(x) \approx g(a) + (x - a)g'(a)$$
+
+* Let $x^*$ be the location of the true minimum
+* Let $x^{(k)}$ be our current guess for $x^*$
+* Taylor expansion:
+
+$$f'(x^*) \approx \hspace{4cm}$$
+
+\vspace{4cm}
+
+## Newton's method (in one dimension)
+
+Iterative updates:
+
+$$x^{(k+1)} = x^{(k)} - (f''(x^{(k)}))^{-1} f'(x^{(k)})$$
+
+**Question:** How does this compare with gradient descent?
+
+\vspace{5cm}
+
+## Newton's method (in one dimension)
+
+Iterative updates:
+
+$$x^{(k+1)} = x^{(k)} - (f''(x^{(k)}))^{-1} f'(x^{(k)})$$
+
+More generally:
+
+$$x^{(k+1)} = x^{(k)} - \alpha_k (f''(x^{(k)}))^{-1} f'(x^{(k)})$$
+
+* $\alpha_k = 1$ is the "natural" value
+* Only use a different value of $\alpha_k$ when $\alpha_k = 1$ doesn't work
+
+## Illustration
+
+```{r, echo=F, fig.width=4, fig.height=3.5}
+fpp <- function(x){
+  3*x^2 + sin(x)
+}
+
+fp_taylor <- function(x, a){
+  fp(a) + (x-a)*fpp(a)
+}
+plot(gridpts, fp(gridpts), type="l",
+     xlab = "x", ylab = "f'(x)", cex.lab=0.75, cex.axis=0.75)
+xk <- -2
+points(gridpts, fp_taylor(gridpts, xk), type="l", col="orange")
+```
+
+* $x^{(0)} = -2$
+
+## Illustration
+
+```{r, echo=F, fig.width=4, fig.height=3.5}
+fpp <- function(x){
+  3*x^2 + sin(x)
+}
+
+fp_taylor <- function(x, a){
+  fp(a) + (x-a)*fpp(a)
+}
+plot(gridpts, fp(gridpts), type="l",
+     xlab = "x", ylab = "f'(x)", cex.lab=0.75, cex.axis=0.75)
+xk <- -2
+points(gridpts, fp_taylor(gridpts, xk), type="l", col="orange")
+abline(h=0, lty=2)
+```
+
+* $x^{(0)} = -2$
+* $x^{(1)}$ solves $f'(x^{(0)}) + (x^{(1)} - x^{(0)})f''(x^{(0)}) = 0$
+
+## Illustration
+
+```{r, echo=F, fig.width=4, fig.height=3.5}
+fpp <- function(x){
+  3*x^2 + sin(x)
+}
+
+fp_taylor <- function(x, a){
+  fp(a) + (x-a)*fpp(a)
+}
+plot(gridpts, fp(gridpts), type="l",
+     xlab = "x", ylab = "f'(x)", cex.lab=0.75, cex.axis=0.75)
+xk <- -2
+points(gridpts, fp_taylor(gridpts, xk), type="l", col="orange")
+abline(h=0, lty=2)
+
+xk <- xk - fpp(xk)^{-1}*fp(xk)
+abline(v = xk, lty=2)
+```
+
+* $x^{(1)}$ solves $f'(x^{(0)}) + (x^{(1)} - x^{(0)})f''(x^{(0)}) = 0$
+* $x^{(1)} = -1.316$
+
+## Illustration
+
+```{r, echo=F, fig.width=4, fig.height=3.5}
+fpp <- function(x){
+  3*x^2 + sin(x)
+}
+
+fp_taylor <- function(x, a){
+  fp(a) + (x-a)*fpp(a)
+}
+plot(gridpts, fp(gridpts), type="l",
+     xlab = "x", ylab = "f'(x)", cex.lab=0.75, cex.axis=0.75)
+xk <- -1.316197
+points(gridpts, fp_taylor(gridpts, xk), type="l", col="orange")
+abline(h=0, lty=2)
+
+xk <- xk - fpp(xk)^{-1}*fp(xk)
+abline(v = xk, lty=2)
+```
+
+* $x^{(1)} = -1.316$
+* $x^{(2)}$ solves $f'(x^{(1)}) + (x^{(2)} - x^{(1)})f''(x^{(1)}) = 0$
+
+## Extension to multiple variables
+
+Example: $f(x,y) = \dfrac{x^4}{4} - \sin(x) + (x + y)^2$
+
+$$\nabla f(x, y) = \begin{pmatrix} \dfrac{\partial f}{\partial x} \\ \dfrac{\partial f}{\partial y} \end{pmatrix} =  \begin{pmatrix} x^3 - \cos(x) + 2(x + y) \\ 2(x + y) \end{pmatrix}$$
+
+**Question:** What is the *second* derivative of $f$?
+
+\vspace{5cm}
+
+## Extension to multiple variables
+
+Example: $f(x,y) = \dfrac{x^4}{4} - \sin(x) + (x + y)^2$
+
+$$\nabla f(x, y) = \begin{pmatrix} \dfrac{\partial f}{\partial x} \\ \dfrac{\partial f}{\partial y} \end{pmatrix} =  \begin{pmatrix} x^3 - \cos(x) + 2(x + y) \\ 2(x + y) \end{pmatrix}$$
+
+**Hessian:** ${\bf H}_f(x, y) = \begin{bmatrix} \dfrac{\partial^2 f}{\partial x^2} & \dfrac{\partial^2 f}{\partial x \partial y} \\ \dfrac{\partial^2 f}{\partial y \partial x} & \dfrac{\partial^2 f}{\partial y^2} \end{bmatrix}$
+
+\vspace{5cm}
+
+## Newton's method in multiple dimensions
+
+* ${\bf x} = (x_1,...,x_d)^T \in \mathbb{R}^d$
+* $f({\bf x}) \in \mathbb{R}$
+
+$$\nabla f({\bf x}) = \begin{pmatrix} \frac{\partial f}{\partial x_1} \\ \vdots \\ \frac{\partial f}{\partial x_d} \end{pmatrix} \hspace{1cm} {\bf H}_f({\bf x}) = \begin{bmatrix} \frac{\partial^2 f}{\partial x_1^2} & \frac{\partial^2 f}{\partial x_1 \partial x_2} & \cdots  & \frac{\partial^2 f}{\partial x_1 \partial x_d} \\ \frac{\partial^2 f}{\partial x_2 \partial x_1} & \frac{\partial^2 f}{\partial x_2^2} & \cdots & \frac{\partial^2 f}{\partial x_2 \partial x_d} \\ \vdots & \vdots& \cdots & \vdots \\ \frac{\partial^2 f}{\partial x_d \partial x_1} & \frac{\partial^2 f}{\partial x_d \partial x_2} & \cdots & \frac{\partial^2 f}{\partial x_d^2} \end{bmatrix}$$
+
+**Newton's method:**
+
+$${\bf x}^{(k+1)} = {\bf x}^{(k)} - \alpha_k({\bf H}_f({\bf x}^{(k)}))^{-1} \nabla f({\bf x}^{(k)})$$
+
+```{r, include=F}
+f <- function(v){
+  x <- v[1]
+  y <- v[2]
+  x^4/4 - sin(x) + (x + y)^2
+}
+
+fp <- function(v){
+  x <- v[1]
+  y <- v[2]
+  c(x^3 - cos(x) + 2*(x + y),
+    2*(x + y))
+}
+
+Hf <- function(v){
+  x <- v[1]
+  y <- v[2]
+  matrix(c(3*x^2 + sin(x) + 2, 2,
+           2, 2), nrow=2)
+}
+
+xk <- c(-2, 0)
+xk <- xk - c(solve(Hf(xk)) %*% fp(xk))
+xk
+```
+
+```{r, include=F}
+x <- seq(-2, 2, by=0.005)
+y <- seq(-2, 2, by=0.005)
+z <- matrix(nrow=length(x), ncol=length(y))
+for(i in 1:nrow(z)){
+  for(j in 1:ncol(z)){
+    z[i,j] <- f(c(x[i], y[j]))
+  }
+}
+
+contour(x, y, z)
+
+xk <- c(-2, 0)
+points(xk[1], xk[2], pch=16, col="blue")
+```
+
+## Your turn
+
+* Newton's method practice questions on the course website:
+
+[https://sta379-s25.github.io/practice_questions/pq_17.html](https://sta379-s25.github.io/practice_questions/pq_17.html)
+
+* If done early, go back to momentum practice questions from Monday:
+
+[https://sta379-s25.github.io/practice_questions/pq_16.html](https://sta379-s25.github.io/practice_questions/pq_16.html)
+
+

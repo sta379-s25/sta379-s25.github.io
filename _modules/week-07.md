@@ -12,4 +12,5 @@ February 26
 : Project work day
 
 February 28
-: Second-order methods
+: Newton's method
+  : [slides (pdf)](https://sta379-s25.github.io/slides/lecture_17.pdf), [practice questions](https://sta379-s25.github.io/practice_questions/pq_17.html), [practice question solutions](https://sta379-s25.github.io/practice_questions/pq_17_solutions.html)

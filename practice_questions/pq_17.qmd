@@ -1,0 +1,160 @@
+---
+title: "Practice Questions: Newton's method"
+format: html
+---
+
+## Newton's method
+
+Suppose we wish to minimize some function $f({\bf x})$, where ${\bf x} = (x_1,...,x_d)^T$ is a $d$-dimensional vector. 
+
+Newton's method uses the update rule
+
+$${\bf x}^{(k+1)} = {\bf x}^{(k)} - \alpha_k({\bf H}_f({\bf x}^{(k)}))^{-1} \nabla f({\bf x}^{(k)})$$
+
+where
+
+$$\nabla f({\bf x}) = \begin{pmatrix} \frac{\partial f}{\partial x_1} \\ \vdots \\ \frac{\partial f}{\partial x_d} \end{pmatrix} \hspace{1cm} {\bf H}_f({\bf x}) = \begin{bmatrix} \frac{\partial^2 f}{\partial x_1^2} & \frac{\partial^2 f}{\partial x_1 \partial x_2} & \cdots  & \frac{\partial^2 f}{\partial x_1 \partial x_d} \\ \frac{\partial^2 f}{\partial x_2 \partial x_1} & \frac{\partial^2 f}{\partial x_2^2} & \cdots & \frac{\partial^2 f}{\partial x_2 \partial x_d} \\ \vdots & \vdots& \cdots & \vdots \\ \frac{\partial^2 f}{\partial x_d \partial x_1} & \frac{\partial^2 f}{\partial x_d \partial x_2} & \cdots & \frac{\partial^2 f}{\partial x_d^2} \end{bmatrix}$$
+
+Typically we choose $\alpha_k = 1$ when possible (this is the "natural" choice, motivated by the Taylor expansion), only using a different value when $\alpha_k = 1$ doesn't work. We will use $\alpha_k = 1$ for this activity.
+
+### Example
+
+In class, we discussed minimizing the function
+
+$$f({\bf x}) = \dfrac{x_1^4}{4} - \sin(x_1) + (x_1 + x_2)^2$$
+
+We found that
+
+$$\nabla f({\bf x}) = \begin{pmatrix} x_1^3 - \cos(x_1) + 2(x_1 + x_2) \\ 2(x_1 + x_2) \end{pmatrix}$$
+
+and
+
+$${\bf H}_f({\bf x}) = \begin{bmatrix} 3x_1^2 + \sin(x_1) + 2 & 2 \\ 2 & 2 \end{bmatrix}$$
+
+The following functions `f`, `fp`, and `Hf` in R calculate $f$, $\nabla f$, and ${\bf H}_f$ respectively:
+
+```{r}
+f <- function(x){
+  x[1]^4/4 - sin(x[1]) + (x[1] + x[2])^2
+}
+
+fp <- function(x){
+  c(x[1]^3 - cos(x[1]) + 2*(x[1] + x[2]),
+    2*(x[1] + x[2]))
+}
+
+Hf <- function(x){
+  matrix(c(3*x[1]^2 + sin(x[1]) + 2, 2,
+           2, 2), nrow=2)
+}
+```
+
+### Questions
+
+The true minimum of $f$ occurs at approximately $(0.865474, -0.865474)$.
+
+1. Run the following code to create a contour plot of $f$ in the neighborhood of the true minimum, and add a point in blue at ${\bf x}^{(0)} = (-2, 0)$:
+
+```{r}
+x <- seq(-2, 2, by=0.005)
+y <- seq(-2, 2, by=0.005)
+z <- matrix(nrow=length(x), ncol=length(y))
+for(i in 1:nrow(z)){
+  for(j in 1:ncol(z)){
+    z[i,j] <- f(c(x[i], y[j]))
+  }
+}
+
+contour(x, y, z)
+
+xk <- c(-2, 0)
+points(xk[1], xk[2], pch=16, col="blue")
+```
+
+2. Beginning at ${\bf x}^{(0)} = (-2, 0)$, run Newton's method with $\alpha_k = 1$ until $||\nabla f({\bf x}^{(k)})|| < 0.0001$. The following code gets you started. What is the estimated minimum from Newton's method, and how many iterations were required?
+
+```{r, eval=F}
+xk <- c(-2, 0)
+
+while(sqrt(sum(fp(xk)^2)) > 0.0001){
+  xk <- ...
+}
+```
+
+
+```{r eval=F, include=F}
+xk <- c(-2, 0)
+update_vals <- xk
+iter_count <- 0
+while(sqrt(sum(fp(xk)^2)) > 0.0001){
+  xk <- xk - c(solve(Hf(xk)) %*% fp(xk))
+  iter_count <- iter_count + 1
+  update_vals <- rbind(update_vals, xk)
+}
+
+xk
+iter_count
+```
+
+3. Plot the path of Newton's method updates on the contour plot.
+
+```{r eval=F, include=F}
+contour(x, y, z)
+points(update_vals, pch=16, col="blue")
+lines(update_vals, pch=16, col="blue")
+```
+
+4. Now instead of using Newton's method, use gradient descent with backtracking line search. The following code gets you started.
+    * Begin at ${\bf x}^{(0)} = (-2, 0)$
+    * In the backtracking line search, try $\alpha_k = 1$ first
+    * Use a value of $c_1 = 0.0001$ in the sufficient decrease condition
+    * Stop gradient descent when $||\nabla f({\bf x}^{(k)})|| < 0.0001$
+    
+```{r, eval=F}
+xk <- c(-2, 0)
+c1 <- ...
+
+while(...){
+  alpha <- 1
+  # backtracking line search
+  while(f(xk - alpha*fp(xk)) > f(xk) - c1*alpha*sum(fp(xk)^2)){
+    alpha <- 0.5*alpha
+  }
+  
+  xk <- ...
+}
+```
+
+5. How many iterations of gradient descent with backtracking line search were required?
+
+6. Add the gradient descent updates to the contour plot with your Newton's method updates. How do the two paths compare?
+
+
+```{r eval=F, include=F}
+xk <- c(-2, 0)
+update_vals_grad <- xk
+c1 <- 0.0001
+iter_count <- 0
+while(sqrt(sum(fp(xk)^2)) > 0.0001){
+  alpha <- 1
+  while(f(xk - alpha*fp(xk)) > f(xk) - c1*alpha*sum(fp(xk)^2)){
+    alpha <- 0.5*alpha
+  }
+  
+  xk <- xk - alpha*fp(xk)
+  update_vals_grad <- rbind(update_vals_grad, xk)
+  iter_count <- iter_count + 1
+}
+
+contour(x, y, z)
+points(update_vals, pch=16, col="blue")
+lines(update_vals, pch=16, col="blue")
+points(update_vals_grad, pch=16, col="orange")
+lines(update_vals_grad, col="orange")
+```
+
+
+
+
+
+
