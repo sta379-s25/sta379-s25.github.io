@@ -1,0 +1,185 @@
+---
+title: "Lecture 18: Newton's method vs. gradient descent"
+author: "Ciaran Evans"
+output: beamer_presentation
+editor_options: 
+  chunk_output_type: console
+---
+
+## Feedback summary
+
+Thanks for feedback on the course! A brief summary of responses:
+
+* Overall pace of the course -- about right
+* Overall workload -- a bit high
+    * Change to 2 projects, not 3
+* HW 4 -- too hard
+* Deadlines -- overwhelming preference for evening deadlines. I'll change that going forward
+* Project 1: most people expected to use extension days. So:
+    * Formal deadline moved to after Spring break
+    * Ideally everyone is able to submit before break, but this gives you a few extra days if needed!
+
+## Previously
+
+**Gradient descent:**
+
+$${\bf x}^{(k+1)} = {\bf x}^{(k)} - \alpha_k \nabla f({\bf x}^{(k)})$$
+
+\bigskip
+
+
+**Newton's method:**
+
+$${\bf x}^{(k+1)} = {\bf x}^{(k)} - \alpha_k({\bf H}_f({\bf x}^{(k)}))^{-1} \nabla f({\bf x}^{(k)})$$
+
+\bigskip
+
+**Today:**
+
+* Brief comparison between the two methods
+* Which one gets used in practice?
+
+## Previously
+
+\textcolor{blue}{Newton's method (blue):} 7 iterations
+
+\textcolor{orange}{Gradient descent with backtracking line search (orange):} 27 iterations
+
+```{r, echo=F, message=F}
+f <- function(x){
+  x[1]^4/4 - sin(x[1]) + (x[1] + x[2])^2
+}
+
+fp <- function(x){
+  c(x[1]^3 - cos(x[1]) + 2*(x[1] + x[2]),
+    2*(x[1] + x[2]))
+}
+
+Hf <- function(x){
+  matrix(c(3*x[1]^2 + sin(x[1]) + 2, 2,
+           2, 2), nrow=2)
+}
+
+x <- seq(-2, 2, by=0.005)
+y <- seq(-2, 2, by=0.005)
+z <- matrix(nrow=length(x), ncol=length(y))
+for(i in 1:nrow(z)){
+  for(j in 1:ncol(z)){
+    z[i,j] <- f(c(x[i], y[j]))
+  }
+}
+
+xk <- c(-2, 0)
+update_vals <- xk
+iter_count <- 0
+while(sqrt(sum(fp(xk)^2)) > 0.0001){
+  xk <- xk - c(solve(Hf(xk)) %*% fp(xk))
+  iter_count <- iter_count + 1
+  update_vals <- rbind(update_vals, xk)
+}
+
+xk <- c(-2, 0)
+update_vals_grad <- xk
+c1 <- 0.0001
+iter_count <- 0
+while(sqrt(sum(fp(xk)^2)) > 0.0001){
+  alpha <- 1
+  while(f(xk - alpha*fp(xk)) > f(xk) - c1*alpha*sum(fp(xk)^2)){
+    alpha <- 0.5*alpha
+  }
+  
+  xk <- xk - alpha*fp(xk)
+  update_vals_grad <- rbind(update_vals_grad, xk)
+  iter_count <- iter_count + 1
+}
+
+contour(x, y, z)
+points(update_vals, pch=16, col="blue")
+lines(update_vals, pch=16, col="blue")
+points(update_vals_grad, pch=16, col="orange")
+lines(update_vals_grad, col="orange")
+```
+
+## Some properties of gradient descent
+
+**Question:** What are some properties we have shown/observed about gradient descent?
+
+\vspace{4cm}
+
+## Some properties of gradient descent
+
+* The direction $\nabla f({\bf x})$ is the direction of *steepest descent* (minimizes directional derivative)
+
+\bigskip
+
+* If $\alpha_k$ is chosen via exact line search, $\nabla f({\bf x}^{(k+1)}) \perp \nabla f({\bf x}^{(k)})$ (zig-zag pattern)
+
+
+\bigskip
+
+* Gradient descent takes many iterations in long, narrow valleys; scaling matters
+
+
+## Some properties of Newton's method
+
+**Gradient descent:**
+
+* The direction $-\nabla f({\bf x})$ is the direction of *steepest descent* (minimizes directional derivative)
+
+* If $\alpha_k$ is chosen via exact line search, $\nabla f({\bf x}^{(k+1)}) \perp \nabla f({\bf x}^{(k)})$ (zig-zag pattern)
+
+* Gradient descent takes many iterations in long, narrow valleys; scaling matters
+
+**Newton's method:**
+
+* $-({\bf H}_f({\bf x}))^{-1} \nabla f({\bf x})$ is a descent direction (directional derivative is negative)
+* Not forced to take zig-zag steps
+* Less susceptible to scaling issue
+
+## $-({\bf H}_f({\bf x}))^{-1} \nabla f({\bf x})$ is a descent direction
+
+**Claim:** Let ${\bf u}$ be a unit vector in the direction of $-({\bf H}_f({\bf x}))^{-1} \nabla f({\bf x})$. Then $D_{\bf u} f({\bf x}) < 0$ if ${\bf H}_f$ is a **positive definite** matrix
+
+\bigskip
+
+* **Definition (positive definite):** ${\bf H}_f({\bf x})$ is a positive definite matrix if for all vectors ${\bf v} \neq 0$, 
+
+$${\bf v}^T {\bf H}_f({\bf x}) {\bf v} > 0$$
+
+* **Fact:** If ${\bf H}_f({\bf x})$ is positive definite for all ${\bf x}$, then $f$ is a **convex** function
+
+\vspace{2.5cm}
+
+## $-({\bf H}_f({\bf x}))^{-1} \nabla f({\bf x})$ is a descent direction
+
+**Claim:** Let ${\bf u}$ be a unit vector in the direction of $-({\bf H}_f({\bf x}))^{-1} \nabla f({\bf x})$. Then $D_{\bf u} f({\bf x}) < 0$ if ${\bf H}_f$ is a **positive definite** matrix
+
+\bigskip
+
+* **Definition (positive definite):** ${\bf H}_f({\bf x})$ is a positive definite matrix if for all vectors ${\bf v} \neq 0$, 
+
+$${\bf v}^T {\bf H}_f({\bf x}) {\bf v} > 0$$
+
+**Proof of claim:**
+
+\vspace{3cm}
+
+## What actually gets used in practice? A broad generalization
+
+
+**Classical statistics:** (parametric models with moderate size) Newton's method
+
+* Generalized linear models: Fisher scoring (Newton's method with Fisher info), often calculated with iteratively re-weighted least squares (IRLS)
+
+* Generalized estimating equations
+
+* Nonlinear least squares: Gauss-Newton (variant of Newton's method)
+
+
+**Modern statistical learning:** (large models with *many* parameters) Gradient descent
+
+* Basic gradient descent and line search are not commonly used with large models
+
+* Variations (stochastic gradient descent, momentum, subgradient methods, etc) are standard
+
+
