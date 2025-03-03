@@ -11,6 +11,7 @@ editor_options:
 Thanks for feedback on the course! A brief summary of responses:
 
 * Overall pace of the course -- about right
+* Challenge assignments and extended practice questions working well -- we'll continue those
 * Overall workload -- a bit high
     * Change to 2 projects, not 3
 * HW 4 -- too hard
@@ -147,6 +148,8 @@ lines(update_vals_grad, col="orange")
 $${\bf v}^T {\bf H}_f({\bf x}) {\bf v} > 0$$
 
 * **Fact:** If ${\bf H}_f({\bf x})$ is positive definite for all ${\bf x}$, then $f$ is a **convex** function
+
+* **Fact:** If ${\bf H}_f({\bf x})$ is positive definite, then $({\bf H}_f({\bf x}))^{-1}$ is positive definite
 
 \vspace{2.5cm}
 
