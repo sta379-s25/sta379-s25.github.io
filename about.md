@@ -148,7 +148,7 @@ Unlike homework assignments, **challenge assignments must be completed independe
 
 ### Projects
 
-Computational statistics in practice often involves implementing broad, complex methods that require more than a single short function or simulation. Projects provide an opportunity to develop these skills, and pull together a variety of tools that you have learned in class and practiced on homework assignments. There will be three projects assigned throughout the semester (you do not have to do them all; see the grading system below for more information). Projects will require you to do more, and will be completed over a longer time scale than other assignments.
+Computational statistics in practice often involves implementing broad, complex methods that require more than a single short function or simulation. Projects provide an opportunity to develop these skills, and pull together a variety of tools that you have learned in class and practiced on homework assignments. There will be two projects assigned. Projects will require you to do more, and will be completed over a longer time scale than other assignments.
 
 Unlike homework assignments, **projects must be completed independently**. Any unauthorized collaboration will be treated as plagiarism, and may receive a grade of 0 on the assignment.
 
@@ -187,12 +187,12 @@ Coding assignments lend themselves particularly well to this type of grading. Ma
 
 Grades on assignments will reflect the amount of the assignment that you have mastered. On a homework assignment with 4 questions, for example, mastering 3 out of 4 questions results in a grade of 75% on that assignment. Grading rubrics for projects and challenges will be communicated separately in the assignment instructions.
 
-There will be *N* homework assignments (assigned most weeks), 3 projects, and likely 3-5 challenge assignments (I promise at least 3 challenge assignments). Final grades in the course will be assigned as follows:
+There will be *N* homework assignments (assigned most weeks), 2 projects, and likely 3-5 challenge assignments (I promise at least 3 challenge assignments). Final grades in the course will be assigned as follows:
 
 | Component | Weight |
 | --- | --- |
 | Homeworks and Challenges (top *N+1*) | 60% |
-| Projects (top 2) | 40% |
+| Projects (2) | 40% |
 
 This means that I will only count your top *N+1* homework and challenge grades. That is, doing extra challenges can replace homework assignments.
 
@@ -207,13 +207,13 @@ Here is the grade breakdown from the old system. Note that mastery under the old
 * To get an **A** in the course:
 
     * Master a combination of at least *N+3* homeworks, challenge assignments, and projects
-    * AND Master at least 2 projects
-    * Eg: *N* homeworks and 3 projects, or *N* homeworks and 1 challenge and 2 projects, or *N-1* homeworks and 2 challenges and 2 projects, or *N-2* homeworks and 3 challenges and 2 projects, etc.
+    * AND Master 2 projects
+    * Eg: *N* homeworks and 1 challenge and 2 projects, or *N-1* homeworks and 2 challenges and 2 projects, or *N-2* homeworks and 3 challenges and 2 projects, etc.
 
 * To get an **A-** in the course:
 
     * Master a combination of at least *N+2* homeworks, challenge assignments, and projects
-    * AND Master at least 2 projects
+    * AND Master 2 projects
 
 * To get a **B+** in the course:
 
@@ -251,7 +251,7 @@ Work which does not meet the "C-" threshold has not met the core course requirem
 Each grade bundle is an indivisible unit; all assignments in a bundle must meet expectations in order to
 earn the associated grade. 
 
-There are a few things to note about this grading system. First, a grade of "C" means that you have met the basic requirements for the course (completing most of the homework assignments). It is possible to receive a "C" or "C+" without completing any challenge assignments or projects, provided you keep on top of the homework. Receiving a grade in the "B" range requires completing at least 1 project, while receiving a grade in the "A" range requires completing at least 2 projects. 
+There are a few things to note about this grading system. First, a grade of "C" means that you have met the basic requirements for the course (completing most of the homework assignments). It is possible to receive a "C" or "C+" without completing any challenge assignments or projects, provided you keep on top of the homework. Receiving a grade in the "B" range requires completing at least 1 project, while receiving a grade in the "A" range requires completing 2 projects. 
 
 ## Late work
 

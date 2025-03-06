@@ -1701,7 +1701,7 @@ sampling</h1>
       
    
 <!-- Don't indent these lines or it will mess pre blocks indentation --> 
-<p><strong>Due:</strong> Wednesday March 5, 10:00am</p>
+<p><strong>Due:</strong> Wednesday March 19, 10:00pm</p>
 <p><strong>Submission:</strong> See the Submission Checklist at the end
 of the assignment</p>
 <div id="rules" class="section level1">
@@ -2084,6 +2084,64 @@ are</p>
 <p>and the corresponding interval weights <span class="math inline">\(p_i\)</span> are</p>
 <pre><code>## [1] 4.819848e-02 1.103018e+00 1.823329e-01 8.009170e-03 7.674614e-05</code></pre>
 </div>
+<div id="calculating-s-and-g_c-example-1" class="section level3">
+<h3>Calculating <span class="math inline">\(s^*\)</span> and <span class="math inline">\(g_c^*\)</span>, example 1</h3>
+<p>Suppose we sample a candidate point <span class="math inline">\(Y\)</span>; we now need to decide whether to
+accept or reject that sample, which requires us to calculate <span class="math inline">\(s^*(Y)\)</span> and <span class="math inline">\(g_c^*(Y)\)</span>.</p>
+<p>Suppose we sampled <span class="math inline">\(y = 0.005\)</span>.
+Using the example above, this falls in the first interval <span class="math inline">\([z_0, z_1]\)</span>:</p>
+<pre><code>## [1] 0.0000000 0.3984216 3.7481141 6.2719143 8.7565956       Inf</code></pre>
+<p>So, <span class="math inline">\(g_c^*(y) = \ell(x_1) + (y - x_1)
+\ell&#39;(x_1)\)</span>:</p>
+<pre><code>## [1] -4.637754</code></pre>
+<p>Now in this example, the grid points <span class="math inline">\(x_i\)</span> are</p>
+<pre><code>## [1]  0.100  2.575  5.050  7.525 10.000</code></pre>
+<p>So, <span class="math inline">\(y = 0.005 &lt; x_1\)</span>, and
+therefore <span class="math inline">\(s^*(y) = -\infty\)</span>.</p>
+</div>
+<div id="calculating-s-and-g_c-example-2" class="section level3">
+<h3>Calculating <span class="math inline">\(s^*\)</span> and <span class="math inline">\(g_c^*\)</span>, example 2</h3>
+<p>Now suppose we sampled <span class="math inline">\(y = 3\)</span>.
+Using the example above, this falls in the second interval <span class="math inline">\([z_1, z_2]\)</span>:</p>
+<pre><code>## [1] 0.0000000 0.3984216 3.7481141 6.2719143 8.7565956       Inf</code></pre>
+<p>So, <span class="math inline">\(g_c^*(y) = \ell(x_2) + (y - x_2)
+\ell&#39;(x_2)\)</span>:</p>
+<pre><code>## [1] -1.377818</code></pre>
+<p>Now in this example, the grid points <span class="math inline">\(x_i\)</span> are</p>
+<pre><code>## [1]  0.100  2.575  5.050  7.525 10.000</code></pre>
+<p>So, <span class="math inline">\(y = 3 \in [x_2, x_3]\)</span>, and
+therefore</p>
+<p><span class="math display">\[s^*(y) = \dfrac{(x_3 - y)\ell(x_2) + (y
+- x_2) \ell(x_3)}{x_3 - x_2}\]</span></p>
+<p>which is</p>
+<pre><code>## [1] -1.558693</code></pre>
+<p>Notice that <span class="math inline">\(s^*(y) \leq
+g_c^*(y)\)</span>. This should <em>always</em> be the case (because
+<span class="math inline">\(s^*\)</span> bounds <span class="math inline">\(\ell\)</span> from below, while <span class="math inline">\(g_c^*\)</span> bounds <span class="math inline">\(\ell\)</span> from above). If you ever have a
+situation in which you calculate that <span class="math inline">\(s^*(y)
+&gt; g_c^*(y)\)</span>, there is a bug somewhere in your code (likely
+the index in one of your calculations is off by 1).</p>
+</div>
+<div id="calculating-s-and-g_c-example-3" class="section level3">
+<h3>Calculating <span class="math inline">\(s^*\)</span> and <span class="math inline">\(g_c^*\)</span>, example 3</h3>
+<p>Now suppose we sampled <span class="math inline">\(y = 2\)</span>.
+Using the example above, this falls in the second interval <span class="math inline">\([z_1, z_2]\)</span>:</p>
+<pre><code>## [1] 0.0000000 0.3984216 3.7481141 6.2719143 8.7565956       Inf</code></pre>
+<p>So, <span class="math inline">\(g_c^*(y) = \ell(x_2) + (y - x_2)
+\ell&#39;(x_2)\)</span>:</p>
+<pre><code>## [1] -1.122418</code></pre>
+<p>Now in this example, the grid points <span class="math inline">\(x_i\)</span> are</p>
+<pre><code>## [1]  0.100  2.575  5.050  7.525 10.000</code></pre>
+<p>So, <span class="math inline">\(y = 2 \in [x_1, x_2]\)</span>. Notice
+that while <span class="math inline">\(y = 2\)</span> and <span class="math inline">\(y=3\)</span> are in the same interval <span class="math inline">\([z_1, z_2]\)</span>, they are in
+<em>different</em> intervals in terms of the <span class="math inline">\(x_i\)</span>. Therefore</p>
+<p><span class="math display">\[s^*(y) = \dfrac{(x_2 - y)\ell(x_1) + (y
+- x_1) \ell(x_2)}{x_2 - x_1}\]</span></p>
+<p>which is</p>
+<pre><code>## [1] -1.831694</code></pre>
+<p>Notice again that <span class="math inline">\(s^*(y) \leq
+g_c^*(y)\)</span>.</p>
+</div>
 <div id="updating-example-1" class="section level3">
 <h3>Updating, example 1</h3>
 <p>Suppose we now want to add the point <span class="math inline">\(x_{new} = 0.005\)</span> to our grid. The new grid
@@ -2219,11 +2277,11 @@ your code. Instead, I would recommend that you test whether <span class="math in
 to 0. In R, this can be done using <code>all.equal</code> or
 <code>.Machine$double.eps</code>. For example:</li>
 </ol>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fl">1e-12</span> <span class="sc">==</span> <span class="dv">0</span></span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="fl">1e-12</span> <span class="sc">==</span> <span class="dv">0</span></span></code></pre></div>
 <pre><code>## [1] FALSE</code></pre>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">all.equal</span>(<span class="fl">1e-12</span>, <span class="dv">0</span>) <span class="co"># close enough to 0</span></span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="fu">all.equal</span>(<span class="fl">1e-12</span>, <span class="dv">0</span>) <span class="co"># close enough to 0</span></span></code></pre></div>
 <pre><code>## [1] TRUE</code></pre>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">abs</span>(<span class="fl">1e-12</span>) <span class="sc">&lt;</span> <span class="fu">sqrt</span>(.Machine<span class="sc">$</span>double.eps) <span class="co"># close enough to 0</span></span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="fu">abs</span>(<span class="fl">1e-12</span>) <span class="sc">&lt;</span> <span class="fu">sqrt</span>(.Machine<span class="sc">$</span>double.eps) <span class="co"># close enough to 0</span></span></code></pre></div>
 <pre><code>## [1] TRUE</code></pre>
 </div>
 </div>

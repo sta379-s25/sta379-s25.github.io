@@ -7,7 +7,7 @@ output:
 link-citations: yes
 ---
 
-**Due:** Wednesday March 5, 10:00am
+**Due:** Wednesday March 19, 10:00pm
 
 **Submission:** See the Submission Checklist at the end of the assignment
 
@@ -643,6 +643,110 @@ and the corresponding interval weights $p_i$ are
 intervals$p
 ```
 
+### Calculating $s^*$ and $g_c^*$, example 1
+
+Suppose we sample a candidate point $Y$; we now need to decide whether to accept or reject that sample, which requires us to calculate $s^*(Y)$ and $g_c^*(Y)$.
+
+Suppose we sampled $y = 0.005$. Using the example above, this falls in the first interval $[z_0, z_1]$:
+
+```{r echo=F}
+intervals$z
+```
+
+So, $g_c^*(y) = \ell(x_1) + (y - x_1) \ell'(x_1)$:
+
+```{r echo=F}
+y <- 0.005
+ls <- log_f(gridpts)
+dls <- log_f_prime(gridpts)
+
+g_star <- ls[1] + (y - gridpts[1])*dls[1]
+g_star
+```
+
+Now in this example, the grid points $x_i$ are
+
+```{r echo=F}
+gridpts
+```
+
+So, $y = 0.005 < x_1$, and therefore $s^*(y) = -\infty$.
+
+
+
+### Calculating $s^*$ and $g_c^*$, example 2
+
+Now suppose we sampled $y = 3$. Using the example above, this falls in the second interval $[z_1, z_2]$:
+
+```{r echo=F}
+intervals$z
+```
+
+So, $g_c^*(y) = \ell(x_2) + (y - x_2) \ell'(x_2)$:
+
+```{r echo=F}
+y <- 3
+
+g_star <- ls[2] + (y - gridpts[2])*dls[2]
+g_star
+```
+
+Now in this example, the grid points $x_i$ are
+
+```{r echo=F}
+gridpts
+```
+
+So, $y = 3 \in [x_2, x_3]$, and therefore 
+
+$$s^*(y) = \dfrac{(x_3 - y)\ell(x_2) + (y - x_2) \ell(x_3)}{x_3 - x_2}$$
+
+which is
+
+```{r echo=F}
+s_star <- ((gridpts[3] - y)*ls[2] + (y - gridpts[2])*ls[3])/(gridpts[3] - gridpts[2])
+s_star
+```
+
+Notice that $s^*(y) \leq g_c^*(y)$. This should *always* be the case (because $s^*$ bounds $\ell$ from below, while $g_c^*$ bounds $\ell$ from above). If you ever have a situation in which you calculate that $s^*(y) > g_c^*(y)$, there is a bug somewhere in your code (likely the index in one of your calculations is off by 1).
+
+
+### Calculating $s^*$ and $g_c^*$, example 3
+
+Now suppose we sampled $y = 2$. Using the example above, this falls in the second interval $[z_1, z_2]$:
+
+```{r echo=F}
+intervals$z
+```
+
+So, $g_c^*(y) = \ell(x_2) + (y - x_2) \ell'(x_2)$:
+
+```{r echo=F}
+y <- 2
+
+g_star <- ls[2] + (y - gridpts[2])*dls[2]
+g_star
+```
+
+Now in this example, the grid points $x_i$ are
+
+```{r echo=F}
+gridpts
+```
+
+So, $y = 2 \in [x_1, x_2]$. Notice that while $y = 2$ and $y=3$ are in the same interval $[z_1, z_2]$, they are in *different* intervals in terms of the $x_i$. Therefore 
+
+$$s^*(y) = \dfrac{(x_2 - y)\ell(x_1) + (y - x_1) \ell(x_2)}{x_2 - x_1}$$
+
+which is
+
+```{r echo=F}
+s_star <- ((gridpts[2] - y)*ls[1] + (y - gridpts[1])*ls[2])/(gridpts[2] - gridpts[1])
+s_star
+```
+
+Notice again that $s^*(y) \leq g_c^*(y)$. 
+
 ### Updating, example 1
 
 Suppose we now want to add the point $x_{new} = 0.005$ to our grid. The new grid points will be
@@ -690,6 +794,9 @@ and the new $p_i$ are
 ```{r echo=F}
 grid_new$p
 ```
+
+
+
 
 
 # Task 1: Implementing the adaptive sampling function
