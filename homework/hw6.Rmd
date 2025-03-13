@@ -1,0 +1,314 @@
+---
+title: "Homework 6"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+**Due:** Friday March 28, 10pm
+
+**Submission:** For this assignment, you will submit three files:
+
+* A pdf containing your written answer to question 1 (submitted to Canvas)
+* A knitted html or pdf file (from an R Markdown or Quarto document) showing your code, results, and answers for questions 2-8 (submitted to Canvas)
+* An R script (`hw6_code.R`) containing your function for question 9 (submitted to GitHub)
+
+**Grading:** You will receive a score out of 9 for the number of questions mastered. To master a question, you must satisfy the following requirements:
+
+* Function implementations must pass all specified unit tests, *as written* (you may not modify the unit tests which I provide)
+* Your code must meet all requirements described in the questions below (matching the requested inputs and outputs)
+* You must comment your code
+* Your written solutions must be complete and correct, with no missing steps or mistakes
+* Responses to questions asking for description or explanation must be complete, thorough, and correct
+* Your work must abide by the academic honesty requirements in the syllabus 
+
+If you make an honest effort to answer all questions, but you do not master all of the questions on your first submission, you will have one resubmission attempt after receiving feedback.
+
+**Resources:** 
+
+* [Algorithms for Optimization](https://algorithmsbook.com/optimization/files/optimization.pdf) 6.1
+* *Computational Statistics* (Givens and Hoeting) Chapter 5.1, 5.3
+
+
+# Fitting survival models with Newton's method
+
+*Survival analysis* is the field of statistics which focuses on modeling time-to-event data, that is, the time until a certain event occurs. Survival analysis is a very important area and is often used in biostatistics and medicine for outcomes related to diseases and mortality.
+
+In the first part of this assignment, you will work with data from the North Central Cancer Treatment Group, on patients with advanced lung cancer. The data is available in the `lung` dataset in the `survival` package (you may need to install this package), and we will focus on the following columns:
+
+* `time`: survival time in days
+* `status`: censoring status (1 = censored, 2 = outcome observed)
+* `age`: age in years
+* `wt.loss`: weight loss in last six months (pounds)
+
+**Censoring:** If this is the first time you have seen survival analysis, you may be unfamiliar with the idea of censored data. We have already said that survival analysis models the time until a certain event occurs. However, for some study participants, the event will not be observed during the study window (in the case of the lung cancer data, these would be patients who are still alive at the end of the study). Censored data is not missing data -- rather, censoring places a lower bound on the time at which the event occurs, but we don't get to see the full outcome.
+
+## Modeling time-to-event data
+
+There are a variety of methods for modeling time-to-event data. One common choice is the *Cox proportional hazards (Cox PH)* model. To define the Cox PH model, we first need to introduce the hazard rate.
+
+Let $Y$ be the outcome variable of interested (time to some specified event), and let $f(t)$ be its pdf and $F(t)$ its cdf. Then, $F(t) = P(Y \leq t)$ is the probability the event happens before time $t$, and $f(t) = F'(t)$ is the instantaneous rate of the event at time $t$ (recall that the derivative is an instantaneous rate).
+
+The *hazard rate* is defined as:
+
+$$\lambda(t) = \frac{f(t)}{1 - F(t)}$$
+This is the instantaneous rate of failure, scaled by the fraction of survivors at time $t$. The Cox PH model assumes that this hazard rate depends on some specified explanatory variables. 
+
+For example, suppose that we wish to model survival as a function of age and weight loss. The Cox PH model is then
+
+$$\lambda_i(t) = \lambda_0(t) \exp\{ \beta_1 X_{i1} + \beta_2 X_{i2} \}$$
+
+where
+
+* $\lambda_i(t)$ is the hazard rate for the $i$th patient in the dataset
+* $\lambda_0(t)$ is a baseline hazard rate, which does not depend on any explanatory variables (think of this as playing the intercept role; this is why there is no $\beta_0$ in the model above)
+* $X_{i1}$ is the $i$th patient's age
+* $X_{i2}$ is the $i$th patient's weight loss in the last six months
+
+Fitting the model then requires estimating $\beta_1$ and $\beta_2$ (the baseline hazard rate is treated as a sort of "nuisance parameter" here).
+
+## Fitting a Cox PH model in R
+
+The `coxph` function in the `survival` package allows us to fit the model described above:
+
+```{r, message=F, warning=F}
+library(survival)
+
+coxph(Surv(time, status) ~ age + wt.loss, data=lung)
+```
+
+* The `Surv(time, status)` tells the model which outcomes are censored, and which are not
+* Notice that 14 observations were removed due to missingness -- we will have to deal with those when we fit the model too
+
+## Fitting a Cox PH model -- Newton's method
+
+The Cox PH model is estimated by *maximizing* the following quantity:
+
+$$\ell(\beta) = \sum \limits_{i=1}^n d_i(\beta_1 X_{i1} + \beta_2 X_{i2}) - \sum \limits_{i=1}^n d_i \log(W_i)$$
+
+where 
+
+* $d_i = 1$ if the $i$th outcome is observed, and $d_i = 0$ if the $i$th outcome is censored
+* $W_i = \sum \limits_{k=1}^n \mathbb{I}\{Y_k \geq Y_i \} w_k$
+* $\mathbb{I}\{Y_k \geq Y_i \} = 1$ if $Y_k \geq Y_i$, and 0 otherwise (indicator function)
+* $w_k = \exp\{\beta_1 X_{k1} + \beta_2 X_{k2} \}$
+
+There is no closed-form solution to maximize this function. A standard approach is to use Newton's method. Recall that Newton's method optimizes (maximizes or minimizes) a function via the update rule
+
+$$\beta^{(k+1)} = \beta^{(k)} - ({\bf H}(\beta^{(k)}))^{-1} \nabla \ell(\beta^{(k)})$$
+
+where $\nabla \ell(\beta)$ is the gradient (vector of first partial derivatives) and ${\bf H}(\beta)$ is the Hessian (matrix of second partial derivatives).
+
+:::{.question}
+#### Question 1 (written)
+
+For notational convenience, define
+
+$$\pi_{ki} = \frac{\mathbb{I}\{ Y_k \geq Y_i \} w_k}{W_i}$$
+
+Show that 
+
+$$\frac{\partial \ell}{\partial \beta_1} = \sum \limits_{i=1}^n d_i X_{i1} - \sum \limits_{i=1}^n d_i \left( \sum \limits_{k=1}^n \pi_{ki} X_{k1} \right)$$
+
+and
+
+$$\frac{\partial \ell}{\partial \beta_2} = \sum \limits_{i=1}^n d_i X_{i2} - \sum \limits_{i=1}^n d_i \left( \sum \limits_{k=1}^n \pi_{ki} X_{k2} \right)$$
+
+Show all work.
+
+:::
+
+To implement Newton's method, it is easier to express the gradient in matrix form. It can be shown that
+
+$$\nabla \ell(\beta) := \begin{pmatrix} \frac{\partial \ell}{\partial \beta_1} \\ \frac{\partial \ell}{\partial \beta_2} \end{pmatrix} = {\bf X}^T({\bf d} - {\bf P} {\bf d})$$
+where 
+
+* ${\bf X} = \begin{pmatrix} X_{11} & X_{12} \\ X_{21} & X_{22} \\ \vdots & \vdots \\ X_{n1} & X_{n2} \end{pmatrix}$ (notice there is no column of 1s here, because we don't have the $\beta_0$ intercept term in the model!)
+* ${\bf d} = \begin{pmatrix} d_1 \\ d_2 \\ \vdots \\ d_n \end{pmatrix}$
+* ${\bf P} = \begin{pmatrix} \pi_{11} & \pi_{12} & \cdots & \pi_{1n} \\ \pi_{21} & \pi_{22} & \cdots & \pi_{2n} \\ \vdots & \vdots & \cdots & \vdots \\ \pi_{n1} & \pi_{n2} & \cdots & \pi_{nn} \end{pmatrix}$
+
+## Implementation
+
+In practice, we order the observations in our data by the outcome time in ascending order; this means that $\mathbb{I}\{ Y_k \geq Y_i \} = \mathbb{I}\{k \geq i\}$, and that ${\bf P}$ is a lower-triangular matrix. (Note: for this assignment, we won't worry about ties in the $Y$ values, though in practice we do need to think about them). We will also need to handle the missing observations.
+
+:::{.question}
+#### Question 2 (.html)
+
+Create a subset `lung_small` of the `lung` dataset, which satisfies the following:
+
+* It contains the columns `time`, `status`, `age`, and `wt.loss`
+* All missing values in these four columns have been removed (you should have 214 rows after removing missing values)
+* The rows are ordered by `time` in ascending order
+
+:::
+
+:::{.question}
+#### Question 3 (.html)
+
+Use your `lung_small` dataset to create the matrix ${\bf X}$ and the vector ${\bf d}$.
+
+:::
+
+Now let's calculate the matrix ${\bf P}$ that is part of the gradient. Note that unlike ${\bf X}$ and ${\bf d}$, ${\bf P}$ *does* depend on $\beta$.
+
+:::{.question}
+#### Question 4 (.html)
+
+Using $\beta_1 = 0$ and $\beta_2 = 0$, calculate ${\bf P}$. 
+
+```{r, include=F}
+library(tidyverse)
+lung_small <- lung |>
+  drop_na(wt.loss) |>
+  arrange(time)
+
+X <- cbind(lung_small$age, lung_small$wt.loss)
+y <- lung_small$time
+d <- lung_small$status - 1
+
+beta <- c(0, 0)
+eta <- X %*% beta
+haz <- as.numeric(exp(eta))
+rsk <- rev(cumsum(rev(haz)))
+P <- outer(haz, rsk, '/')
+P[upper.tri(P)] <- 0
+```
+
+The first few entries of ${\bf P}$ should look like this:
+
+```{r}
+P[1:5, 1:5]
+```
+
+
+*Hints:*
+
+* Begin by creating a vector for the $w_k$ values
+* With the observations in ascending order, $W_i = \sum \limits_{k=i}^n w_k$. This looks like a cumulative sum. In R, the `cumsum` function calculates cumulative sums; you may also want to use the `rev` function...
+
+:::
+
+Now we can calculate the gradient.
+
+:::{.question}
+#### Question 5 (.html)
+
+Calculate the gradient vector $\nabla \ell(\beta)$ for $\beta_1 = 0$, $\beta_2 = 0$. You should get
+
+```{r, echo=F}
+c(t(X) %*% (d -P %*% d))
+```
+
+:::
+
+## Newton's method
+
+Now that we have the gradient, we need the Hessian. I won't make you calculate the Hessian here. Rather, it can be shown that the Hessian matrix has the form
+
+$${\bf H}(\beta) = - {\bf X}^T {\bf U} {\bf X}$$
+where ${\bf U}$ can be calculated in R as follows:
+
+```{r}
+U <- P %*% diag(d) %*% t(P)
+diag(U) <- -diag(P %*% diag(d) %*% t(1-P))
+```
+
+
+:::{.question}
+#### Question 6 (.html)
+
+Use Newton's method to estimate the coefficients of the Cox PH model for the lung cancer data. Begin at $\beta^{(0)} = (0, 0)^T$, and stop when $||\nabla \ell(\beta^{(k)})|| < 10^{-6}$. Remember to update ${\bf P}$ when you update $\beta$.
+
+Report your final estimated coefficients $\widehat{\beta}$, and the number of iterations required.
+
+:::
+
+
+# Numerical integration
+
+Numerical integration is used to approximate definite integrals when we can't get a closed form. Two important approaches to numerical integration are the *trapezoid rule* and *Gaussian quadrature*.
+
+## Trapezoid rule
+
+To approximate $\int \limits_a^b f(x) dx$, the (composite) trapezoid rule divides the interval $[a, b]$ into $n$ subintervals of equal length $h = n/(b - a)$. The approximation is
+
+$$\int \limits_a^b f(x) dx \approx \widehat{T}_n(f) = h \sum \limits_{i=1}^{n-1} f(a + ih) + \frac{h}{2}(f(a) + f(b))$$
+
+**Absolute error:** If $f$ has a second derivative such that $|f''(x)| \leq M < \infty$ for all $x \in [a, b]$, then the error in the trapezoid rule approximation is bounded above by
+
+$$\left\lvert \int \limits_a^b f(x) dx - \widehat{T}_n(f) \right\rvert \leq M \frac{(b - a)^3}{12n^2}$$
+
+
+:::{.question}
+#### Question 7 (.html)
+
+The Bessel function $J_0(x)$ is given by
+
+$$J_0(x) = \frac{1}{\pi} \int \limits_0^\pi \cos(x \cos(\theta)) d\theta$$
+
+Let $f(\theta) = \cos(x \cos(\theta))$. Then $|f''(\theta)| \leq x^2$. Using the bound on the absolute error given above, determine the number of intervals $n$ needed to approximate $J_0(x)$ with trapezoid rule, to an absolute error of at most $10^{-8}$, at each of the following values of $x$:
+
+$$x = 1, 2, 4, 8, ..., 128, 256$$
+
+:::
+
+:::{.question}
+#### Question 8 (.html)
+
+Use trapezoid rule to approximate $J_0(x)$ for $x = 1, 2, 4, 8, ..., 128, 256$. For each value of $x$, use the corresponding number of subintervals $n$ found in the previous question.
+
+:::
+
+
+## Gaussian quadrature
+
+Gaussian quadrature with $n$ nodes approximates the integral $\int \limits_{-1}^1 f(x) dx$ by
+
+$$\int \limits_{-1}^1 f(x) dx \approx \sum \limits_{i=1}^n w_if(x_i)$$
+
+where the nodes $x_1,...,x_n$ are the $n$ roots of the $n$th Legendre polynomial, and the weights $w_i$ can also be calculated from the Legendre polynomials.
+
+By a change of variables, the integral over an arbitrary interval $[a,b]$ is then given by
+
+$$\int \limits_a^b f(x) dx \approx \frac{b-a}{2} \sum \limits_{i=1}^n w_i f \left( \frac{b-a}{2} x_i + \frac{a+b}{2}\right)$$
+
+:::{.question}
+#### Question 9 (code)
+
+The Beta($\alpha, \beta$) distribution has pdf
+
+$$f(x) = \frac{\Gamma(\alpha)\Gamma(\beta)}{\Gamma(\alpha + \beta)} x^{\alpha - 1}(1 - x)^{\beta - 1} \hspace{1cm} x \in [0,1]$$
+
+Write a function in R called `my_pbeta` to calculate the Beta cdf, satisfying the following requirements:
+
+* Inputs:
+    * `q`: a vector of points at which to evaluate the cdf
+    * `shape1`: the parameter $\alpha > 0$
+    * `shape2`: the parameter $\beta > 0$
+* Output: a vector containing the Beta cdf evaluated at the points in `q`
+
+**Error handling:** the function should produce an error if either $\alpha \leq 0$ or $\beta \leq 0$
+
+**Additional requirements:**
+
+* Your function should use Gaussian quadrature with 8 nodes. The 8 nodes $x_i$ are
+```r
+-0.9602899 -0.7966665 -0.5255324 -0.1834346  0.1834346  
+ 0.5255324 0.7966665  0.9602899
+```
+and the corresponding weights $w_i$ are
+```r
+0.1012285 0.2223810 0.3137066 0.3626838 0.3626838 
+ 0.3137066 0.2223810 0.1012285
+```
+
+* You may not use any other implementations of the Beta cdf (except to check your work in the unit tests)
+* You *may* use the `dbeta` function to calculate the Beta pdf
+* The basic Gaussian quadrature implementation described here will not work well if $\alpha < 1$ or $\beta < 1$. For this problem, we will restrict ourselves to $\alpha, \beta \geq 1$.
+
+**Unit tests:** Unit tests are provided in `hw6_tests.R`
+:::
+
+
