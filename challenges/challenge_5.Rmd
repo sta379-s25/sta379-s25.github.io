@@ -1,0 +1,245 @@
+---
+title: "Challenge 5: Legendre Polynomials"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+**Due:** 
+
+**Submission:** For this assignment, you will submit two files:
+
+* An R script (`challenge5_code.R`) containing your code for questions 1, 3, 4, and 5 (submitted to GitHub)
+* A knitted html or pdf file (from an R Markdown or Quarto document) showing your code and figure for question 2
+
+
+**Grading:** You will receive a score out of 5 for the number of questions mastered. To master a question, you must satisfy the following requirements:
+
+* Function implementations must pass all specified unit tests, *as written* (you may not modify the unit tests which I provide)
+* Your code must meet all requirements described in the questions below (matching the requested inputs and outputs)
+* You must comment your code
+* Your written solutions must be complete and correct, with no missing steps or mistakes
+* Responses to questions asking for description or explanation must be complete, thorough, and correct
+* Your work must abide by the academic honesty requirements in the syllabus 
+
+If you make an honest effort to answer all questions, but you do not master all of the questions on your first submission, you will have one resubmission attempt after receiving feedback.
+
+**Resources:** 
+
+* *Computational Statistics* (Givens and Hoeting) Chapter 5.3
+
+# Legendre polynomials
+
+The *Legendre polynomials* are a sequence of polynomials which are important in numerical integration with Gaussian quadrature. Recall that the Gaussian quadrature rule with $n$ nodes is
+
+$$\int \limits_{-1}^1 f(x) dx \approx \sum \limits_{i=1}^n w_if(x_i)$$
+
+where the nodes $x_1,...,x_n$ are the $n$ roots of the $n$th Legendre polynomial, and the weights $w_i$ can also be calculated from the Legendre polynomials. The goal of this challenge assignment is to write code which can calculate the nodes $x_i$ and the weights $w_i$, given the desired number of nodes $n$.
+
+## The polynomials
+
+Let $p_n$ be the $n$th Legendre polynomials. One way to define the Legendre polynomials is with the following recurrence relation:
+
+$$p_0(x) = 1 \hspace{1cm} p_1(x) = x$$
+
+$$p_n(x) = \frac{2n-1}{n} x p_{n-1}(x) - \frac{n-1}{n}p_{n-2}(x)$$
+
+Their derivatives also obey a recurrence relation:
+
+$$p_0'(x) = 0 \hspace{1cm} p_1'(x) = 1$$
+
+$$p_n'(x) = np_{n-1}(x) + xp_{n-1}'(x)$$
+
+## Recursive functions and memoisation
+
+To begin, we would like to write functions in R to calculate $p_n(x)$ and $p_n'(x)$. However, the value of $p_n(x)$ depends on $p_{n-1}(x)$ and $p_{n-2}(x)$, neither of which we know! So what do we do?
+
+In situations in which functions are defined with a recurrence relation, we can implement the functions as *recursive functions*. A recursive function is simply a function that calls itself.
+
+### Example: Fibonacci numbers
+
+A classic example of recursion is the calculation of Fibonacci numbers. Fibonacci numbers are given by
+
+$$F_0 = 0 \hspace{1cm} F_1 = 1$$
+
+$$F_n = F_{n-1} + F_{n-2}$$
+
+Here is an example implementation in R:
+
+```{r}
+fib <- function(n){
+  if(n == 0){
+    return(0)
+  } else if(n == 1){
+    return(1)
+  } else {
+    return(fib(n-1) + fib(n-2))
+  }
+}
+
+fib(0)
+fib(1)
+fib(2)
+fib(3)
+fib(4)
+fib(5)
+```
+
+### Memoisation
+
+The challenge with recursive functions is that they often involve calculating the same values repeatedly, which can lead to very slow evaluations. One way to make recursive functions faster is [**memoisation**](https://en.wikipedia.org/wiki/Memoization), in which the values of the function are stored once they are computed.
+
+In R, memoisation can be done with the `memoise` package. Here is an example showing how much faster the `fib` function can be with memoisation:
+
+```{r}
+library(memoise)
+system.time(fib(35))
+fib <- memoise(fib)
+system.time(fib(35))
+```
+
+
+:::{.question}
+#### Question 1 (code)
+
+Write a function in R called `pn` to compute the $n$th Legendre polynomial $p_n$. Your function should satisfy the following requirements:
+
+* Inputs:
+    * `x`: a vector of values at which to evaluate $p_n$
+    * `n`: which Legendre polynomial $p_n$ to evaluate
+    
+* Output: a vector containing the values $p_n(x)$ for the input `x`
+
+**Additional requirements:**
+
+* Memoise your function using the `memoise` package
+* You should not use any existing implementations of the Legendre polynomials
+
+**Unit tests:** See the unit tests in `challenge5_tests.R`
+
+:::
+
+:::{.question}
+#### Question 2 (.html)
+
+Using your function `pn` from question 1, make a plot showing the first 6 Legendre polynomials ($p_0$, $p_1$,...,$p_5$), with a different color for each. Here is an example of what your plot would look like:
+
+```{r, echo=F, message=F, warning=F}
+library(tidyverse)
+
+pn <- function(x, n){
+  if(n == 0){
+    return(rep(1, length(x)))
+  } else if(n == 1){
+    return(x)
+  } else {
+    return( (2*(n-1) + 1)/n * x*pn(x, n-1) - (n-1)/n * pn(x, n-2))
+  }
+}
+
+pn <- memoise(pn)
+
+x <- seq(-1, 1, 0.01)
+pol_vals <- c()
+for(n in 0:5){
+  pol_vals <- c(pol_vals, pn(x, n))
+}
+
+data.frame(x = rep(x, 6), p = pol_vals, 
+           n = rep(paste0("p", 0:5), each=length(x))) |>
+  ggplot(aes(x = x, y = p, color=n)) +
+  geom_line() +
+  theme_bw() +
+  labs(y="", color="")
+```
+
+
+:::
+
+
+:::{.question}
+#### Question 3 (code)
+
+Write a function in R called `pn_prime` to compute the derivative $p_n'$ of the $n$th Legendre polynomial $p_n$. Your function should satisfy the following requirements:
+
+* Inputs:
+    * `x`: a vector of values at which to evaluate $p_n'$
+    * `n`: which Legendre polynomial $p_n$ to differentiate
+    
+* Output: a vector containing the values $p'_n(x)$ for the input `x`
+
+**Additional requirements:**
+
+* Memoise your function using the `memoise` package
+* Use your memoised implementation `pn` from question 1 in the recurrence relation
+
+**Unit tests:** See the unit tests in `challenge5_tests.R`
+
+:::
+
+
+# Roots of Legendre polynomials
+
+The $n$th Legendre polynomial $p_n$ has $n$ roots in the interval $(-1, 1)$; that is, $n$ values $x_1, x_2,...,x_n$ for which $p_n(x_i) = 0$. 
+
+These roots are important in Gaussian quadrature, and so we need to find them. However, since the Legendre polynomials are defined here recursively, there is not a simple expression for the roots. Rather, we will use a combination of bisection and Newton's method to find the roots.
+
+Newton's method requires an initial value, and performance depends on how close that initial value is to the truth -- especially when there are multiple roots! Here is how we will go about finding the roots, leveraging the knowledge that $p_n$ will have exactly $n$ roots in $(-1, 1)$:
+
+1. Divide the interval $(-1, 1)$ into $m$ evenly-spaced intervals; begin with $m = n$ (since there are $n$ roots). The endpoints of the $i$th interval are then $[a_{i-1}, a_i] = \left[ -1 + \frac{2(i-1)}{m}, -1 + \frac{2i}{m} \right]$ for $i = 1,...,m$.
+
+2. Look for a sign change between the endpoints of the intervals, i.e. check whether $\text{sign}(f(a_{i-1})) \neq \text{sign}(f(a_{i}))$
+
+3. If there are $n$ intervals with a sign change, we know that each of these intervals contains one of the $n$ roots. If there are fewer than $n$ intervals with a sign change, go back to step 1 with $m = 2m$ (double the number of intervals we check)
+
+4. Once we have found $n$ intervals that contain our $n$ roots, perform Newton's method within each interval to find the location of the root. Initialize Newton's method at the midpoint of each interval.
+
+:::{.question}
+#### Question 4 (code)
+
+Write a function in R called `legendre_roots` to compute the $n$ roots of the $n$th Legendre polynomial. Your function should satisfy the following requirements:
+
+* Input:
+    * `n`: which Legendre polynomial $p_n$ to take the roots
+    
+* Output: a vector containing the ordered roots of $p_n$
+
+**Additional requirements:**
+
+* Use your memoised functions `pn` and `pn_prime` from the previous questions
+* You may not use any other implementations of Legendre polynomials or roots
+* You must use the method described above to find the roots (bisection + Newton's method)
+* You must implement Newton's method yourself
+
+**Unit tests:** See the unit tests in `challenge5_tests.R`
+
+:::
+
+# Gaussian quadrature weights
+
+Using the definitions above, the weights $w_i$ corresponding to the nodes $x_i$ in Gaussian quadrature can be found with the formula
+
+$$w_i = \frac{2}{(1 - x_i)^2(p_n'(x_i))^2}$$
+
+:::{.question}
+#### Question 5 (code)
+
+Write a function in R called `legendre_weights` to compute the $n$ weights $w_i$ for Gaussian quadrature with $n$ nodes. Your function should satisfy the following requirements:
+
+* Input:
+    * `nodes`: a vector of nodes $x_1,...,x_n$ for Gaussian quadrature
+    
+* Output: a vector containing the weights $w_1,...,w_n$ corresponding to the nodes $x_1,...,x_n$
+
+**Additional requirements:**
+
+* Use your memoised functions `pn` and `pn_prime` from the previous questions
+
+**Unit tests:** See the unit tests in `challenge5_tests.R`
+
+:::
+
+
+
