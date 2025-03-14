@@ -1,0 +1,72 @@
+---
+title: "Numerical integration practice questions: solutions"
+format: html
+---
+
+1. 
+
+```{r}
+riemann_sum <- function(f, a, b, n){
+  h <- (b-a)/n
+  rsum <- 0
+  for(i in 0:(n-1)){
+    rsum <- rsum + h*f(a + i*h)
+  }
+  
+  return(rsum)
+}
+
+riemann_sum(dnorm, -1, 1, n=5)
+riemann_sum(dnorm, -2, 2, n=5)
+riemann_sum(dnorm, -3, 3, n=5)
+```
+
+3.
+
+```{r}
+trapezoid_sum <- function(f, a, b, n){
+  h <- (b-a)/n
+  tsum <- 0
+  for(i in 1:(n-1)){
+    tsum <- tsum + h*f(a + i*h)
+  }
+  tsum <- tsum + h/2 *(f(a) + f(b))
+  return(tsum)
+}
+
+trapezoid_sum(dnorm, -1, 1, n=5)
+trapezoid_sum(dnorm, -2, 2, n=5)
+trapezoid_sum(dnorm, -3, 3, n=5)
+```
+
+The results are the same because we are integrating a function which is symmetric about 0, on an interval which is also symmetric around 0. The underestimate of the Riemann sum for intervals to the left of 0 is canceled out by the overestimate of the Riemann sum for intervals to the right of 0, and the result is the same as approximating with a linear function.
+
+4. 
+
+```{r}
+pnorm(1) - pnorm(0)
+trapezoid_sum(dnorm, 0, 1, 5)
+riemann_sum(dnorm, 0, 1, 5)
+```
+
+The trapezoid rule does a better job here; the Riemann sum overestimates the probability because the density is decreasing on the interval $(0, 1)$.
+
+5. 
+
+```{r}
+simpson_rule <- function(f, a, b, n){
+  h <- (b-a)/n
+  ssum <- 0
+  for(i in 0:(n-1)){
+    ssum <- ssum + h/6 * (f(a + i*h) + 4*f(0.5*(a+i*h + a+(i+1)*h)) + f(a+(i+1)*h))
+  }
+  return(ssum)
+}
+
+simpson_rule(dnorm, 0, 1, 5)
+pnorm(1) - pnorm(0)
+```
+
+Simpson's rule is very close to the true value. Using a quadratic function (instead of the simpler linear or constant functions of the trapezoid and Riemann rules) produces a better estimate of $f$, and hence a better approximation of the integral.
+
+

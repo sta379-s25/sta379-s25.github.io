@@ -1,0 +1,55 @@
+---
+title: "Practice Questions: Numerical integration"
+format: html
+---
+
+## Riemann sums and trapezoid rule
+
+For both Riemann sums and the trapezoid rule, divide the interval $[a, b]$ into $n$ subintervals of equal width $h = (b-a)/n$.
+
+**Riemann sum:** 
+
+$$\int \limits_a^b f(x) dx \ \approx \ h \sum \limits_{i=0}^{n-1} f(a + ih)$$
+
+**Trapezoid rule:**
+
+$$\int \limits_a^b f(x) dx \ \approx \ h \sum \limits_{i=1}^{n-1} f(a + ih) + \frac{h}{2}(f(a) + f(b))$$
+
+## The 68-95-99.7 rule
+
+The 68-95-99.7 rule says that for a normal distribution, there is approximately a 68% chance that a randomly sampled observation lies within 1 standard deviation of the mean, a 95% chance that a randomly sampled observation lies within 2 standard deviations of the mean, and a 99.7% chance that a randomly sampled observations lies within 3 standard deviations of the mean.
+
+We can verify this with the standard normal distribution:
+
+```{r}
+pnorm(1) - pnorm(-1)
+pnorm(2) - pnorm(-2)
+pnorm(3) - pnorm(-3)
+```
+
+1. Use a Riemann sum with $n=5$ subintervals to approximate each of these probabilities.
+
+2. How many subintervals are needed for each probability to be accurate to three decimal places?
+
+3. Use the trapezoid rule with $n=5$ subintervals to approximate each of the probabilities. Why does the trapezoid rule return the same approximations as the Riemann sum in this example?
+
+4. Now use both a Riemann sum and the trapezoid rule to approximate $P(0 \leq X \leq 1)$ for $X \sim N(0, 1)$, using $n=5$ subintervals. Which of these two approximations does a better job? Why?
+
+## Simpson's rule
+
+The Riemann sum approximates the integral of $f$ by approximating $f$ with a constant function in each subinterval. The trapezoid rule approximates the integral of $f$ by approximating $f$ with a *linear* function in each subinterval. We might then wonder what would happen if we approximate $f$ with a *quadratic* function in each subinterval.
+
+If we do, we get **Simpson's rule**. Divide the interval $[a, b]$ into $n$ subintervals of equal width $h = (b-a)/n$.
+
+**Simpson's rule:**
+
+$$\int \limits_a^b f(x) dx \approx \frac{h}{6} \sum \limits_{i=0}^{n-1} \left[ f(a + ih) + 4 f\left( \frac{a + ih + a + (i+1)h}{2} \right) + f(a + (i+1)h) \right]$$
+
+5. Use Simpson's rule to approximate $P(0 \leq X \leq 1)$ for $X \sim N(0, 1)$, using $n=5$ subintervals. How does the approximation compare to the trapezoid rule?
+
+
+
+
+
+
+

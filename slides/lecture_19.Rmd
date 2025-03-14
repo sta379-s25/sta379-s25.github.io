@@ -1,0 +1,245 @@
+---
+title: "Lecture 19: Numerical Integration"
+author: "Ciaran Evans"
+output: beamer_presentation
+editor_options: 
+  chunk_output_type: console
+---
+
+## Numerical integration
+
+**Numerical integration:** Numerical approximations to definite integrals that are hard to solve in closed form.
+
+\vspace{1cm}
+
+**Question:** In statistics, when do integrals without a closed form solution arise?
+
+\vspace{1cm}
+
+## Numerical integration: motivation
+
+* CDFs with intractable integrals: e.g.,
+
+$$\int \limits_{-\infty}^t \frac{1}{\sqrt{2 \pi}} e^{-x^2/2} dx \hspace{1cm} \int \limits_{0}^t \frac{\Gamma(\alpha)\Gamma(\beta)}{\Gamma(\alpha + \beta)} x^{\alpha - 1}(1 - x)^{\beta - 1} dx$$
+
+\vspace{1cm}
+
+* Optimization problems involving integrals: e.g., mixed effects models,
+
+$$\prod_i \int \left[ \phi(\gamma_i; 0, \sigma^2) \prod_j f(y_{ij} | \theta_{ij}) \right] d\gamma_i$$
+
+## Numerical integration
+
+Suppose I want to calculate $\int \limits_a^b f(x) dx$, but I can't get a closed form for the anti-derivative.
+
+```{r, fig.width=3, fig.height=2.5, echo=F, message=F, warning=F}
+library(tidyverse)
+x <- seq(0, 1, 0.01)
+y <- x^3 - 1.5*x^2 + x
+#plot(x, y, type="l", ylab="f(x)", xaxt='n', yaxt='n', cex.lab=0.75)
+data.frame(x = x, y = y) |>
+  ggplot(aes(x = x, y = y)) +
+  geom_line() +
+  theme_classic() +
+  labs(y = "f(x)") +
+  theme(axis.ticks.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y=element_blank())
+```
+
+**Question:** How can we approximate the integral without a closed form?
+
+## Numerical integration: Riemann sum
+
+Divide $[a, b]$ into $n$ subintervals:
+
+
+```{r fig.width=3.5, fig.height=3, echo=F}
+temp_f <- function(x){
+  x^3 - 1.5*x^2 + x
+}
+data.frame(x = x, y = y) |>
+  ggplot() +
+  geom_line(aes(x = x, y = y)) +
+  geom_segment(x = 0.1, y = 0, xend = 0.1, yend = temp_f(0.1), lty=2) +
+  geom_segment(x = 0.2, y = 0, xend = 0.2, yend = temp_f(0.2), lty=2) +
+  geom_segment(x = 0.3, y = 0, xend = 0.3, yend = temp_f(0.3), lty=2) +
+  geom_segment(x = 0.4, y = 0, xend = 0.4, yend = temp_f(0.4), lty=2) +
+  geom_segment(x = 0.5, y = 0, xend = 0.5, yend = temp_f(0.5), lty=2) +
+  geom_segment(x = 0.6, y = 0, xend = 0.6, yend = temp_f(0.6), lty=2) +
+  geom_segment(x = 0.7, y = 0, xend = 0.7, yend = temp_f(0.7), lty=2) +
+  geom_segment(x = 0.8, y = 0, xend = 0.8, yend = temp_f(0.8), lty=2) +
+  geom_segment(x = 0.9, y = 0, xend = 0.9, yend = temp_f(0.9), lty=2) +
+  theme_classic() +
+  labs(y = "f(x)") +
+  theme(axis.ticks.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y=element_blank())
+```
+
+
+## Numerical integration: Riemann sum
+
+Approximate $f(x)$ in each interval:
+
+
+```{r fig.width=3.5, fig.height=3, echo=F}
+data.frame(x = x, y = y) |>
+  ggplot() +
+  geom_line(aes(x = x, y = y)) +
+  geom_segment(x = 0.1, y = 0, xend = 0.1, yend = temp_f(0.1), lty=2) +
+  geom_segment(x = 0.1, y = temp_f(0.1), xend=0.2, yend=temp_f(0.1), lty=2) +
+  geom_segment(x = 0.2, y = 0, xend = 0.2, yend = temp_f(0.2), lty=2) +
+  geom_segment(x = 0.2, y = temp_f(0.2), xend=0.3, yend=temp_f(0.2), lty=2) +
+  geom_segment(x = 0.3, y = 0, xend = 0.3, yend = temp_f(0.3), lty=2) +
+  geom_segment(x = 0.3, y = temp_f(0.3), xend=0.4, yend=temp_f(0.3), lty=2) +
+  geom_segment(x = 0.4, y = 0, xend = 0.4, yend = temp_f(0.4), lty=2) +
+  geom_segment(x = 0.4, y = temp_f(0.4), xend=0.5, yend=temp_f(0.4), lty=2) +
+  geom_segment(x = 0.5, y = 0, xend = 0.5, yend = temp_f(0.5), lty=2) +
+  geom_segment(x = 0.5, y = temp_f(0.5), xend=0.6, yend=temp_f(0.5), lty=2) +
+  geom_segment(x = 0.6, y = 0, xend = 0.6, yend = temp_f(0.6), lty=2) +
+  geom_segment(x = 0.6, y = temp_f(0.6), xend=0.7, yend=temp_f(0.6), lty=2) +
+  geom_segment(x = 0.7, y = 0, xend = 0.7, yend = temp_f(0.7), lty=2) +
+  geom_segment(x = 0.7, y = temp_f(0.7), xend=0.8, yend=temp_f(0.7), lty=2) +
+  geom_segment(x = 0.8, y = 0, xend = 0.8, yend = temp_f(0.8), lty=2) +
+  geom_segment(x = 0.8, y = temp_f(0.8), xend=0.9, yend=temp_f(0.8), lty=2) +
+  geom_segment(x = 0.9, y = 0, xend = 0.9, yend = temp_f(0.9), lty=2) +
+  theme_classic() +
+  labs(y = "f(x)") +
+  theme(axis.ticks.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y=element_blank())
+```
+
+
+## Numerical integration: Riemann sum
+
+Use the approximation in each interval to approximate the integral:
+
+
+```{r fig.width=3.5, fig.height=3, echo=F}
+data.frame(x = x, y = y) |>
+  ggplot() +
+  geom_line(aes(x = x, y = y)) +
+  geom_segment(x = 0.1, y = 0, xend = 0.1, yend = temp_f(0.1), lty=2) +
+  geom_segment(x = 0.1, y = temp_f(0.1), xend=0.2, yend=temp_f(0.1), lty=2) +
+  geom_segment(x = 0.2, y = 0, xend = 0.2, yend = temp_f(0.2), lty=2) +
+  geom_segment(x = 0.2, y = temp_f(0.2), xend=0.3, yend=temp_f(0.2), lty=2) +
+  geom_segment(x = 0.3, y = 0, xend = 0.3, yend = temp_f(0.3), lty=2) +
+  geom_segment(x = 0.3, y = temp_f(0.3), xend=0.4, yend=temp_f(0.3), lty=2) +
+  geom_segment(x = 0.4, y = 0, xend = 0.4, yend = temp_f(0.4), lty=2) +
+  geom_segment(x = 0.4, y = temp_f(0.4), xend=0.5, yend=temp_f(0.4), lty=2) +
+  geom_segment(x = 0.5, y = 0, xend = 0.5, yend = temp_f(0.5), lty=2) +
+  geom_segment(x = 0.5, y = temp_f(0.5), xend=0.6, yend=temp_f(0.5), lty=2) +
+  geom_segment(x = 0.6, y = 0, xend = 0.6, yend = temp_f(0.6), lty=2) +
+  geom_segment(x = 0.6, y = temp_f(0.6), xend=0.7, yend=temp_f(0.6), lty=2) +
+  geom_segment(x = 0.7, y = 0, xend = 0.7, yend = temp_f(0.7), lty=2) +
+  geom_segment(x = 0.7, y = temp_f(0.7), xend=0.8, yend=temp_f(0.7), lty=2) +
+  geom_segment(x = 0.8, y = 0, xend = 0.8, yend = temp_f(0.8), lty=2) +
+  geom_segment(x = 0.8, y = temp_f(0.8), xend=0.9, yend=temp_f(0.8), lty=2) +
+  geom_segment(x = 0.9, y = 0, xend = 0.9, yend = temp_f(0.9), lty=2) +
+  theme_classic() +
+  labs(y = "f(x)") +
+  theme(axis.ticks.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y=element_blank())
+```
+
+
+## Numerical integration: Riemann sum
+
+Want to approximate $\int \limits_a^b f(x) dx$
+
+\bigskip
+
+1. Divide $[a,b]$ into $n$ subintervals of equal width $h = \dfrac{b-a}{n}$
+
+\bigskip
+
+2. Riemann sum approximation:
+
+$$\int \limits_a^b f(x) dx \ \approx \ h \sum \limits_{i=0}^{n-1} f(a + ih)$$
+
+\vspace{2cm}
+
+
+## Numerical integration: trapezoid rule
+
+Instead of a constant value in each interval, use a line:
+
+```{r fig.width=3.5, fig.height=3, echo=F}
+data.frame(x = x, y = y) |>
+  ggplot() +
+  geom_line(aes(x = x, y = y)) +
+  geom_segment(x = 0.1, y = 0, xend = 0.1, yend = temp_f(0.1), lty=2) +
+  geom_segment(x = 0.366667, y = 0, xend = 0.366667, yend = temp_f(0.366667), lty=2) +
+  geom_segment(x = 0.633333, y = 0, xend = 0.633333, yend = temp_f(0.633333), lty=2) +
+  geom_segment(x = 0.9, y = 0, xend = 0.9, yend = temp_f(0.9), lty=2) +
+  geom_segment(x = 0.1, y = temp_f(0.1), xend=0.366667, yend=temp_f(0.366667), lty=2) +
+  geom_segment(x = 0.366667, y = temp_f(0.366667), xend=0.633333, yend=temp_f(0.633333), lty=2) +
+  geom_segment(x = 0.633333, y = temp_f(0.633333), xend=0.9, yend=temp_f(0.9), lty=2) +
+  theme_classic() +
+  labs(y = "f(x)") +
+  theme(axis.ticks.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y=element_blank())
+```
+
+
+## Numerical integration: trapezoid rule
+
+Instead of a constant value in each interval, use a line:
+
+```{r fig.width=3.5, fig.height=3, echo=F}
+data.frame(x = x, y = y) |>
+  ggplot() +
+  geom_line(aes(x = x, y = y)) +
+  geom_segment(x = 0.1, y = 0, xend = 0.1, yend = temp_f(0.1), lty=2) +
+  geom_segment(x = 0.1, y = temp_f(0.1), xend=0.2, yend=temp_f(0.2), lty=2) +
+  geom_segment(x = 0.2, y = 0, xend = 0.2, yend = temp_f(0.2), lty=2) +
+  geom_segment(x = 0.2, y = temp_f(0.2), xend=0.3, yend=temp_f(0.3), lty=2) +
+  geom_segment(x = 0.3, y = 0, xend = 0.3, yend = temp_f(0.3), lty=2) +
+  geom_segment(x = 0.3, y = temp_f(0.3), xend=0.4, yend=temp_f(0.4), lty=2) +
+  geom_segment(x = 0.4, y = 0, xend = 0.4, yend = temp_f(0.4), lty=2) +
+  geom_segment(x = 0.4, y = temp_f(0.4), xend=0.5, yend=temp_f(0.5), lty=2) +
+  geom_segment(x = 0.5, y = 0, xend = 0.5, yend = temp_f(0.5), lty=2) +
+  geom_segment(x = 0.5, y = temp_f(0.5), xend=0.6, yend=temp_f(0.6), lty=2) +
+  geom_segment(x = 0.6, y = 0, xend = 0.6, yend = temp_f(0.6), lty=2) +
+  geom_segment(x = 0.6, y = temp_f(0.6), xend=0.7, yend=temp_f(0.7), lty=2) +
+  geom_segment(x = 0.7, y = 0, xend = 0.7, yend = temp_f(0.7), lty=2) +
+  geom_segment(x = 0.7, y = temp_f(0.7), xend=0.8, yend=temp_f(0.8), lty=2) +
+  geom_segment(x = 0.8, y = 0, xend = 0.8, yend = temp_f(0.8), lty=2) +
+  geom_segment(x = 0.8, y = temp_f(0.8), xend=0.9, yend=temp_f(0.9), lty=2) +
+  geom_segment(x = 0.9, y = 0, xend = 0.9, yend = temp_f(0.9), lty=2) +
+  theme_classic() +
+  labs(y = "f(x)") +
+  theme(axis.ticks.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y=element_blank())
+```
+
+
+## Numerical integration: trapezoid rule
+
+
+Want to approximate $\int \limits_a^b f(x) dx$
+
+\bigskip
+
+1. Divide $[a,b]$ into $n$ subintervals of equal width $h = \dfrac{b-a}{n}$
+
+\bigskip
+
+2. Trapezoid rule approximation:
+
+$$\int \limits_a^b f(x) dx \ \approx \ \sum \limits_{i=0}^{n-1} \frac{h}{2}\left[ f(a + ih) + f(a + (i+1)h) \right]$$
+
+$$= h \sum \limits_{i=1}^{n-1} f(a + ih) + \frac{h}{2}(f(a) + f(b))$$
+
+\vspace{2cm}
