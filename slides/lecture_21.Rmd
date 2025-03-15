@@ -1,0 +1,231 @@
+---
+title: "Lecture 21: Gaussian quadrature"
+author: "Ciaran Evans"
+output: beamer_presentation
+editor_options: 
+  chunk_output_type: console
+---
+
+## Gaussian quadrature
+
+**General result:** If $f(x) = c_0 + c_1 x + c_2x^2 + \cdots + c_{2n-1} x^{2n-1}$, then there exist **nodes** $x_1,...,x_n$ and **weights** $w_1,...,x_n$ such that
+
+$$\int \limits_{-1}^1 f(x) dx = \sum \limits_{i=1}^n w_i f(x_i)$$
+
+**n-node Gaussian quadrature rule:** For general function $f$,
+
+$$\int \limits_{-1}^1 f(x) dx \approx \sum \limits_{i=1}^n w_i f(x_i)$$
+
+## Activity, Part 1
+
+Class activity to help motivate Gaussian quadrature:
+
+[https://sta379-s25.github.io/practice_questions/pq_21.html](https://sta379-s25.github.io/practice_questions/pq_21.html)
+
+* Work with your neighbors on Part 1 of the activity
+* In a bit, we will discuss key points as a class
+
+## Activity, Part 1
+
+$$L_{n,i}(x) = \prod \limits_{k : k \neq i} \frac{(x - x_k)}{(x_i - x_k)}$$
+
+\vspace{1cm}
+
+$$q(x) = \sum \limits_{i=1}^n y_i L_{n,i}(x)$$
+
+$$q(x_i) = \hspace{3cm}$$
+
+\vspace{2cm}
+
+## Activity, Part 1
+
+Original: \textcolor{red}{$f(x) = 10(x^7 - 1.6225x^5 +0.79875x^3 - 0.113906x)$}
+
+Polynomial interpolation: $q(x)$, with $n=4$ points
+
+```{r, echo=F, fig.width=4, fig.height=3.5}
+# calculate q at a single point
+# x: point to evaluate q(x)
+# xi: the points x1,...,xn
+# yi: the points y1,...,yn
+q_helper <- function(x, xi, yi){
+  lp <- sapply(1:length(xi), 
+               function(i){prod((x - xi[-i])/(xi[i] - xi[-i]))})
+  sum(yi*lp)
+}
+
+# calculate q at a vector of new points
+# x: point to evaluate q(x)
+# xi: the points x1,...,xn
+# yi: the points y1,...,yn
+q <- function(x, xi, yi){
+  sapply(x, function(t){q_helper(t, xi, yi)})
+}
+
+f <- function(x){
+  10*(x^7 -1.6225*x^5 +0.79875*x^3 - 0.113906*x)
+}
+
+n <- 4
+xi <- seq(-1, 1, length.out=n)
+yi <- f(xi)
+
+plot(xi, yi, pch=16, xlab="x", ylab="y", cex.lab=0.75, cex.axis=0.75)
+
+x <- seq(-1, 1, 0.01)
+lines(x, q(x, xi, yi))
+lines(x, f(x), col="red")
+```
+
+## Activity, Part 1
+
+Polynomial interpolation: $q(x)$, with $n=4$ points
+
+```{r, echo=F, fig.width=4, fig.height=3.5}
+# calculate q at a single point
+# x: point to evaluate q(x)
+# xi: the points x1,...,xn
+# yi: the points y1,...,yn
+q_helper <- function(x, xi, yi){
+  lp <- sapply(1:length(xi), 
+               function(i){prod((x - xi[-i])/(xi[i] - xi[-i]))})
+  sum(yi*lp)
+}
+
+# calculate q at a vector of new points
+# x: point to evaluate q(x)
+# xi: the points x1,...,xn
+# yi: the points y1,...,yn
+q <- function(x, xi, yi){
+  sapply(x, function(t){q_helper(t, xi, yi)})
+}
+
+f <- function(x){
+  10*(x^7 -1.6225*x^5 +0.79875*x^3 - 0.113906*x)
+}
+
+n <- 4
+xi <- seq(-1, 1, length.out=n)
+yi <- f(xi)
+
+plot(xi, yi, pch=16, xlab="x", ylab="y", cex.lab=0.75, cex.axis=0.75)
+
+x <- seq(-1, 1, 0.01)
+lines(x, q(x, xi, yi))
+lines(x, f(x), col="red")
+```
+
+**Question:** What happens as I change the number of points $n$ used for $q(x)$?
+
+## Activity, Part 1
+
+Polynomial interpolation: $q(x)$, with $n=6$ points
+
+```{r, echo=F, fig.width=4, fig.height=3.5}
+# calculate q at a single point
+# x: point to evaluate q(x)
+# xi: the points x1,...,xn
+# yi: the points y1,...,yn
+q_helper <- function(x, xi, yi){
+  lp <- sapply(1:length(xi), 
+               function(i){prod((x - xi[-i])/(xi[i] - xi[-i]))})
+  sum(yi*lp)
+}
+
+# calculate q at a vector of new points
+# x: point to evaluate q(x)
+# xi: the points x1,...,xn
+# yi: the points y1,...,yn
+q <- function(x, xi, yi){
+  sapply(x, function(t){q_helper(t, xi, yi)})
+}
+
+f <- function(x){
+  10*(x^7 -1.6225*x^5 +0.79875*x^3 - 0.113906*x)
+}
+
+n <- 6
+xi <- seq(-1, 1, length.out=n)
+yi <- f(xi)
+
+plot(xi, yi, pch=16, xlab="x", ylab="y", cex.lab=0.75, cex.axis=0.75)
+
+x <- seq(-1, 1, 0.01)
+lines(x, q(x, xi, yi))
+lines(x, f(x), col="red")
+```
+
+## Activity, Part 1
+
+Polynomial interpolation: $q(x)$, with $n=8$ points
+
+```{r, echo=F, fig.width=4, fig.height=3.5}
+# calculate q at a single point
+# x: point to evaluate q(x)
+# xi: the points x1,...,xn
+# yi: the points y1,...,yn
+q_helper <- function(x, xi, yi){
+  lp <- sapply(1:length(xi), 
+               function(i){prod((x - xi[-i])/(xi[i] - xi[-i]))})
+  sum(yi*lp)
+}
+
+# calculate q at a vector of new points
+# x: point to evaluate q(x)
+# xi: the points x1,...,xn
+# yi: the points y1,...,yn
+q <- function(x, xi, yi){
+  sapply(x, function(t){q_helper(t, xi, yi)})
+}
+
+f <- function(x){
+  10*(x^7 -1.6225*x^5 +0.79875*x^3 - 0.113906*x)
+}
+
+n <- 8
+xi <- seq(-1, 1, length.out=n)
+yi <- f(xi)
+
+plot(xi, yi, pch=16, xlab="x", ylab="y", cex.lab=0.75, cex.axis=0.75)
+
+x <- seq(-1, 1, 0.01)
+lines(x, q(x, xi, yi))
+lines(x, f(x), col="red")
+```
+
+## Polynomial interpolation
+
+Let $f$ be a function on $(-1, 1)$ we wish to approximate, and let $x_1,...,x_n$ be $n$ distinct points in $(-1, 1)$.
+
+**Interpolating polynomial:** $q(x) = \sum \limits_{i=1}^n f(x_i) L_{n,i}(x)$
+
+* $q(x_i) = f(x_i)$ for $i=1,...,n$ (**interpolation**)
+* If $f$ is a polynomial of degree $\leq n-1$, then $q(x) = f(x)$ for **all** $x$
+
+Integration: $\int \limits_{-1}^1 f(x) dx \approx \int \limits_{-1}^1 q(x) dx$
+
+\vspace{4cm}
+
+## Summary so far
+
+## Summary so far
+
+To approximate $\int \limits_{-1}^1 f(x) dx$:
+
+1. Choose $n$ points $x_1,...,x_n$ in $(-1, 1)$
+2. Construct the interpolating polynomial: $q(x) = \sum \limits_{i=1}^n f(x_i) L_{n,i}(x)$
+3. Integrate $q$:
+$$\int \limits_{-1}^1 q(x) dx = \sum \limits_{i=1}^n w_i f(x_i) \hspace{1cm} w_i = \int\limits_{-1}^1 L_{n,i}(x) dx$$
+4. Approximate the integral of $f$:
+$$\int \limits_{-1}^1 f(x)dx \approx \int \limits_{-1}^1 q(x) dx = \sum \limits_{i=1}^n w_i f(x_i)$$
+
+**Next time:** Which points $x_1,...,x_n$ do we use??
+
+
+## Activity, Part 2
+
+Verify calculation of the weights $w_i$:
+
+[https://sta379-s25.github.io/practice_questions/pq_21.html](https://sta379-s25.github.io/practice_questions/pq_21.html)
+
+* Work with your neighbors on Part 2 of the activity

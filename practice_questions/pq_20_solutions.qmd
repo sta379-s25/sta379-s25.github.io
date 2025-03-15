@@ -1,0 +1,58 @@
+---
+title: "Gaussian quadrature practice questions: solutions"
+format: html
+---
+
+1.
+    * $\int \limits_{-1}^1 x^5 dx = 0$
+    * $\int \limits_{-1}^1 (x^5 - 5x^4 - 3x^2)dx = -4$
+    
+```{r}
+nodes <- c(-sqrt(3/5), 0, sqrt(3/5))
+weights <- c(5/9, 8/9, 5/9)
+
+f <- function(x){
+  x^5
+}
+sum(weights*f(nodes))
+
+f <- function(x){
+  x^5 - 5*x^4 - 3*x^2
+}
+sum(weights*f(nodes))
+```
+
+2. 
+
+```{r}
+# true value
+pnorm(1) - pnorm(-1)
+
+# Gaussian quadrature
+nodes <- c(-sqrt(3/5), 0, sqrt(3/5))
+weights <- c(5/9, 8/9, 5/9)
+
+sum(weights*dnorm(nodes))
+
+# trapezoid rule
+trapezoid_sum <- function(f, a, b, n){
+  h <- (b-a)/n
+  tsum <- 0
+  for(i in 1:(n-1)){
+    tsum <- tsum + h*f(a + i*h)
+  }
+  tsum <- tsum + h/2 *(f(a) + f(b))
+  return(tsum)
+}
+
+trapezoid_sum(dnorm, -1, 1, n=5)
+```
+
+Gaussian quadrature is a better approximation, and it uses fewer points than trapezoid rule. In fact, it takes 23 subintervals for trapezoid rule to be as good as Gaussian quadrature for this example:
+
+```{r}
+trapezoid_sum(dnorm, -1, 1, n=23)
+```
+
+
+

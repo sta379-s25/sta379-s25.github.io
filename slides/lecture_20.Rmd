@@ -1,0 +1,136 @@
+---
+title: "Lecture 20: Intro to Gaussian quadrature"
+author: "Ciaran Evans"
+output: beamer_presentation
+editor_options: 
+  chunk_output_type: console
+---
+
+## Recap: numerical integration rules (so far)
+
+Divide interval $[a, b]$ into $n$ subintervals of equal width $h = \dfrac{b-a}{n}$
+
+* **Riemann rule:** (piecewise constant approximation)
+
+\vspace{-0.5cm}
+
+$$\int \limits_a^b f(x) dx \ \approx \ h \sum \limits_{i=0}^{n-1} f(a + ih)$$
+
+* **Trapezoid rule:** (piecewise linear approximation)
+
+\vspace{-0.5cm}
+
+$$\int \limits_a^b f(x) dx \ \approx \ h \sum \limits_{i=1}^{n-1} f(a + ih) + \frac{h}{2}(f(a) + f(b))$$
+
+* **Simpson's rule:** (piecewise quadratic approximation)
+
+\vspace{-0.5cm}
+
+$$\int \limits_a^b f(x) dx \approx \frac{h}{6} \sum \limits_{i=0}^{n-1} \left[ f(a + ih) + 4 f\left( \frac{2a + 2ih + h}{2} \right) + f(a + (i+1)h) \right]$$
+
+## Trapezoid rule
+
+* Choose $n$. Interval widths are all the same: $h = (b-a)/n$
+
+$$\int \limits_a^b f(x) dx \ \approx \ h \sum \limits_{i=1}^{n-1} f(a + ih) + \frac{h}{2}(f(a) + f(b))$$
+$$ = \sum_i w_i f(x_i)$$
+
+**Idea:** What if we try another weighted sum, 
+$$\int \limits_a^b f(x) dx \approx \sum_i w_i f(x_i)$$ 
+but this time we try to be more clever with the points $x_i$?
+
+
+## Motivation: using fewer points
+
+* For now, restrict attention to functions on $[-1, 1]$ (can generalize to other intervals with a change of variables later)
+
+\bigskip
+
+* Suppose $f(x) = c_0 + c_1 x$ on $[-1, 1]$ (linear function)
+
+\bigskip
+
+**Question:** Will trapezoid rule do a good job?
+
+\vspace{5cm}
+
+## Motivation: using fewer points
+
+* For now, restrict attention to functions on $[-1, 1]$ (can generalize to other intervals with a change of variables later)
+
+* Suppose $f(x) = c_0 + c_1 x$ on $[-1, 1]$ (linear function) $\Rightarrow$ trapezoid rule is **exact**
+
+* Trapezoid rule requires evaluation $f$ at two points: $\int \limits_{-1}^1 f(x) dx = f(-1) + f(1)$
+
+\bigskip
+
+**Claim:** If $f(x) = c_0 + c_1x$, there exist $w_1, x_1$ such that
+
+$$\int \limits_{-1}^1 f(x) dx = w_1 f(x_1)$$
+
+## Motivation: using fewer points
+
+**Claim:** If $f(x) = c_0 + c_1x$, there exist $w_1, x_1$ such that
+
+$$\int \limits_{-1}^1 f(x) dx = w_1 f(x_1)$$
+
+\vspace{5cm}
+
+## "Best" single point approximation
+
+The "best" approximation with a single point $x_1$ is
+
+$$\int \limits_{-1}^1 f(x) dx \approx w_1 f(x_1) = 2f(0)$$
+
+\vspace{4cm}
+
+## What can we do with two points?
+
+**Question:** A single point can integrate a linear function (1st order polynomial) exactly. What order of polynomial do you think we could integrate with *two* points?
+
+\vspace{4cm}
+
+## What can we do with two points?
+
+**Claim:** If $f(x) = c_0 + c_1 x + c_2 x^2 + c_3 x^3$, then there exist $x_1, x_2, w_1, w_2$ such that
+
+$$\int \limits_{-1}^1 f(x) dx = w_1 f(x_1) + w_2 f(x_2)$$
+
+\vspace{5cm}
+
+## Example
+
+$$f(x) = x^3 - 2x^2 + 3$$
+
+\vspace{7cm}
+
+## Example
+
+$$f(x) = x^3 - 2x^2 + 3$$
+
+$$\int \limits_{-1}^1 f(x) dx = \left( \frac{x^4}{4} - \frac{2x^3}{3} + 3x \right)\biggr\rvert_{-1}^1 = \frac{14}{3}$$
+
+$$f\left( -\frac{1}{\sqrt{3}} \right) + f\left( \frac{1}{\sqrt{3}} \right) = -\frac{1}{3\sqrt{3}} - \frac{2}{3} + 3 + \frac{1}{3\sqrt{3}} - \frac{2}{3} + 3 = \frac{14}{3}$$
+
+
+
+## Gaussian quadrature
+
+**General result:** If $f(x) = c_0 + c_1 x + c_2x^2 + \cdots + c_{2n-1} x^{2n-1}$, then there exist **nodes** $x_1,...,x_n$ and **weights** $w_1,...,x_n$ such that
+
+$$\int \limits_{-1}^1 f(x) dx = \sum \limits_{i=1}^n w_i f(x_i)$$
+
+**n-node Gaussian quadrature rule:** For general function $f$,
+
+$$\int \limits_{-1}^1 f(x) dx \approx \sum \limits_{i=1}^n w_i f(x_i)$$
+
+## Your turn
+
+Practice questions on the course website:
+
+[https://sta379-s25.github.io/practice_questions/pq_20.html](https://sta379-s25.github.io/practice_questions/pq_20.html)
+
+* Try Gaussian quadrature with 3 nodes
+* Start in class. You are welcome to work with others
+* Practice questions are to help you practice. They are not submitted and not graded
+* Solutions are posted on the course website

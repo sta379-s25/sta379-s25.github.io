@@ -1,0 +1,48 @@
+---
+title: "Practice Questions: Gaussian quadrature"
+format: html
+---
+
+## Gaussian quadrature
+
+**General result:** If $f(x) = c_0 + c_1 x + c_2x^2 + \cdots + c_{2n-1} x^{2n-1}$, then there exist **nodes** $x_1,...,x_n$ and **weights** $w_1,...,x_n$ such that
+
+$$\int \limits_{-1}^1 f(x) dx = \sum \limits_{i=1}^n w_i f(x_i)$$
+
+**n-node Gaussian quadrature rule:** For general function $f$,
+
+$$\int \limits_{-1}^1 f(x) dx \approx \sum \limits_{i=1}^n w_i f(x_i)$$
+
+## Exact integration
+
+The Gaussian quadrature rule with three nodes has nodes $x_1 = -\sqrt{\dfrac{3}{5}}, \ x_2 = 0, \ x_3 = \sqrt{\dfrac{3}{5}}$, and weights $w_1 = 5/9, \ w_2 = 8/9, \ w_3 = 5/9$.
+
+1. **Question:** For each of the following 5th degree polynomials, find the integral analytically (i.e. by solving the integral in closed form), and with 3-node Gaussian quadrature. Verify that Gaussian quadrature is exact for these polynomials:
+    * $f(x) = x^5$
+    * $f(x) = x^5 - 5x^4 - 3x^2$
+
+```{r, include=F, eval=F}
+f <- function(x){
+  x^5 - 5*x^4 - 3*x^2
+}
+nodes <- c(-sqrt(3/5), 0, sqrt(3/5))
+weights <- c(5/9, 8/9, 5/9)
+
+sum(weights*f(nodes))
+```
+
+## The 68-95-99.7 rule revisited
+
+2. **Question:** Use Gaussian quadrature with 3 nodes to approximate $P(-1 \leq X \leq 1)$ for $X \sim N(0, 1)$. How does the approximation compare to the trapezoid rule approximation with 5 subintervals?
+
+```{r, include=F, eval=F}
+
+nodes <- c(-sqrt(3/5), 0, sqrt(3/5))
+weights <- c(5/9, 8/9, 5/9)
+
+sum(weights*dnorm(nodes))
+pnorm(1) - pnorm(-1)
+```
+
+
+
