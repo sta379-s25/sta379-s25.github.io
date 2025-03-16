@@ -1681,7 +1681,7 @@ margin-left: 0 !important;
       
    
 <!-- Don't indent these lines or it will mess pre blocks indentation --> 
-<p><strong>Due:</strong></p>
+<p><strong>Due:</strong> Friday April 25, 10pm</p>
 <p><strong>Submission:</strong> For this assignment, you will submit two
 files:</p>
 <ul>
@@ -1794,11 +1794,11 @@ can be with memoisation:</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="fu">library</span>(memoise)</span>
 <span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="fu">system.time</span>(<span class="fu">fib</span>(<span class="dv">35</span>))</span></code></pre></div>
 <pre><code>##    user  system elapsed 
-##   4.897   0.037   4.935</code></pre>
+##   5.005   0.051   5.086</code></pre>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>fib <span class="ot">&lt;-</span> <span class="fu">memoise</span>(fib)</span>
 <span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="fu">system.time</span>(<span class="fu">fib</span>(<span class="dv">35</span>))</span></code></pre></div>
 <pre><code>##    user  system elapsed 
-##   0.009   0.000   0.010</code></pre>
+##   0.010   0.001   0.009</code></pre>
 <div id="question-1-code" class="section level4 question">
 <h4>Question 1 (code)</h4>
 <p>Write a function in R called <code>pn</code> to compute the <span class="math inline">\(n\)</span>th Legendre polynomial <span class="math inline">\(p_n\)</span>. Your function should satisfy the

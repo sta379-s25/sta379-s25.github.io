@@ -6,6 +6,22 @@ editor_options:
   chunk_output_type: console
 ---
 
+## Where we are in the semester
+
+Assignments:
+
+* Due this week:
+    * Project 1 (Wednesday -- if you use two extension days, would be due Friday)
+    * HW 5 (Friday)
+* Challenge 5 posted on course website
+* Project 2 will be posted soon
+
+Material:
+
+* New topic: numerical integration
+* Next topic: Monte Carlo integration
+
+
 ## Numerical integration
 
 **Numerical integration:** Numerical approximations to definite integrals that are hard to solve in closed form.
