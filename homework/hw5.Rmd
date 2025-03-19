@@ -9,7 +9,7 @@ link-citations: yes
 
 **Note:** To give you time to work on Project 1, this homework is shorter than previous assignments
 
-**Due:** Monday March 3, 10pm
+**Due:** Friday March 21, 10pm
 
 **Submission:** For this assignment, you will submit two files:
 
