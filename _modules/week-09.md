@@ -15,3 +15,7 @@ March 19
 
 March 21
 : Gaussian quadrature
+  : [slides (pdf)](https://sta379-s25.github.io/slides/lecture_21.pdf), [practice questions](https://sta379-s25.github.io/practice_questions/pq_21.html), [practice question solutions](https://sta379-s25.github.io/practice_questions/pq_21_solutions.html)
+  
+: **Homework 6 released**{: .label .label-yellow }
+  : [HW 6](https://sta379-s25.github.io/homework/hw6.html)
