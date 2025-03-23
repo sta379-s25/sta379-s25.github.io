@@ -1,0 +1,22 @@
+---
+title: "Warmup: The importance of node choice in Gaussian quadrature"
+format: html
+---
+
+## Integral approximations
+
+Given $n$ nodes $x_1,...,x_n$ in $(-1, 1)$, we approximated the integral of a function $f$ by
+$$\int \limits_{-1}^1 f(x) dx \approx \sum \limits_{i=1}^n w_i f(x_i),$$
+where
+$$w_i = \int \limits_{-1}^1 L_{n,i}(x) \hspace{1cm} L_{n,i}(x) = \prod \limits_{k : k \neq i} \frac{(x - x_k)}{(x_i - x_k)}$$
+
+Our goal for today is to understand the importance of choosing the *right* nodes $x_1,...,x_n$.
+
+### Questions
+
+1. For the two-point rule ($n = 2$) we have $L_{2,1}(x) = \dfrac{x - x_2}{x_1 - x_2}$ and $L_{2,2}(x) = \dfrac{x - x_1}{x_2 - x_1}$.
+Suppose that we choose $n=2$ nodes with $x_1 = -0.1$ and $x_2 = 0.5$. Show that $w_1 = 5/3$ and $w_2 = 1/3$.
+
+2. Let $f(x) = x^3 - 2x^2 + 3$. Then, $\int \limits_{-1}^1 f(x) dx = 14/3$. Calculate $w_1f(x_1) + w_2f(x_2)$ using the two nodes and weights from question 1. Is our integral approximation exact with these two nodes?
+
+3. Let $f(x) = x^3 - 2x^2 + 3$. Previously, we found that the "best" two-point rule uses $x_1 = -1\sqrt{3}$ and $x_2 = 1/\sqrt{3}$. Calculating the weights for these two nodes gives $w_1 = w_2 = 1$. Using these optimal nodes and weights, calculate $w_1f(x_1) + w_2f(x_2)$. Is our integral approximation exact with these two nodes?

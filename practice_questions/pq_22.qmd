@@ -1,0 +1,39 @@
+---
+title: "Practice questions: Legendre polynomials and Gaussian quadrature"
+format: html
+---
+
+## Key result
+
+Suppose $f(x)$ is a polynomial of degree $2n - 1$. Let $p_n$ be the $n$th Legendre polynomial, and let $x_1,...,x_n$ be the $n$ roots of $p_n$. Then
+$$\int \limits_{-1}^1 f(x)dx =  \sum \limits_{i=1}^n w_i f(x_i) \hspace{1cm} w_i = \int\limits_{-1}^1 L_{n,i}(x) dx$$
+
+### Questions
+
+The 4th Legendre polynomial is
+
+$$p_4 = \frac{1}{8}(35x^4 - 30x^2 + 3)$$
+
+The 4 roots of $p_n$ can be found in R using the `uniroot.all` function in the `rootSolve` package. Here is an example of the `uniroot.all` function in action for $p_2$:
+
+```{r}
+library(rootSolve)
+uniroot.all(function(x){(1/2) * (3*x^2 - 1)}, c(-1, 1), tol=1e-12)
+```
+
+1. **Question 1:** Use the `uniroot.all` function to find the roots of $p_4$.
+
+
+```{r, include=F}
+library(rootSolve)
+uniroot.all(function(x){(1/8) * (35*x^4 - 30*x^2 + 3)}, c(-1, 1), tol=1e-12)
+```
+
+The corresponding weights are 
+
+$$w_1 = \frac{18 - \sqrt{30}}{36}, \ w_2 = \frac{18 + \sqrt{30}}{36}, \ w_3 = \frac{18 + \sqrt{30}}{36}, \ w_4 = \frac{18 - \sqrt{30}}{36}$$
+
+2. **Question 2:** Choose a degree 7 polynomial and verify that using the roots of $p_4$ and the weights given here allows you to integrate the degree 7 polynomial exactly with Gaussian quadrature.
+
+
+

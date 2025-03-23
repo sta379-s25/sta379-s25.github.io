@@ -1,0 +1,112 @@
+---
+title: "Lecture 22: Gaussian quadrature and Legendre polynomials"
+author: "Ciaran Evans"
+output: beamer_presentation
+editor_options: 
+  chunk_output_type: console
+---
+
+## Summary so far
+
+To approximate $\int \limits_{-1}^1 f(x) dx$:
+
+1. Choose $n$ points $x_1,...,x_n$ in $(-1, 1)$
+2. Construct the interpolating polynomial: $q(x) = \sum \limits_{i=1}^n f(x_i) L_{n,i}(x)$
+3. Integrate $q$:
+$$\int \limits_{-1}^1 q(x) dx = \sum \limits_{i=1}^n w_i f(x_i) \hspace{1cm} w_i = \int\limits_{-1}^1 L_{n,i}(x) dx$$
+4. Approximate the integral of $f$:
+$$\int \limits_{-1}^1 f(x)dx \approx \int \limits_{-1}^1 q(x) dx = \sum \limits_{i=1}^n w_i f(x_i)$$
+
+**Today:** Which points $x_1,...,x_n$ do we use??
+
+## Warmup
+
+Warmup activity to motivate importance of node choice:
+
+[https://sta379-s25.github.io/practice_questions/pq_22_warmup.html](https://sta379-s25.github.io/practice_questions/pq_22_warmup.html)
+
+* Work with your neighbors on the warmup activity
+* In a bit, we will discuss key points as a class
+
+## Warmup
+
+* If $x_1 = -0.1$, $x_2 = 0.5$, then $w_1 = 5/3$ and $w_2 = 1/3$
+* Best two-point rule: $x_1 = -1\sqrt{3}$, $x_2 = 1\sqrt{3}$, $w_1 = w_2 = 1$
+
+$$\int \limits_{-1}^1 (x^3 - 2x^2 + 3)dx = 14/3$$
+$$\frac{5}{3}f(-0.1) + \frac{1}{3}f(0.5) = \hspace{3cm}$$
+
+$$f(-1/\sqrt{3}) + f(1/\sqrt{3}) = \hspace{3cm}$$
+
+## Warmup
+
+* If $x_1 = -0.1$, $x_2 = 0.5$, then $w_1 = 5/3$ and $w_2 = 1/3$
+* Best two-point rule: $x_1 = -1\sqrt{3}$, $x_2 = 1\sqrt{3}$, $w_1 = w_2 = 1$
+
+$$\int \limits_{-1}^1 (2x + 1)dx = 2$$
+$$\frac{5}{3}f(-0.1) + \frac{1}{3}f(0.5) = \hspace{3cm}$$
+
+$$f(-1/\sqrt{3}) + f(1/\sqrt{3}) = \hspace{3cm}$$
+
+## Summary so far
+
+* Choose $n$ points $x_1,...,x_n$ in $(-1, 1)$
+$$\int \limits_{-1}^1 f(x)dx \approx  \sum \limits_{i=1}^n w_i f(x_i) \hspace{1cm} w_i = \int\limits_{-1}^1 L_{n,i}(x) dx$$
+
+* If $f(x)$ is a polynomial of degree $\leq n-1$, approximation is **exact**:
+$$\int \limits_{-1}^1 f(x)dx =  \sum \limits_{i=1}^n w_i f(x_i) $$
+for *any* choice of $n$ distinct points $x_1,...,x_n$ in $(-1, 1)$.
+
+* If we are **clever** about choosing $x_1,...,x_n$, we can get exact integrals for polynomials of degree $\leq 2n-1$
+
+**Next step:** How should we be clever? Turns out the best nodes $x_1,...,x_n$ are the roots of **Legendre polynomials**
+
+## Legendre polynomials
+
+The **Legendre polynomials** are a set of polynomials $p_0, p_1, p_2,...$ The first few Legendre polynomials are:
+
+$$p_0(x) = 1 \hspace{0.5cm} p_1(x) = x \hspace{0.5cm} p_2(x) = \frac{1}{2}(3x^2 - 1) \hspace{0.5cm} p_3(x) = \frac{1}{2}(5x^3 - 3x^2)$$
+
+**Degree:** Degree of $p_n$ is $n$
+
+## Roots of Legendre polynomials
+
+* $p_1(x) = x$. Root of $p_1$: 
+
+\vspace{1cm}
+
+* $p_2(x) = \frac{1}{2}(3x^2 - 1)$. Roots of $p_2$:
+
+\vspace{2cm}
+
+* $p_3(x) = \frac{1}{3}(5x^3 - 3x^2)$. Roots of $p_3$:
+
+\vspace{2cm}
+
+## Properties of Legendre polynomials
+
+Let $p_n$ be the $n$th Legendre polynomial
+
+* $p_n$ has degree $n$
+* $p_n$ has $n$ distinct roots in $(-1, 1)$
+* Let $g(x) = c_0 + c_1x + \cdots + c_{n-1} x^{n-1}$. Then
+$$\int \limits_{-1}^1 g(x) p_n(x) dx = 0$$
+
+\vspace{4cm}
+
+## Why the Legendre polynomials?
+
+**Theorem:** Suppose $f(x)$ is a polynomial of degree $2n - 1$. Let $p_n$ be the $n$th Legendre polynomial, and let $x_1,...,x_n$ be the $n$ roots of $p_n$. Then
+$$\int \limits_{-1}^1 f(x)dx =  \sum \limits_{i=1}^n w_i f(x_i) \hspace{1cm} w_i = \int\limits_{-1}^1 L_{n,i}(x) dx$$
+
+\vspace{4cm}
+
+## Your turn
+
+Practice questions with roots of Legendre polynomials and Gaussian quadrature:
+
+[https://sta379-s25.github.io/practice_questions/pq_22.html](https://sta379-s25.github.io/practice_questions/pq_22.html)
+
+* Start in class
+* You are welcome and encouraged to work with your neighbors
+* Solutions posted on course website
