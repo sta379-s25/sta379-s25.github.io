@@ -10,6 +10,7 @@ description: >-
 ## Projects
 
 * [Project 1](https://sta379-s25.github.io/projects/project_1.html)
+* [Project 2](https://sta379-s25.github.io/projects/project_2.html)
 
 ## Challenges
 
@@ -18,6 +19,7 @@ description: >-
 * [Challenge 3](https://sta379-s25.github.io/challenges/challenge_3.html)
 * [Challenge 4](https://sta379-s25.github.io/challenges/challenge_4.html)
 * [Challenge 5](https://sta379-s25.github.io/challenges/challenge_5.html)
+* [Challenge 6](https://sta379-s25.github.io/challenges/challenge_6.html)
 
 ## Homework
 
