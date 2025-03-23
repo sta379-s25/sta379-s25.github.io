@@ -53,7 +53,7 @@ As we have seen already this semester, you could re-write this model in matrix f
 
 $${\bf y} = {\bf X} \beta + \varepsilon,$$
 
-where ${\bf y} = (Y_1,...,Y_n)'$ is the vector of responses, $\beta = (\beta_0, \beta_1,...,\beta_k)'$ is the vector of regression coefficients, ${\bf X}$ is the design matrix (remember that the first column of ${\bf X}$ is a column of 1s!), and $\varepsilon = (\varepsilon_1,...,\varepsilon_n)'$ is the vector of error terms.
+where ${\bf y} = (Y_1,...,Y_n)^T$ is the vector of responses, $\beta = (\beta_0, \beta_1,...,\beta_k)^T$ is the vector of regression coefficients, ${\bf X}$ is the design matrix (remember that the first column of ${\bf X}$ is a column of 1s!), and $\varepsilon = (\varepsilon_1,...,\varepsilon_n)^T$ is the vector of error terms.
 
 In previous stats courses, you have discussed the assumptions typically made when we fit a linear regression model, such as the shape, constant variance, and independence assumptions (normality ends up not being particularly important). We can summarize these assumptions as follows:
 
@@ -65,7 +65,7 @@ $$Var({\bf y} | {\bf X}) = \sigma^2 {\bf I} \hspace{0.5cm} \text{captures the co
 
 Sometimes, however, the assumptions of a linear model aren't appropriate. One way this can occur is if our data are dependent -- that is, there is some kind of correlation structure inherent to the data. Correlated data often results from a hierarchical structure, in which we have several independent groups, and multiple observations from each group. For example, we may observe several different hospitals, and multiple patients within each hospital. The hospitals form groups/clusters in the data, and we expect observations on patients from the same hospital to be correlated.
 
-To capture this kind of structure, suppose that there are $m$ independent groups, and $n_i$ observations for each group $i=1,...,m$. Let ${\bf y}_i = (Y_{i,1},...,Y_{i,n_i})'$ denote the vector of responses for group $i$, and let ${\bf X}_i$ denote the design matrix for group $i$. Within each group, we could still imagine a linear model:
+To capture this kind of structure, suppose that there are $m$ independent groups, and $n_i$ observations for each group $i=1,...,m$. Let ${\bf y}_i = (Y_{i,1},...,Y_{i,n_i})^T$ denote the vector of responses for group $i$, and let ${\bf X}_i$ denote the design matrix for group $i$. Within each group, we could still imagine a linear model:
 
 $$\mathbb{E}[{\bf y}_i | {\bf X}_i] = {\bf X}_i \beta$$
 However, we need to modify the variance structure to account for the groups in the data. Since the groups are independent, $Cov(Y_{i_1,j_1}, Y_{i_2, j_2}) = 0$ for any $i_1 \neq i_2$ (different groups). Within the groups, though, there *will* be correlation, which we can write as 
@@ -274,7 +274,7 @@ Now that we have seen how the GEE approach can be used to account for data depen
 
 ### The data
 
-As before, let ${\bf y}_i = (Y_{i,1},...,Y_{i,n_i})'$ denote the vector of responses for group $i \in \{1,...m\}$, and let ${\bf X}_i$ denote the design matrix for group $i \in \{1,...,m\}$. The responses $Y_{ij}$ could be continuous observations (like height or weight), binary observations (e.g. membership in a treatment or control group in a clinical trial), count observations (e.g. the number of goals scored by a soccer player), etc.
+As before, let ${\bf y}_i = (Y_{i,1},...,Y_{i,n_i})^T$ denote the vector of responses for group $i \in \{1,...m\}$, and let ${\bf X}_i$ denote the design matrix for group $i \in \{1,...,m\}$. The responses $Y_{ij}$ could be continuous observations (like height or weight), binary observations (e.g. membership in a treatment or control group in a clinical trial), count observations (e.g. the number of goals scored by a soccer player), etc.
 
 ### The model
  
@@ -282,7 +282,7 @@ Let $\mu_i = \mathbb{E}[{\bf y}_i | {\bf X}_i]$. We assume that:
 
 * $g(\mu_i) = {\bf X}_i \beta$ 
     * $g$ is a continuous, monotone increasing function
-    * Note that $\mu_i = (\mu_{i,1},...,\mu_{i,n_i})'$ is a vector. By $g(\mu_i)$, we mean "apply the function $g$ to each element of the vector", i.e. $g(\mu_i) = (g(\mu_{i,1}),...,g(\mu_{i,n_i}))'$
+    * Note that $\mu_i = (\mu_{i,1},...,\mu_{i,n_i})^T$ is a vector. By $g(\mu_i)$, we mean "apply the function $g$ to each element of the vector", i.e. $g(\mu_i) = (g(\mu_{i,1}),...,g(\mu_{i,n_i}))^T$
 * $Var({\bf y}_i | {\bf X}_i) = \phi {\bf V}_i^{1/2} {\bf R}_i(\rho) {\bf V}_i^{1/2}$
     * $\phi > 0$ is called the *dispersion parameter*; in practice we will estimate $\phi$ directly
     * ${\bf V}_i = \text{diag}(V(\mu_{i,1}),...,V(\mu_{i,n_i}))$
@@ -477,7 +477,7 @@ m_gee$scale
 
 Generalized estimating equations get their name because they estimate $\beta$ by solving the following system:
 
-$$\Psi(\beta) = \sum \limits_{i=1}^m {\bf D}_i' {\bf W}_i^{-1} ({\bf y}_i - \mu_i) = 0$$
+$$\Psi(\beta) = \sum \limits_{i=1}^m {\bf D}_i^T {\bf W}_i^{-1} ({\bf y}_i - \mu_i) = 0$$
 
 where 
 
@@ -489,13 +489,13 @@ $${\bf W}_i = \phi {\bf V}_i^{1/2} {\bf R}_i(\rho) {\bf V}_i^{1/2}.$$
 
 However, because $\mu_i$ and ${\bf V}_i$ are typically non-linear functions of $\beta$, the coefficients $\beta$ in the GEE models above generally cannot be estimated in close form. Rather, we must employ an iterative estimation procedure. Often, a Newton's method approach is done, which means we need the derivative of $\Psi$:
 
-$${\bf H}(\beta) := \frac{\partial}{\partial \beta}\Psi(\beta) = -\sum \limits_{i=1}^m {\bf D}_i' {\bf W}_i^{-1} {\bf D}_i$$
+$${\bf H}(\beta) := \frac{\partial}{\partial \beta}\Psi(\beta) = -\sum \limits_{i=1}^m {\bf D}_i^T {\bf W}_i^{-1} {\bf D}_i$$
 
 The coefficients $\beta$, and the additional parameters $\rho$ and $\phi$, are then simultaneously estimated as follows. 
 
 ### The algorithm
 
-Here let $N = \sum \limits_{i=1}^m n_i$ be the total number of observations across all groups, and $k + 1$ the number of coefficients to estimate (i.e., $\beta = (\beta_0,...,\beta_k)'$).
+Here let $N = \sum \limits_{i=1}^m n_i$ be the total number of observations across all groups, and $k + 1$ the number of coefficients to estimate (i.e., $\beta = (\beta_0,...,\beta_k)^T$).
 
 * **Step 1:** Initialize the coefficients. Let $\beta^{(0)}$ denote the vector of initial coefficients.
 * **Step 2:** Calculate fitted values and standardized residuals:
@@ -519,21 +519,21 @@ Here let $N = \sum \limits_{i=1}^m n_i$ be the total number of observations acro
 
 Let $\bar{Y} = \frac{1}{n} \sum \limits_{i=1}^n Y_i$. One way to initialize a gaussian GEE is to make 
 
-$$\beta^{(0)} = \left(\bar{Y}, 0, 0, ..., 0 \right)'$$
+$$\beta^{(0)} = \left(\bar{Y}, 0, 0, ..., 0 \right)^T$$
 That is, the initial value of the intercept is $\bar{Y}$, and the initial value of all other coefficients is 0.
 
 **Binomial GEE:**
 
 Let $\bar{Y} = \frac{1}{n} \sum \limits_{i=1}^n Y_i$. One way to initialize a binomial GEE is to make 
 
-$$\beta^{(0)} = \left( \log \left( \frac{\bar{Y}}{1 - \bar{Y}} \right), 0, 0, ..., 0 \right)'$$
+$$\beta^{(0)} = \left( \log \left( \frac{\bar{Y}}{1 - \bar{Y}} \right), 0, 0, ..., 0 \right)^T$$
 That is, the initial value of the intercept is $\log \left( \frac{\bar{Y}}{1 - \bar{Y}} \right)$, and the initial value of all other coefficients is 0.
 
 **Poisson GEE:**
 
 Let $\bar{Y} = \frac{1}{n} \sum \limits_{i=1}^n Y_i$. One way to initialize Poisson regression is to make 
 
-$$\beta^{(0)} = \left( \log (\bar{Y}), 0, 0, ..., 0 \right)'$$
+$$\beta^{(0)} = \left( \log (\bar{Y}), 0, 0, ..., 0 \right)^T$$
 That is, the initial value of the intercept is $\log (\bar{Y})$, and the initial value of all other coefficients is 0.
 
 ### Convergence
@@ -560,8 +560,8 @@ $$\widehat{Var}(\widehat{\beta}) = \widehat{{\bf A}}^{-1} \widehat{{\bf B}} \wid
 
 where
 
-* $\widehat{{\bf A}} = \sum \limits_{i=1}^m \widehat{\bf D}_i' \widehat{\bf W}_i^{-1} \widehat{\bf D}_i$
-* $\widehat{{\bf B}} = \sum \limits_{i=1}^m \widehat{\bf D}_i' \widehat{\bf W}_i^{-1} ({\bf y}_i - \widehat{\mu}_i)({\bf y}_i - \widehat{\mu}_i)' \widehat{\bf W}_i^{-1} \widehat{\bf D}_i$
+* $\widehat{{\bf A}} = \sum \limits_{i=1}^m \widehat{\bf D}_i^T \widehat{\bf W}_i^{-1} \widehat{\bf D}_i$
+* $\widehat{{\bf B}} = \sum \limits_{i=1}^m \widehat{\bf D}_i^T \widehat{\bf W}_i^{-1} ({\bf y}_i - \widehat{\mu}_i)({\bf y}_i - \widehat{\mu}_i)^T \widehat{\bf W}_i^{-1} \widehat{\bf D}_i$
 
 This estimated variance matrix is called a *sandwich* estimator (because of the sandwiched format of the matrices). In R, the robust variance (sandwich) matrix can be extracted for a fitted GEE via
 
@@ -595,19 +595,19 @@ Your task in this assignment is to write your own implementation of a GEE, with 
         * `scale`: the estimate $\widehat{\phi}$
         * `family`: the family which was fit (one of `"gaussian"`, `"binomial"`, or `"poisson"`)
         * `iterations`: the number of iterations which were run
-* You are welcome, and encouraged, to write helper functions that are called by `geeC`
+* You should write helper functions that are called by `geeC`
 * All code (`geeC` and any helper functions) should be written in C++ using the Rcpp and/or RcppArmadillo libraries (you will almost certainly need to use Armadillo, for the linear algebra required)
 * All code must be documented
-* Your C++ code must be stored in a file called `gee_code.cpp`
-* The `geeC` function must be callable from R, after sourcing `gee_code.cpp`
+* Your C++ code should be written in `project2_code.cpp`
+* The `geeC` function must be callable from R, after sourcing `project2_code.cpp`
 
 Here is an example of the code you (and I) should be able to run in R, with the output compared to the output of the `gee` package:
 
-```{r, eval=F}
+```{r}
 library(gee)
 
 # export the C++ functions to R
-Rcpp::sourceCpp("gee_code.cpp")
+Rcpp::sourceCpp("project2_code.cpp")
 
 # simulate data with correlation structure
 set.seed(3)
@@ -651,3 +651,59 @@ m_geeC$iterations
 m_gee$family
 m_geeC$family
 ```
+
+### Helper functions
+
+Long functions which do many things are hard to read, hard to debug, and hard to test. The better implementations will divide the work and the steps of GEE estimation between several smaller helper functions. Each helper function would be responsible for one piece of the process, and would get called inside the main `geeC` function.
+
+Suggested helper functions include (but are not limited to)
+
+* A function to calculate $\mu_1, \mu_2,...,\mu_n$ for a specified distributional family and current coefficients
+* A function to calculate $V(\mu)$, depending on the specified distributional family
+* A function to initialize $\beta^{(0)}$, depending on the specified distributional family
+* Helper functions to calculate other pieces of the Newton's method update rule, such as the estimated dispersion parameter $\widehat{\phi}$, the estimated correlation $\widehat{\rho}$, and the Hessian
+        
+Using helper functions is recommended, and necessary for achieving a higher grade on the project. If you would like to divide the work differently between helper functions, that is ok, provided that your code is clear, readable, and a single helper function does not do too many tasks. 
+
+### Implementation tips
+
+* The type to use for strings in C++ (e.g., `"gaussian"`, `"poisson"`, `"binomial"`) is probably `std::string`
+* Do not assume that all groups have the same number of observations (i.e., $n_i$ can be different for different groups)
+* You will need to subset vectors and matrices to extract observations belonging to a specific group. For Armadillo objects, the functions `find()`, `.rows()`, and `.elem()` may be useful
+* Calculating the matrix ${\bf W}_i$ requires us to calculate ${\bf V}_i^{1/2}$. To take a matrix square root, I recommend the Armadillo function `sqrtmat_sympd`
+* Vector and matrix norms can be calculated with the Armadillo `norm` function
+
+### Unit tests
+
+I have provided a few unit tests for the main `geeC` function, and you can check that the estimated coefficients are reasonable by comparing them to the output of the `gee` function in R.
+
+**You** are responsible for creating `testthat` unit tests for any helper functions. These unit tests should check things like:
+
+* Do we get the correct type of output? (e.g., if we expect a list, do we get a list?)
+* Do we get the right size of output? 
+* Do we get the right values of output?
+
+# Grading rubric
+
+Each component of the assignment will be graded as mastered / not yet mastered. If you make an honest attempt at a component but do not master that component on your initial submission, you will have one attempt to re-submit and master that component. Note that mastering the `geeC` component requires that the function be fully correct and complete; if it does not pass one or more of the unit tests, there is no partial credit for the `geeC` component.
+
+| Component | Portion of total grade | Minimum requirements to receive credit |
+| --- | --- | --- |
+| Main `geeC` function | 40% | Function meets requirements listed above and passes all provided unit tests |
+| Use of helper functions | 10% | Computation is reasonably divided between several helper functions, each with a clear task |
+| Code style and readability | 4% | Code is commented, clearly written, and uses informative names |
+| Unit tests | 10% | Several unit tests are written in `project2_tests.R` for each helper function, testing that the helper functions work as desired. The helper functions pass the provided unit tests. |
+| Simulation and mathematical questions | 36% (6% each) | Each question will be graded for mastery. Mastery of mathematical questions requires a fully complete and correct solution, with no errors or missing steps/explanation. Mastery of simulation questions requires full code, results and discussion. All necessary figures should be included, and should be properly labeled, clear, and easy to read. Discussion should explain the results shown in the figures in complete sentences. The simulation and mathematical questions will be treated separately, e.g. mastering 5 of the 6 questions would give 25 out of 30 possible points |
+
+
+# Submission checklist
+
+* pdf with written solutions to questions 1--2 (Canvas)
+* HTML with simulation code, results, plots, and discussion for questions 3--6 (Canvas)
+* implementation in `project2_code.R` (GitHub)
+    * main `geeC` function, following all listed requirements
+    * any associated helper functions
+* unit tests in `project2_tests.R` (GitHub)
+    * I have provided unit tests for the `geeC` function; do not edit these
+    * You are responsible for creating unit tests for all helper functions which you write
+

@@ -1676,6 +1676,9 @@ Equations</li>
           <li><a href="#implementation-your-task" id="toc-implementation-your-task">Implementation: Your
           task</a></li>
           </ul></li>
+          <li><a href="#grading-rubric" id="toc-grading-rubric">Grading
+          rubric</a></li>
+          <li><a href="#submission-checklist" id="toc-submission-checklist">Submission checklist</a></li>
           </ul>
         </nav>
         <ul class="authors">
@@ -1776,12 +1779,12 @@ models. For example,</p>
 in matrix form:</p>
 <p><span class="math display">\[{\bf y} = {\bf X} \beta +
 \varepsilon,\]</span></p>
-<p>where <span class="math inline">\({\bf y} =
-(Y_1,...,Y_n)&#39;\)</span> is the vector of responses, <span class="math inline">\(\beta = (\beta_0,
-\beta_1,...,\beta_k)&#39;\)</span> is the vector of regression
+<p>where <span class="math inline">\({\bf y} = (Y_1,...,Y_n)^T\)</span>
+is the vector of responses, <span class="math inline">\(\beta =
+(\beta_0, \beta_1,...,\beta_k)^T\)</span> is the vector of regression
 coefficients, <span class="math inline">\({\bf X}\)</span> is the design
 matrix (remember that the first column of <span class="math inline">\({\bf X}\)</span> is a column of 1s!), and <span class="math inline">\(\varepsilon =
-(\varepsilon_1,...,\varepsilon_n)&#39;\)</span> is the vector of error
+(\varepsilon_1,...,\varepsilon_n)^T\)</span> is the vector of error
 terms.</p>
 <p>In previous stats courses, you have discussed the assumptions
 typically made when we fit a linear regression model, such as the shape,
@@ -1806,7 +1809,7 @@ group. For example, we may observe several different hospitals, and
 multiple patients within each hospital. The hospitals form
 groups/clusters in the data, and we expect observations on patients from
 the same hospital to be correlated.</p>
-<p>To capture this kind of structure, suppose that there are <span class="math inline">\(m\)</span> independent groups, and <span class="math inline">\(n_i\)</span> observations for each group <span class="math inline">\(i=1,...,m\)</span>. Let <span class="math inline">\({\bf y}_i = (Y_{i,1},...,Y_{i,n_i})&#39;\)</span>
+<p>To capture this kind of structure, suppose that there are <span class="math inline">\(m\)</span> independent groups, and <span class="math inline">\(n_i\)</span> observations for each group <span class="math inline">\(i=1,...,m\)</span>. Let <span class="math inline">\({\bf y}_i = (Y_{i,1},...,Y_{i,n_i})^T\)</span>
 denote the vector of responses for group <span class="math inline">\(i\)</span>, and let <span class="math inline">\({\bf X}_i\)</span> denote the design matrix for
 group <span class="math inline">\(i\)</span>. Within each group, we
 could still imagine a linear model:</p>
@@ -2075,7 +2078,7 @@ hood”.</p>
 <div id="the-data" class="section level3">
 <h3>The data</h3>
 <p>As before, let <span class="math inline">\({\bf y}_i =
-(Y_{i,1},...,Y_{i,n_i})&#39;\)</span> denote the vector of responses for
+(Y_{i,1},...,Y_{i,n_i})^T\)</span> denote the vector of responses for
 group <span class="math inline">\(i \in \{1,...m\}\)</span>, and let
 <span class="math inline">\({\bf X}_i\)</span> denote the design matrix
 for group <span class="math inline">\(i \in \{1,...,m\}\)</span>. The
@@ -2095,10 +2098,10 @@ X}_i]\)</span>. We assume that:</p>
 <li><span class="math inline">\(g\)</span> is a continuous, monotone
 increasing function</li>
 <li>Note that <span class="math inline">\(\mu_i =
-(\mu_{i,1},...,\mu_{i,n_i})&#39;\)</span> is a vector. By <span class="math inline">\(g(\mu_i)\)</span>, we mean “apply the function
+(\mu_{i,1},...,\mu_{i,n_i})^T\)</span> is a vector. By <span class="math inline">\(g(\mu_i)\)</span>, we mean “apply the function
 <span class="math inline">\(g\)</span> to each element of the vector”,
 i.e. <span class="math inline">\(g(\mu_i) =
-(g(\mu_{i,1}),...,g(\mu_{i,n_i}))&#39;\)</span></li>
+(g(\mu_{i,1}),...,g(\mu_{i,n_i}))^T\)</span></li>
 </ul></li>
 <li><span class="math inline">\(Var({\bf y}_i | {\bf X}_i) = \phi {\bf
 V}_i^{1/2} {\bf R}_i(\rho) {\bf V}_i^{1/2}\)</span>
@@ -2251,7 +2254,7 @@ fitting the model with the <code>gee</code> function.</p>
 <span class="math inline">\(\beta\)</span> by solving the following
 system:</p>
 <p><span class="math display">\[\Psi(\beta) = \sum \limits_{i=1}^m {\bf
-D}_i&#39; {\bf W}_i^{-1} ({\bf y}_i - \mu_i) = 0\]</span></p>
+D}_i^T {\bf W}_i^{-1} ({\bf y}_i - \mu_i) = 0\]</span></p>
 <p>where</p>
 <p><span class="math display">\[{\bf D}_i = \dfrac{\partial
 \mu_i}{\partial \beta} = {\bf V}_i {\bf X}_i\]</span></p>
@@ -2266,7 +2269,7 @@ must employ an iterative estimation procedure. Often, a Newton’s method
 approach is done, which means we need the derivative of <span class="math inline">\(\Psi\)</span>:</p>
 <p><span class="math display">\[{\bf H}(\beta) :=
 \frac{\partial}{\partial \beta}\Psi(\beta) = -\sum \limits_{i=1}^m {\bf
-D}_i&#39; {\bf W}_i^{-1} {\bf D}_i\]</span></p>
+D}_i^T {\bf W}_i^{-1} {\bf D}_i\]</span></p>
 <p>The coefficients <span class="math inline">\(\beta\)</span>, and the
 additional parameters <span class="math inline">\(\rho\)</span> and
 <span class="math inline">\(\phi\)</span>, are then simultaneously
@@ -2277,7 +2280,7 @@ estimated as follows.</p>
 n_i\)</span> be the total number of observations across all groups, and
 <span class="math inline">\(k + 1\)</span> the number of coefficients to
 estimate (i.e., <span class="math inline">\(\beta =
-(\beta_0,...,\beta_k)&#39;\)</span>).</p>
+(\beta_0,...,\beta_k)^T\)</span>).</p>
 <ul>
 <li><strong>Step 1:</strong> Initialize the coefficients. Let <span class="math inline">\(\beta^{(0)}\)</span> denote the vector of initial
 coefficients.</li>
@@ -2325,7 +2328,7 @@ below), or when a maximum number of iterations is reached.</li>
 \limits_{i=1}^n Y_i\)</span>. One way to initialize a gaussian GEE is to
 make</p>
 <p><span class="math display">\[\beta^{(0)} = \left(\bar{Y}, 0, 0, ...,
-0 \right)&#39;\]</span> That is, the initial value of the intercept is
+0 \right)^T\]</span> That is, the initial value of the intercept is
 <span class="math inline">\(\bar{Y}\)</span>, and the initial value of
 all other coefficients is 0.</p>
 <p><strong>Binomial GEE:</strong></p>
@@ -2333,7 +2336,7 @@ all other coefficients is 0.</p>
 \limits_{i=1}^n Y_i\)</span>. One way to initialize a binomial GEE is to
 make</p>
 <p><span class="math display">\[\beta^{(0)} = \left( \log \left(
-\frac{\bar{Y}}{1 - \bar{Y}} \right), 0, 0, ..., 0 \right)&#39;\]</span>
+\frac{\bar{Y}}{1 - \bar{Y}} \right), 0, 0, ..., 0 \right)^T\]</span>
 That is, the initial value of the intercept is <span class="math inline">\(\log \left( \frac{\bar{Y}}{1 - \bar{Y}}
 \right)\)</span>, and the initial value of all other coefficients is
 0.</p>
@@ -2342,9 +2345,9 @@ That is, the initial value of the intercept is <span class="math inline">\(\log 
 \limits_{i=1}^n Y_i\)</span>. One way to initialize Poisson regression
 is to make</p>
 <p><span class="math display">\[\beta^{(0)} = \left( \log (\bar{Y}), 0,
-0, ..., 0 \right)&#39;\]</span> That is, the initial value of the
-intercept is <span class="math inline">\(\log (\bar{Y})\)</span>, and
-the initial value of all other coefficients is 0.</p>
+0, ..., 0 \right)^T\]</span> That is, the initial value of the intercept
+is <span class="math inline">\(\log (\bar{Y})\)</span>, and the initial
+value of all other coefficients is 0.</p>
 </div>
 <div id="convergence" class="section level3">
 <h3>Convergence</h3>
@@ -2384,12 +2387,12 @@ A}}^{-1},\]</span></p>
 <p>where</p>
 <ul>
 <li><span class="math inline">\(\widehat{{\bf A}} = \sum \limits_{i=1}^m
-\widehat{\bf D}_i&#39; \widehat{\bf W}_i^{-1} \widehat{\bf
+\widehat{\bf D}_i^T \widehat{\bf W}_i^{-1} \widehat{\bf
 D}_i\)</span></li>
 <li><span class="math inline">\(\widehat{{\bf B}} = \sum \limits_{i=1}^m
-\widehat{\bf D}_i&#39; \widehat{\bf W}_i^{-1} ({\bf y}_i -
-\widehat{\mu}_i)({\bf y}_i - \widehat{\mu}_i)&#39; \widehat{\bf
-W}_i^{-1} \widehat{\bf D}_i\)</span></li>
+\widehat{\bf D}_i^T \widehat{\bf W}_i^{-1} ({\bf y}_i -
+\widehat{\mu}_i)({\bf y}_i - \widehat{\mu}_i)^T \widehat{\bf W}_i^{-1}
+\widehat{\bf D}_i\)</span></li>
 </ul>
 <p>This estimated variance matrix is called a <em>sandwich</em>
 estimator (because of the sandwiched format of the matrices). In R, the
@@ -2453,17 +2456,17 @@ sandwich variance</li>
 run</li>
 </ul></li>
 </ul></li>
-<li>You are welcome, and encouraged, to write helper functions that are
-called by <code>geeC</code></li>
+<li>You should write helper functions that are called by
+<code>geeC</code></li>
 <li>All code (<code>geeC</code> and any helper functions) should be
 written in C++ using the Rcpp and/or RcppArmadillo libraries (you will
 almost certainly need to use Armadillo, for the linear algebra
 required)</li>
 <li>All code must be documented</li>
-<li>Your C++ code must be stored in a file called
-<code>gee_code.cpp</code></li>
+<li>Your C++ code should be written in
+<code>project2_code.cpp</code></li>
 <li>The <code>geeC</code> function must be callable from R, after
-sourcing <code>gee_code.cpp</code></li>
+sourcing <code>project2_code.cpp</code></li>
 </ul>
 <p>Here is an example of the code you (and I) should be able to run in
 R, with the output compared to the output of the <code>gee</code>
@@ -2471,7 +2474,7 @@ package:</p>
 <div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" tabindex="-1"></a><span class="fu">library</span>(gee)</span>
 <span id="cb45-2"><a href="#cb45-2" tabindex="-1"></a></span>
 <span id="cb45-3"><a href="#cb45-3" tabindex="-1"></a><span class="co"># export the C++ functions to R</span></span>
-<span id="cb45-4"><a href="#cb45-4" tabindex="-1"></a>Rcpp<span class="sc">::</span><span class="fu">sourceCpp</span>(<span class="st">&quot;gee_code.cpp&quot;</span>)</span>
+<span id="cb45-4"><a href="#cb45-4" tabindex="-1"></a>Rcpp<span class="sc">::</span><span class="fu">sourceCpp</span>(<span class="st">&quot;project2_code.cpp&quot;</span>)</span>
 <span id="cb45-5"><a href="#cb45-5" tabindex="-1"></a></span>
 <span id="cb45-6"><a href="#cb45-6" tabindex="-1"></a><span class="co"># simulate data with correlation structure</span></span>
 <span id="cb45-7"><a href="#cb45-7" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3</span>)</span>
@@ -2489,32 +2492,202 @@ package:</p>
 <span id="cb45-19"><a href="#cb45-19" tabindex="-1"></a></span>
 <span id="cb45-20"><a href="#cb45-20" tabindex="-1"></a><span class="co"># fit the gee using the gee package</span></span>
 <span id="cb45-21"><a href="#cb45-21" tabindex="-1"></a>m_gee <span class="ot">&lt;-</span> <span class="fu">gee</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">id =</span> groups, <span class="at">corstr =</span> <span class="st">&quot;exchangeable&quot;</span>,</span>
-<span id="cb45-22"><a href="#cb45-22" tabindex="-1"></a>             <span class="at">family =</span> gaussian)</span>
-<span id="cb45-23"><a href="#cb45-23" tabindex="-1"></a></span>
-<span id="cb45-24"><a href="#cb45-24" tabindex="-1"></a><span class="co"># fit the gee using our C++ implementation</span></span>
-<span id="cb45-25"><a href="#cb45-25" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="dv">1</span>, x1, x2) <span class="co"># the design matrix</span></span>
-<span id="cb45-26"><a href="#cb45-26" tabindex="-1"></a>m_geeC <span class="ot">&lt;-</span> <span class="fu">geeC</span>(X, y, groups, <span class="st">&quot;gaussian&quot;</span>)</span>
-<span id="cb45-27"><a href="#cb45-27" tabindex="-1"></a></span>
-<span id="cb45-28"><a href="#cb45-28" tabindex="-1"></a><span class="co"># compare the output</span></span>
-<span id="cb45-29"><a href="#cb45-29" tabindex="-1"></a><span class="co"># It should be close; it is ok if it doesn&#39;t agree exactly</span></span>
-<span id="cb45-30"><a href="#cb45-30" tabindex="-1"></a>m_gee<span class="sc">$</span>coefficients</span>
-<span id="cb45-31"><a href="#cb45-31" tabindex="-1"></a>m_geeC<span class="sc">$</span>coefficients</span>
-<span id="cb45-32"><a href="#cb45-32" tabindex="-1"></a></span>
-<span id="cb45-33"><a href="#cb45-33" tabindex="-1"></a>m_gee<span class="sc">$</span>robust.variance</span>
-<span id="cb45-34"><a href="#cb45-34" tabindex="-1"></a>m_geeC<span class="sc">$</span>robust.variance</span>
-<span id="cb45-35"><a href="#cb45-35" tabindex="-1"></a></span>
-<span id="cb45-36"><a href="#cb45-36" tabindex="-1"></a>m_gee<span class="sc">$</span>working.correlation[<span class="dv">2</span>,<span class="dv">1</span>]</span>
-<span id="cb45-37"><a href="#cb45-37" tabindex="-1"></a>m_geeC<span class="sc">$</span>correlation</span>
-<span id="cb45-38"><a href="#cb45-38" tabindex="-1"></a></span>
-<span id="cb45-39"><a href="#cb45-39" tabindex="-1"></a>m_gee<span class="sc">$</span>scale</span>
-<span id="cb45-40"><a href="#cb45-40" tabindex="-1"></a>m_geeC<span class="sc">$</span>scale</span>
-<span id="cb45-41"><a href="#cb45-41" tabindex="-1"></a></span>
-<span id="cb45-42"><a href="#cb45-42" tabindex="-1"></a>m_gee<span class="sc">$</span>iterations</span>
-<span id="cb45-43"><a href="#cb45-43" tabindex="-1"></a>m_geeC<span class="sc">$</span>iterations</span>
-<span id="cb45-44"><a href="#cb45-44" tabindex="-1"></a></span>
-<span id="cb45-45"><a href="#cb45-45" tabindex="-1"></a>m_gee<span class="sc">$</span>family</span>
-<span id="cb45-46"><a href="#cb45-46" tabindex="-1"></a>m_geeC<span class="sc">$</span>family</span></code></pre></div>
+<span id="cb45-22"><a href="#cb45-22" tabindex="-1"></a>             <span class="at">family =</span> gaussian)</span></code></pre></div>
+<pre><code>## Beginning Cgee S-function, @(#) geeformula.q 4.13 98/01/27</code></pre>
+<pre><code>## running glm to get initial regression estimate</code></pre>
+<pre><code>## (Intercept)          x1          x2 
+##  0.96619317 -0.08699001  0.84048730</code></pre>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" tabindex="-1"></a><span class="co"># fit the gee using our C++ implementation</span></span>
+<span id="cb49-2"><a href="#cb49-2" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="dv">1</span>, x1, x2) <span class="co"># the design matrix</span></span>
+<span id="cb49-3"><a href="#cb49-3" tabindex="-1"></a>m_geeC <span class="ot">&lt;-</span> <span class="fu">geeC</span>(X, y, groups, <span class="st">&quot;gaussian&quot;</span>)</span>
+<span id="cb49-4"><a href="#cb49-4" tabindex="-1"></a></span>
+<span id="cb49-5"><a href="#cb49-5" tabindex="-1"></a><span class="co"># compare the output</span></span>
+<span id="cb49-6"><a href="#cb49-6" tabindex="-1"></a><span class="co"># It should be close; it is ok if it doesn&#39;t agree exactly</span></span>
+<span id="cb49-7"><a href="#cb49-7" tabindex="-1"></a>m_gee<span class="sc">$</span>coefficients</span></code></pre></div>
+<pre><code>## (Intercept)          x1          x2 
+##   0.9688800  -0.1656508   0.8413985</code></pre>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" tabindex="-1"></a>m_geeC<span class="sc">$</span>coefficients</span></code></pre></div>
+<pre><code>##            [,1]
+## [1,]  0.9688755
+## [2,] -0.1655199
+## [3,]  0.8413969</code></pre>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" tabindex="-1"></a>m_gee<span class="sc">$</span>robust.variance</span></code></pre></div>
+<pre><code>##              (Intercept)           x1           x2
+## (Intercept)  0.023620765 -0.002402707 -0.001999555
+## x1          -0.002402707  0.006685035  0.004815115
+## x2          -0.001999555  0.004815115  0.014342830</code></pre>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" tabindex="-1"></a>m_geeC<span class="sc">$</span>robust.variance</span></code></pre></div>
+<pre><code>##              [,1]         [,2]         [,3]
+## [1,]  0.023619146 -0.002404918 -0.001999968
+## [2,] -0.002404918  0.006689130  0.004819901
+## [3,] -0.001999968  0.004819901  0.014341910</code></pre>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" tabindex="-1"></a>m_gee<span class="sc">$</span>working.correlation[<span class="dv">2</span>,<span class="dv">1</span>]</span></code></pre></div>
+<pre><code>## [1] 0.3857375</code></pre>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" tabindex="-1"></a>m_geeC<span class="sc">$</span>correlation</span></code></pre></div>
+<pre><code>## [1] 0.3831451</code></pre>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" tabindex="-1"></a>m_gee<span class="sc">$</span>scale</span></code></pre></div>
+<pre><code>## [1] 0.5343232</code></pre>
+<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" tabindex="-1"></a>m_geeC<span class="sc">$</span>scale</span></code></pre></div>
+<pre><code>## [1] 0.5343076</code></pre>
+<div class="sourceCode" id="cb65"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" tabindex="-1"></a>m_gee<span class="sc">$</span>iterations</span></code></pre></div>
+<pre><code>## [1] 3</code></pre>
+<div class="sourceCode" id="cb67"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" tabindex="-1"></a>m_geeC<span class="sc">$</span>iterations</span></code></pre></div>
+<pre><code>## [1] 4</code></pre>
+<div class="sourceCode" id="cb69"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" tabindex="-1"></a>m_gee<span class="sc">$</span>family</span></code></pre></div>
+<pre><code>## 
+## Family: gaussian 
+## Link function: identity</code></pre>
+<div class="sourceCode" id="cb71"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" tabindex="-1"></a>m_geeC<span class="sc">$</span>family</span></code></pre></div>
+<pre><code>## [1] &quot;gaussian&quot;</code></pre>
+<div id="helper-functions" class="section level3">
+<h3>Helper functions</h3>
+<p>Long functions which do many things are hard to read, hard to debug,
+and hard to test. The better implementations will divide the work and
+the steps of GEE estimation between several smaller helper functions.
+Each helper function would be responsible for one piece of the process,
+and would get called inside the main <code>geeC</code> function.</p>
+<p>Suggested helper functions include (but are not limited to)</p>
+<ul>
+<li>A function to calculate <span class="math inline">\(\mu_1,
+\mu_2,...,\mu_n\)</span> for a specified distributional family and
+current coefficients</li>
+<li>A function to calculate <span class="math inline">\(V(\mu)\)</span>,
+depending on the specified distributional family</li>
+<li>A function to initialize <span class="math inline">\(\beta^{(0)}\)</span>, depending on the specified
+distributional family</li>
+<li>Helper functions to calculate other pieces of the Newton’s method
+update rule, such as the estimated dispersion parameter <span class="math inline">\(\widehat{\phi}\)</span>, the estimated correlation
+<span class="math inline">\(\widehat{\rho}\)</span>, and the
+Hessian</li>
+</ul>
+<p>Using helper functions is recommended, and necessary for achieving a
+higher grade on the project. If you would like to divide the work
+differently between helper functions, that is ok, provided that your
+code is clear, readable, and a single helper function does not do too
+many tasks.</p>
 </div>
+<div id="implementation-tips" class="section level3">
+<h3>Implementation tips</h3>
+<ul>
+<li>The type to use for strings in C++ (e.g., <code>&quot;gaussian&quot;</code>,
+<code>&quot;poisson&quot;</code>, <code>&quot;binomial&quot;</code>) is probably
+<code>std::string</code></li>
+<li>Do not assume that all groups have the same number of observations
+(i.e., <span class="math inline">\(n_i\)</span> can be different for
+different groups)</li>
+<li>You will need to subset vectors and matrices to extract observations
+belonging to a specific group. For Armadillo objects, the functions
+<code>find()</code>, <code>.rows()</code>, and <code>.elem()</code> may
+be useful</li>
+<li>Calculating the matrix <span class="math inline">\({\bf
+W}_i\)</span> requires us to calculate <span class="math inline">\({\bf
+V}_i^{1/2}\)</span>. To take a matrix square root, I recommend the
+Armadillo function <code>sqrtmat_sympd</code></li>
+<li>Vector and matrix norms can be calculated with the Armadillo
+<code>norm</code> function</li>
+</ul>
+</div>
+<div id="unit-tests" class="section level3">
+<h3>Unit tests</h3>
+<p>I have provided a few unit tests for the main <code>geeC</code>
+function, and you can check that the estimated coefficients are
+reasonable by comparing them to the output of the <code>gee</code>
+function in R.</p>
+<p><strong>You</strong> are responsible for creating
+<code>testthat</code> unit tests for any helper functions. These unit
+tests should check things like:</p>
+<ul>
+<li>Do we get the correct type of output? (e.g., if we expect a list, do
+we get a list?)</li>
+<li>Do we get the right size of output?</li>
+<li>Do we get the right values of output?</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="grading-rubric" class="section level1">
+<h1>Grading rubric</h1>
+<p>Each component of the assignment will be graded as mastered / not yet
+mastered. If you make an honest attempt at a component but do not master
+that component on your initial submission, you will have one attempt to
+re-submit and master that component. Note that mastering the
+<code>geeC</code> component requires that the function be fully correct
+and complete; if it does not pass one or more of the unit tests, there
+is no partial credit for the <code>geeC</code> component.</p>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Component</th>
+<th>Portion of total grade</th>
+<th>Minimum requirements to receive credit</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Main <code>geeC</code> function</td>
+<td>40%</td>
+<td>Function meets requirements listed above and passes all provided
+unit tests</td>
+</tr>
+<tr class="even">
+<td>Use of helper functions</td>
+<td>10%</td>
+<td>Computation is reasonably divided between several helper functions,
+each with a clear task</td>
+</tr>
+<tr class="odd">
+<td>Code style and readability</td>
+<td>4%</td>
+<td>Code is commented, clearly written, and uses informative names</td>
+</tr>
+<tr class="even">
+<td>Unit tests</td>
+<td>10%</td>
+<td>Several unit tests are written in <code>project2_tests.R</code> for
+each helper function, testing that the helper functions work as desired.
+The helper functions pass the provided unit tests.</td>
+</tr>
+<tr class="odd">
+<td>Simulation and mathematical questions</td>
+<td>36% (6% each)</td>
+<td>Each question will be graded for mastery. Mastery of mathematical
+questions requires a fully complete and correct solution, with no errors
+or missing steps/explanation. Mastery of simulation questions requires
+full code, results and discussion. All necessary figures should be
+included, and should be properly labeled, clear, and easy to read.
+Discussion should explain the results shown in the figures in complete
+sentences. The simulation and mathematical questions will be treated
+separately, e.g. mastering 5 of the 6 questions would give 25 out of 30
+possible points</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="submission-checklist" class="section level1">
+<h1>Submission checklist</h1>
+<ul>
+<li>pdf with written solutions to questions 1–2 (Canvas)</li>
+<li>HTML with simulation code, results, plots, and discussion for
+questions 3–6 (Canvas)</li>
+<li>implementation in <code>project2_code.R</code> (GitHub)
+<ul>
+<li>main <code>geeC</code> function, following all listed
+requirements</li>
+<li>any associated helper functions</li>
+</ul></li>
+<li>unit tests in <code>project2_tests.R</code> (GitHub)
+<ul>
+<li>I have provided unit tests for the <code>geeC</code> function; do
+not edit these</li>
+<li>You are responsible for creating unit tests for all helper functions
+which you write</li>
+</ul></li>
+</ul>
 </div>
 
    
