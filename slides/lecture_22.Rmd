@@ -6,6 +6,16 @@ editor_options:
   chunk_output_type: console
 ---
 
+## Course logistics
+
+* Project 2 released, due April 18
+    * No HW due that week or the week before
+    * We will have several project work days in class
+    
+\bigskip
+
+* Challenge 6 released (inverse variance weighting)
+
 ## Summary so far
 
 To approximate $\int \limits_{-1}^1 f(x) dx$:
