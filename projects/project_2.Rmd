@@ -1,0 +1,653 @@
+---
+title: "Project 2: Generalized Estimating Equations"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+**Due:** Friday April 18, 10:00pm
+
+**Submission:** See the Submission Checklist at the end of the assignment
+
+# Rules
+
+Projects in this course take the place of exams. Their goal is both to assess what you have learned in the class, and to explore extensions of the material more complex than we can cover on a homework assignment. Therefore, projects **must be completed independently**. You **may not:**
+
+* Discuss the project with anyone other than the course instructor
+* Share tips, hints, suggestions, code snippets, full or partial solutions, etc. to any of the pieces of this project with anyone other than the course instructor
+* Use any other resource (a book, the internet, generative AI such as ChatGPT, etc.) to find solutions to mathematical questions or the coding implementation
+* Read any other implementations or pseudocode for the coding portion of the project
+
+However, you **may:**
+
+* Discuss the project with me in office hours (however, I may provide somewhat less specific assistance than on homework assignments)
+* Refer to any of your previous assignments and feedback
+* Refer to other resources (the internet, books, notes from prior courses) for short questions not specific to the project assignment. Such questions could include things like
+    * How do I call an R function in C++ with Rcpp?
+    * How do I find the length of a vector in C++?
+    * What does [a specific error message] mean?
+    
+Any violation of the rules will be treated as plagiarism, and may result in a 0 on the assignment with no option of resubmission.
+
+# Overview
+
+In this assignment, you will use *Generalized Estimating Equations* (GEE) to fit regression models with dependent data. GEE is a method that allows us to account for group structure in our data that results in dependence between observations in the same group (breaking the usual regression assumption of independent observations!). The instructions below describe the procedure in detail. If you have any clarification questions about details of the procedure, please let me know.
+
+Note that previous exposure to GEE is not assumed or expected. One of the important skills in computational statistics is understanding and implementing various adaptations and modifications of existing algorithms with which you are familiar; there are many, many variations of common algorithms, and it would be impossible to cover them all in one course. In this case, GEE extends the regression models we have discussed in class, and uses Newton's method to estimate the regression coefficients.
+
+There are two main parts to the assignment: conducting simulations to explore the impact of dependent data and the role of GEE in addressing dependence, and implementing regression with GEE in C++. You will submit your code implementation on GitHub, and your simulation work on Canvas. The simulation section involves a couple of mathematical questions in addition to the simulation studies.
+
+
+
+# Background
+
+## Recap: linear models
+
+In STA 112 (and perhaps other courses), you learned about linear models. For example,
+
+$$Y_i = \beta_0 + \beta_1 X_{i,1} + \cdots + \beta_k X_{i,k} + \varepsilon_i$$
+
+As we have seen already this semester, you could re-write this model in matrix form:
+
+$${\bf y} = {\bf X} \beta + \varepsilon,$$
+
+where ${\bf y} = (Y_1,...,Y_n)'$ is the vector of responses, $\beta = (\beta_0, \beta_1,...,\beta_k)'$ is the vector of regression coefficients, ${\bf X}$ is the design matrix (remember that the first column of ${\bf X}$ is a column of 1s!), and $\varepsilon = (\varepsilon_1,...,\varepsilon_n)'$ is the vector of error terms.
+
+In previous stats courses, you have discussed the assumptions typically made when we fit a linear regression model, such as the shape, constant variance, and independence assumptions (normality ends up not being particularly important). We can summarize these assumptions as follows:
+
+$$\mathbb{E}[{\bf y} | {\bf X}] = {\bf X} \beta \hspace{0.5cm} \text{captures shape, and zero-mean assumption for } \varepsilon$$
+
+$$Var({\bf y} | {\bf X}) = \sigma^2 {\bf I} \hspace{0.5cm} \text{captures the constant variance assumption, and } Cov(Y_i, Y_j) = 0$$
+
+## Dependent data
+
+Sometimes, however, the assumptions of a linear model aren't appropriate. One way this can occur is if our data are dependent -- that is, there is some kind of correlation structure inherent to the data. Correlated data often results from a hierarchical structure, in which we have several independent groups, and multiple observations from each group. For example, we may observe several different hospitals, and multiple patients within each hospital. The hospitals form groups/clusters in the data, and we expect observations on patients from the same hospital to be correlated.
+
+To capture this kind of structure, suppose that there are $m$ independent groups, and $n_i$ observations for each group $i=1,...,m$. Let ${\bf y}_i = (Y_{i,1},...,Y_{i,n_i})'$ denote the vector of responses for group $i$, and let ${\bf X}_i$ denote the design matrix for group $i$. Within each group, we could still imagine a linear model:
+
+$$\mathbb{E}[{\bf y}_i | {\bf X}_i] = {\bf X}_i \beta$$
+However, we need to modify the variance structure to account for the groups in the data. Since the groups are independent, $Cov(Y_{i_1,j_1}, Y_{i_2, j_2}) = 0$ for any $i_1 \neq i_2$ (different groups). Within the groups, though, there *will* be correlation, which we can write as 
+
+$$Var({\bf y}_i | {\bf X}_i) = \sigma^2 {\bf R}_i(\rho)$$
+Here $\sigma^2 = Var(Y_{ij})$, and ${\bf R}_i(\rho)$ describes the correlation structure. For the purposes of this assignment, we will focus on one of the most common correlation structures, called the *exchangeable* correlation structure:
+
+$${\bf R}_i(\rho) = \begin{bmatrix}
+    1 & \rho &  \cdots & \rho \\
+    \rho & 1 &  \cdots & \rho \\
+    \vdots  & \vdots & \ddots & \vdots \\
+    \rho & \rho &  \cdots & 1
+    \end{bmatrix}$$
+    
+That is, $\rho = Corr(Y_{i,j_1}, Y_{i,j_2})$ for any two observations $j_1 \neq j_2$ within the same group.
+
+## More flexible models
+
+While the model described above allows for dependence, it still makes a pretty strong assumption about *shape*. In particular, it assumes that the mean of ${\bf y}_i$ is a *linear* function of the explanatory variables. However, this isn't always the case -- for example, if our responses $Y_{ij}$ are binary, then a linear relationship for the mean is a poor choice.
+
+How can we generalize this approach? We introduce a *link function* that allows the mean to be a *non-linear* function of ${\bf X}$.
+
+Formally, we assume that
+
+$$g(\mathbb{E}[{\bf y}_i | {\bf X}_i]) = {\bf X}_i \beta,$$
+
+where $g$ is a monotone increasing function. We will see some common link functions below.
+
+Now, when our response variable changes, we also need to change the way we model the variance. The normal distribution (which is how we often motivate standard linear regression models) is kind of special, in that the mean and variance are completely unrelated. This is *not* true of many other distributions -- for example, if $Y \sim Bernoulli(p)$, then $\mathbb{E}[Y] = p$ and $Var(Y) = p(1 - p)$.
+
+We need to introduce a *variance function*, $V$, that describes how the mean is related to the variance. In particular, we will suppose that $Var(Y) = \phi V(\mathbb{E}[Y])$. 
+
+* For a normal distribution, $V(\mu) = 1$ (there is no relationship between the mean and variance), and $\phi = \sigma^2$
+* For a Bernoulli, $V(\mu) = \mu(1 - \mu)$
+* For a Poisson, $V(\mu) = \mu$
+
+Then, we model the variance of ${\bf y}_i$ as
+
+$$Var({\bf y}_i | {\bf X}_i) = \phi {\bf V}_i^{1/2} {\bf R}_i(\rho) {\bf V}_i^{1/2},$$
+
+where ${\bf V}_i = \text{diag}(V(\mathbb{E}[Y_{ij} | X_{ij}]))$, and ${\bf R}_i(\rho)$ is as described above.
+
+
+# Simulation: Understanding the effect of dependent data
+
+Before we discuss how to fit a model that accounts for the exchangeable dependence structure described above, let's perform some simulations to demonstrate *why* accounting for this dependence is important.
+
+For the purpose of these simulations, suppose we have a continuous response $Y_{ij}$, where the subscript $i=1,...,m$ denotes the $i$th group, and the subscript $j = 1,...,n_i$ denotes the $j$th observation within group $i$. Suppose also that we have a single continuous explanatory variable $X_{ij}$, and the relationship between $X_{ij}$ and $Y_{ij}$ is as follows:
+
+$$Y_{ij} = \beta_0 + u_i + \beta_1 X_{ij} + \varepsilon_{ij}$$
+Here $u_i$ is a group-specific **random effect**, which captures variation between the $m$ different groups. Each group $i$ has its own random effect $u_i$, which means that while the slope for $X_{ij}$ is the same ($\beta_1$) for all groups, each group has its own intercept $\beta_0 + u_i$. The term $\varepsilon_{ij}$ is the usual noise term that describes variability of the response around the line.
+
+Note that $X_{ij}$, $u_i$, and $\varepsilon_{ij}$ are all random variables, and we will need to choose distributions for them in order to carry out simulations. For these simulations, assume that
+
+$$X_{ij} \overset{iid}{\sim} N(\theta_i, \sigma_x^2)$$
+
+$$\theta_i \overset{iid}{\sim} N(0, \sigma_\theta^2)$$
+$$u_i \overset{iid}{\sim} N(0, \sigma_u^2)$$
+$$\varepsilon_{ij} \overset{iid}{\sim} N(0, \sigma_\varepsilon^2)$$
+
+Furthermore, assume that the $X_{ij}$, $\varepsilon_{ij}$, and $u_i$ are all independent of each other.
+
+:::{.question}
+#### Question 1 (written)
+
+For the model 
+$$Y_{ij} = \beta_0 + u_i + \beta_1 X_{ij} + \varepsilon_{ij}$$
+with $u_i$ and $\varepsilon_{ij}$ generated as described above, show that
+$$Var(Y_{ij} | X_{ij}) = \sigma_u^2 + \sigma_\varepsilon^2,$$
+and
+$$Cov(Y_{ij}, Y_{ik}) = \sigma_u^2$$
+for two observations $Y_{ij}, Y_{ik}$ from the same group ($j \neq k$).
+
+:::
+
+
+:::{.question}
+#### Question 2 (written)
+
+From question 2, conclude that
+$$\rho := Corr(Y_{ij}, Y_{ik}) = \frac{\sigma_u^2}{\sigma_u^2 + \sigma_\varepsilon^2},$$
+and therefore observations from the same group are *dependent* whenever $\sigma_u^2 > 0$.
+
+(If you have taken STA 214, you may recognize this as the intraclass correlation coefficient!)
+:::
+
+## Simulating data from the model
+
+The code below simulates data from the model described above with 
+
+* $m = 50$ groups
+* $n_i = 10$ observations in each group
+* $\sigma_x = 1$
+* $\sigma_u = 1$
+* $\sigma_\varepsilon = 1$
+* $\sigma_\theta = 2$
+* $\beta_0 = 1$
+* $\beta_1 = 0$
+
+```{r, echo=F}
+set.seed(1)
+```
+
+
+```{r}
+m <- 50
+n_i <- 10
+n <- m*n_i
+sigma_x <- 1
+sigma_u <- 1
+sigma_e <- 1
+sigma_t <- 2
+beta0 <- 1
+beta1 <- 0
+groups <- rep(1:m, each=n_i)
+
+theta <- rnorm(m, 0, sigma_t)
+x <- rnorm(n, mean=theta[groups], sd=sigma_x)
+u <- rnorm(m, sd=sigma_u)
+y <- beta0 + u[groups] + beta1*x + rnorm(n, sd=sigma_e)
+```
+
+Now we can fit the usual linear model and look at the estimated coefficients:
+
+```{r}
+m1 <- lm(y ~ x)
+summary(m1)$coefficients
+```
+
+
+We can see that the estimated coefficients $\widehat{\beta}_0$ and $\widehat{\beta}_1$ seem pretty close to their true values. However, the p-value for the test $H_0: \beta_1 = 0$ vs. $H_A: \beta_1 \neq 0$ is a bit smaller than we would expect (given that we simulated data for which $\beta_1 = 0$, so $H_0$ is true).
+
+This is a potential problem for hypothesis testing. When we test hypotheses, we set the type I error rate at a desired level (some pre-specified $\alpha$), and reject when the p-value is less than $\alpha$. If our p-values are artificially small, we will get an inflated type I error rate, which means we can't trust our hypothesis test to actually tell us whether $\beta_1 = 0$ or not.
+
+:::{.question}
+#### Question 3 (.html)
+
+Using the code above as a starter, estimate the type I error for the hypothesis test of $H_0: \beta_1 = 0$ vs. $H_A: \beta_1 \neq 0$ with the usual linear regression model, at level $\alpha = 0.05$.
+
+(See the [practice questions](https://sta379-s25.github.io/practice_questions/pq_1.html) from the first day of class for an example of assessing type I error rate.)
+:::
+
+
+A danger with dependent data is inflated type I error rates. Now let's assess whether the degree of dependence (correlation) is related to the type I error rate.
+
+
+:::{.question}
+#### Question 4 (.html)
+
+Repeat question 3 for different values of the intraclass correlation $\rho$, by changing $\sigma_u^2$ or $\sigma_\varepsilon^2$ to change $\rho$. Make a plot showing type I error rate vs. $\rho$ for a range of values of $\rho$ between 0 and 1. Comment on how the correlation within groups is related to the type I error rate.
+:::
+
+## Model estimation with GEE
+
+The GEE approach accounts for dependence by directly modeling the correlation between observations when fitting the model. We will discuss the technical details below, but for now we'll use R's `gee` package to see how the GEE approach helps.
+
+Here is code to use GEE to fit the linear model:
+
+```{r}
+library(gee)
+
+m2 <- gee(y ~ x, id = groups, corstr = "exchangeable")
+summary(m2)$coefficients
+```
+
+In this code, `id = groups` specifies a vector which contains the group label for each observation, and `corstr = "exchangeable"` means we are fitting the model with an exchangeable correlation structure. The `gee` function first prints out the coefficients used to initialize the iterative estimation process (in this case, the estimates from `lm`), and then we get the final table of estimated coefficients and standard errors.
+
+Note that the final table contains both "naive" and "robust" standard errors. We will discuss those further below -- for now, focus on the "robust" standard errors. The table also does not contain a p-value. We can calculate an approximate p-value for $\beta_1$ ourselves:
+
+```{r}
+2*pnorm(abs(summary(m2)$coefficients[2,5]), lower.tail=F)
+```
+
+The GEE standard errors are larger than the `lm` standard errors, resulting in a larger p-value. The increase in the standard errors is accounting for the additional variability in the estimates that results from correlation in the observations.
+
+The `gee` output also provides estimates for $Var(Y_{ij}|X_{ij})$ (`scale`) and $\rho$ (`working.correlation`):
+
+```{r}
+m2$scale
+m2$working.correlation[1,2]
+```
+
+We can see that the `scale` estimate is close to the true $Var(Y_{ij}|X_{ij})$ ($\sigma_u^2 + \sigma_\varepsilon^2 = 1 + 1 = 2$), and the `working.correlation` estimate is close to the true correlation $\rho$ ($\sigma_u^2/(\sigma_u^2 + \sigma_\varepsilon^2) = 1/2$).
+
+
+:::{.question}
+#### Question 5 (.html)
+
+Repeat question 3 (with both $\sigma_u^2 = 1$ and $\sigma_\varepsilon^2 = 1$ as initially specified) for the GEE model fit. How does type I error for $H_0: \beta_1 = 0$ vs. $H_A: \beta_1 \neq 0$ using the GEE estimates and robust standard errors compare to the nominal level of $\alpha = 0.05$? To the type I error using the p-value from the `lm` fit?
+:::
+
+In question 4, we also looked at how type I error when using the usual `lm` p-values was related to the amount of correlation within groups. Let's examine type I error for both approaches when we change both the amount of correlation and the number of groups $m$.
+
+:::{.question}
+#### Question 6 (.html)
+
+Consider values of the correlation $\rho$ between 0 and 1, and values of $m$ between 5 and 100 (e.g. 5, 10, 20, 30, 50, etc.). For each combination of $\rho$ and $m$, use simulation to estimate the type I error for the test of $H_0: \beta_1 = 0$ vs. $H_A: \beta_1 \neq 0$ for both the GEE robust p-value and the usual `lm` p-value. Present your results in a series of plots, and discuss the results.
+:::
+
+
+# Implementation: Generalized Estimating Equations
+
+## Model details
+
+Now that we have seen how the GEE approach can be used to account for data dependence, let's discuss what is actually going on "under the hood".
+
+### The data
+
+As before, let ${\bf y}_i = (Y_{i,1},...,Y_{i,n_i})'$ denote the vector of responses for group $i \in \{1,...m\}$, and let ${\bf X}_i$ denote the design matrix for group $i \in \{1,...,m\}$. The responses $Y_{ij}$ could be continuous observations (like height or weight), binary observations (e.g. membership in a treatment or control group in a clinical trial), count observations (e.g. the number of goals scored by a soccer player), etc.
+
+### The model
+ 
+Let $\mu_i = \mathbb{E}[{\bf y}_i | {\bf X}_i]$. We assume that:
+
+* $g(\mu_i) = {\bf X}_i \beta$ 
+    * $g$ is a continuous, monotone increasing function
+    * Note that $\mu_i = (\mu_{i,1},...,\mu_{i,n_i})'$ is a vector. By $g(\mu_i)$, we mean "apply the function $g$ to each element of the vector", i.e. $g(\mu_i) = (g(\mu_{i,1}),...,g(\mu_{i,n_i}))'$
+* $Var({\bf y}_i | {\bf X}_i) = \phi {\bf V}_i^{1/2} {\bf R}_i(\rho) {\bf V}_i^{1/2}$
+    * $\phi > 0$ is called the *dispersion parameter*; in practice we will estimate $\phi$ directly
+    * ${\bf V}_i = \text{diag}(V(\mu_{i,1}),...,V(\mu_{i,n_i}))$
+    * $V(\mu_{ij}) \geq 0$
+* $Cov(Y_{i_1,j_1}, Y_{i_2, j_2}) = 0$ for any $i_1 \neq i_2$ (different groups)
+
+We will call the model above a *generalized estimating equation* (GEE) model. Technically we are abusing terminology somewhat here, because we are using the name of the estimating procedure as the name for the model itself. We could call these "generalized linear models with clustered data", or something similar, instead. For simplicity, however, in this assignment we will ignore the distinction between the model and the computational tool for fitting the model.
+
+### Example: gaussian GEE
+
+We would use this model for the same kinds of response variables for which we normally use linear regression models. (Think of this as one way of generalizing linear regression to dependent data).
+
+* $\mu_i = {\bf X}_i \beta$ (identity link)
+* $V(\mu_{ij}) = 1$
+
+### Example: binomial GEE
+
+We would use this model for response variables which could reasonably follow a binomial distribution. A special, important case is when $Y_{ij}$ is *binary*. (Think of this as one way of generalizing logistic regression to dependent data).
+
+* $\log \left( \dfrac{\mu_i}{1 - \mu_i} \right) = {\bf X}_i \beta$ (logit link)
+* $V(\mu_{ij}) = \mu_{ij}(1 - \mu_{ij})$
+
+### Example: Poisson GEE
+
+We would use this model for count response variables ($Y_{ij} \in \{0, 1, 2, ...\}$), which could reasonably follow a Poisson distribution (or a related distribution like a Negative Binomial). (Think of this as one way of generalizing Poisson regression to dependent data).
+
+* $\log \left( \mu_i \right) = {\bf X}_i \beta$ (log link)
+* $V(\mu_{ij}) = \mu_{ij}$
+
+## Examples in R
+
+We can fit the GEE models described above with the `gee` package in R. Below are examples in which we simulate clustered data with an exchangeable correlation structure, and show the results of fitting the model with the `gee` function. 
+
+**Example with gaussian data:**
+
+```{r, include=F}
+library(gee)
+
+### Example with gaussian data
+set.seed(3)
+m <- 10
+n_i <- 10
+n <- m*n_i
+groups <- rep(1:m, each=n_i)
+sigma_u <- 0.5
+sigma_e <- 0.5
+
+u <- rnorm(m, sd=sigma_u)
+x1 <- rnorm(n)
+x2 <- rnorm(m)[groups]
+y <- 1 + u[groups] + 0*x1 + 1*x2 + rnorm(n, 0, sigma_e)
+
+m_gee <- gee(y ~ x1 + x2, id = groups, corstr = "exchangeable",
+          family = gaussian)
+```
+
+```{r, eval=F}
+library(gee)
+
+### Example with gaussian data
+set.seed(3)
+m <- 10
+n_i <- 10
+n <- m*n_i
+groups <- rep(1:m, each=n_i)
+sigma_u <- 0.5
+sigma_e <- 0.5
+
+u <- rnorm(m, sd=sigma_u)
+x1 <- rnorm(n)
+x2 <- rnorm(m)[groups]
+y <- 1 + u[groups] + 0*x1 + 1*x2 + rnorm(n, 0, sigma_e)
+
+m_gee <- gee(y ~ x1 + x2, id = groups, corstr = "exchangeable",
+          family = gaussian)
+```
+
+```{r}
+# estimated coefficients
+m_gee$coefficients
+
+# estimated correlation rho
+m_gee$working.correlation[2,1]
+
+# estimated dispersion parameter phi
+m_gee$scale
+```
+
+
+**Example with bernoulli data:**
+
+```{r, include=F}
+set.seed(3)
+m <- 20
+n_i <- 100
+n <- m*n_i
+groups <- rep(1:m, each=n_i)
+sigma_u <- 2
+
+u <- rnorm(m, sd=sigma_u)
+x1 <- rnorm(n)
+x2 <- rnorm(m)[groups]
+prob <- exp(1 + u[groups] + 0*x1 + 1*x2)/(1 + exp(1 + u[groups] + 0*x1 + 1*x2))
+y <- rbinom(n, 1, prob)
+
+m_gee <- gee(y ~ x1 + x2, id = groups, corstr = "exchangeable",
+          family = binomial)
+```
+
+```{r, eval=F}
+set.seed(3)
+m <- 20
+n_i <- 100
+n <- m*n_i
+groups <- rep(1:m, each=n_i)
+sigma_u <- 2
+
+u <- rnorm(m, sd=sigma_u)
+x1 <- rnorm(n)
+x2 <- rnorm(m)[groups]
+prob <- exp(1 + u[groups] + 0*x1 + 1*x2)/(1 + exp(1 + u[groups] + 0*x1 + 1*x2))
+y <- rbinom(n, 1, prob)
+
+m_gee <- gee(y ~ x1 + x2, id = groups, corstr = "exchangeable",
+          family = binomial)
+```
+
+```{r}
+# estimated coefficients
+m_gee$coefficients
+
+# estimated correlation rho
+m_gee$working.correlation[2,1]
+
+# estimated dispersion parameter phi
+m_gee$scale
+```
+
+
+
+**Example with Poisson data:**
+
+```{r, include=F}
+set.seed(3)
+m <- 15
+n_i <- 50
+n <- m*n_i
+groups <- rep(1:m, each=n_i)
+sigma_u <- 0.5
+
+u <- rnorm(m, sd=sigma_u)
+x1 <- rnorm(n)
+x2 <- rnorm(m)[groups]
+lambda <- exp(1 + u[groups] + 0*x1 + 1*x2)
+y <- rpois(n, lambda)
+
+m_gee <- gee(y ~ x1 + x2, id = groups, corstr = "exchangeable",
+          family = poisson)
+```
+
+```{r, eval=F}
+set.seed(3)
+m <- 15
+n_i <- 50
+n <- m*n_i
+groups <- rep(1:m, each=n_i)
+sigma_u <- 0.5
+
+u <- rnorm(m, sd=sigma_u)
+x1 <- rnorm(n)
+x2 <- rnorm(m)[groups]
+lambda <- exp(1 + u[groups] + 0*x1 + 1*x2)
+y <- rpois(n, lambda)
+
+m_gee <- gee(y ~ x1 + x2, id = groups, corstr = "exchangeable",
+          family = poisson)
+```
+
+```{r}
+# estimated coefficients
+m_gee$coefficients
+
+# estimated correlation rho
+m_gee$working.correlation[2,1]
+
+# estimated dispersion parameter phi
+m_gee$scale
+```
+
+
+## Model estimation
+
+Generalized estimating equations get their name because they estimate $\beta$ by solving the following system:
+
+$$\Psi(\beta) = \sum \limits_{i=1}^m {\bf D}_i' {\bf W}_i^{-1} ({\bf y}_i - \mu_i) = 0$$
+
+where 
+
+$${\bf D}_i = \dfrac{\partial \mu_i}{\partial \beta} = {\bf V}_i {\bf X}_i$$
+
+and
+
+$${\bf W}_i = \phi {\bf V}_i^{1/2} {\bf R}_i(\rho) {\bf V}_i^{1/2}.$$
+
+However, because $\mu_i$ and ${\bf V}_i$ are typically non-linear functions of $\beta$, the coefficients $\beta$ in the GEE models above generally cannot be estimated in close form. Rather, we must employ an iterative estimation procedure. Often, a Newton's method approach is done, which means we need the derivative of $\Psi$:
+
+$${\bf H}(\beta) := \frac{\partial}{\partial \beta}\Psi(\beta) = -\sum \limits_{i=1}^m {\bf D}_i' {\bf W}_i^{-1} {\bf D}_i$$
+
+The coefficients $\beta$, and the additional parameters $\rho$ and $\phi$, are then simultaneously estimated as follows. 
+
+### The algorithm
+
+Here let $N = \sum \limits_{i=1}^m n_i$ be the total number of observations across all groups, and $k + 1$ the number of coefficients to estimate (i.e., $\beta = (\beta_0,...,\beta_k)'$).
+
+* **Step 1:** Initialize the coefficients. Let $\beta^{(0)}$ denote the vector of initial coefficients.
+* **Step 2:** Calculate fitted values and standardized residuals:
+    * $\widehat{\mu}_i = g^{-1}({\bf X}_i \beta^{(0)})$
+    * $r_{ij} = \dfrac{Y_{ij} - \widehat{\mu}_{ij}}{\sqrt{V(\widehat{\mu}_{ij})}}$
+* **Step 3:** Calculate estimates $\rho^{(0)}$ and $\phi^{(0)}$:
+    * $\phi^{(0)} = \dfrac{1}{N - k - 1} \sum \limits_{i=1}^m \sum \limits_{j=1}^{n_i} r_{ij}^2$
+    * $\rho^{(0)} = \dfrac{1}{m \widehat{\rho}^{(0)}} \sum \limits_{i=1}^m \frac{1}{n_i(n_i - 1)} \sum \limits_{j \neq l} r_{ij}r_{il}$
+* **Step 4:** Calculate ${\bf H}(\beta^{0})$ and $\Psi(\beta^{(0)})$
+* **Step 5:** Update:
+    * $s_0 = -({\bf H}(\beta^{0}))^{-1}\Psi(\beta^{(0)})$
+    * $\beta^{(1)} = \beta^{(0)} + s_0$
+* **Step 6:** Iterate: repeat steps 2 -- 5. I.e., if $\beta^{(t)}$ is estimated coefficients on iteration $t$, then use $\beta^{(t)}$ to calculate the $\widehat{\mu}_i$, the $r_{ij}$, $\phi^{(t)}$, $\rho^{(0)}$, ${\bf H}(\beta^{t})$, and $\Psi(\beta^{(t)})$. Then update:
+    * $s_t = -({\bf H}(\beta^{t}))^{-1}\Psi(\beta^{(t)})$
+    * $\beta^{(t+1)} = \beta^{(t)} + s_t$
+* **Step 7:** Stop when the algorithm converges (see below), or when a maximum number of iterations is reached.
+
+### Initialization 
+
+**Gaussian GEE:**
+
+Let $\bar{Y} = \frac{1}{n} \sum \limits_{i=1}^n Y_i$. One way to initialize a gaussian GEE is to make 
+
+$$\beta^{(0)} = \left(\bar{Y}, 0, 0, ..., 0 \right)'$$
+That is, the initial value of the intercept is $\bar{Y}$, and the initial value of all other coefficients is 0.
+
+**Binomial GEE:**
+
+Let $\bar{Y} = \frac{1}{n} \sum \limits_{i=1}^n Y_i$. One way to initialize a binomial GEE is to make 
+
+$$\beta^{(0)} = \left( \log \left( \frac{\bar{Y}}{1 - \bar{Y}} \right), 0, 0, ..., 0 \right)'$$
+That is, the initial value of the intercept is $\log \left( \frac{\bar{Y}}{1 - \bar{Y}} \right)$, and the initial value of all other coefficients is 0.
+
+**Poisson GEE:**
+
+Let $\bar{Y} = \frac{1}{n} \sum \limits_{i=1}^n Y_i$. One way to initialize Poisson regression is to make 
+
+$$\beta^{(0)} = \left( \log (\bar{Y}), 0, 0, ..., 0 \right)'$$
+That is, the initial value of the intercept is $\log (\bar{Y})$, and the initial value of all other coefficients is 0.
+
+### Convergence
+
+Say that the algorithm has converged when the change in the estimated coefficients, $s_t$, is sufficiently small. Usually, this means that $||s_t|| < \delta$ for some small value $\delta$ (e.g. $\delta = 1\times 10^{-6}$).
+
+Remember that $s_t$ is a vector, and that the (Euclidean) norm of a vector $v = (v_1,...,v_p)$ is given by 
+
+$$||v|| = \left( \sum \limits_{i=1}^p v_i^2 \right)^{1/2}$$
+
+## Inference with GEE models
+
+The `gee` package in R provides standard errors for each estimated coefficient, which allow us to do the usual hypothesis testing. The output looks similar to what you would expect from linear regression models (the `lm` function in R) or generalized linear models (the `glm` function in R). For example:
+
+```{r}
+summary(m_gee)$coefficients
+```
+
+However, there is one difference here -- the output provides both "naive" and "robust" standard errors. What's going on?
+
+An advantage to GEE models, which often motivates their use, is that they can be *robust* to mis-specification of the model. This relies on a *robust* estimate of the standard errors. Formally, the robust variance-covariance matrix for the coefficient estimates $\widehat{\beta}$ is given by
+
+$$\widehat{Var}(\widehat{\beta}) = \widehat{{\bf A}}^{-1} \widehat{{\bf B}} \widehat{{\bf A}}^{-1},$$
+
+where
+
+* $\widehat{{\bf A}} = \sum \limits_{i=1}^m \widehat{\bf D}_i' \widehat{\bf W}_i^{-1} \widehat{\bf D}_i$
+* $\widehat{{\bf B}} = \sum \limits_{i=1}^m \widehat{\bf D}_i' \widehat{\bf W}_i^{-1} ({\bf y}_i - \widehat{\mu}_i)({\bf y}_i - \widehat{\mu}_i)' \widehat{\bf W}_i^{-1} \widehat{\bf D}_i$
+
+This estimated variance matrix is called a *sandwich* estimator (because of the sandwiched format of the matrices). In R, the robust variance (sandwich) matrix can be extracted for a fitted GEE via
+
+```{r}
+m_gee$robust.variance
+```
+
+The diagonal entries of this matrix are the estimated variances of the coefficients; taking the square roots gives the estimated standard errors, which align with the robust standard errors presented in the model summary table:
+
+```{r}
+sqrt(diag(m_gee$robust.variance))
+summary(m_gee)$coefficients[,4]
+```
+
+## Implementation: Your task
+
+Your task in this assignment is to write your own implementation of a GEE, with C++ and Rcpp / RcppArmadillo. Your implementation must support Gaussian, binomial, and Poisson GEEs, and should satisfy the following requirements. *Note*: it is very important that you name your arguments and variables just as I request here, so that I can test whether your code runs correctly.
+
+* The main function should be called `geeC`, with the following requirements:
+    * Inputs:
+        * `X`: a design matrix for the full data
+        * `y`: a vector of responses for the full data
+        * `groups`: a vector of group assignments for each observation. Groups should be numbered 1, 2, 3, etc.
+        * `family`: a string specifying the type of GEE (one of `"gaussian"`, `"binomial"`, or `"poisson"`)
+        * `max_iter`: an integer specifying the maximum number of iterations for the estimationg algorithm. The default should be 25.
+        * `tol`: the tolerance ($\delta$) for determining convergence of the algorithm. Default should be $1 \times 10^{-6}$
+    * Output: a list containing the following elements
+        * `coefficients`: a vector containing the final estimates $\widehat{\beta}$
+        * `robust.variance`: a matrix containing the robust sandwich variance
+        * `correlation`: the estimate $\widehat{\rho}$
+        * `scale`: the estimate $\widehat{\phi}$
+        * `family`: the family which was fit (one of `"gaussian"`, `"binomial"`, or `"poisson"`)
+        * `iterations`: the number of iterations which were run
+* You are welcome, and encouraged, to write helper functions that are called by `geeC`
+* All code (`geeC` and any helper functions) should be written in C++ using the Rcpp and/or RcppArmadillo libraries (you will almost certainly need to use Armadillo, for the linear algebra required)
+* All code must be documented
+* Your C++ code must be stored in a file called `gee_code.cpp`
+* The `geeC` function must be callable from R, after sourcing `gee_code.cpp`
+
+Here is an example of the code you (and I) should be able to run in R, with the output compared to the output of the `gee` package:
+
+```{r, eval=F}
+library(gee)
+
+# export the C++ functions to R
+Rcpp::sourceCpp("gee_code.cpp")
+
+# simulate data with correlation structure
+set.seed(3)
+m <- 10
+n_i <- 10
+n <- m*n_i
+groups <- rep(1:m, each=n_i)
+sigma_u <- 0.5
+sigma_e <- 0.5
+
+u <- rnorm(m, sd=sigma_u)
+x1 <- rnorm(n)
+x2 <- rnorm(m)[groups]
+y <- 1 + u[groups] + 0*x1 + 1*x2 + rnorm(n, 0, sigma_e)
+
+# fit the gee using the gee package
+m_gee <- gee(y ~ x1 + x2, id = groups, corstr = "exchangeable",
+             family = gaussian)
+
+# fit the gee using our C++ implementation
+X <- cbind(1, x1, x2) # the design matrix
+m_geeC <- geeC(X, y, groups, "gaussian")
+
+# compare the output
+# It should be close; it is ok if it doesn't agree exactly
+m_gee$coefficients
+m_geeC$coefficients
+
+m_gee$robust.variance
+m_geeC$robust.variance
+
+m_gee$working.correlation[2,1]
+m_geeC$correlation
+
+m_gee$scale
+m_geeC$scale
+
+m_gee$iterations
+m_geeC$iterations
+
+m_gee$family
+m_geeC$family
+```
