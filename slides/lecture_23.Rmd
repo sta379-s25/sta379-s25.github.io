@@ -1,0 +1,184 @@
+---
+title: "Lecture 23: Changing the range of integration"
+author: "Ciaran Evans"
+output: beamer_presentation
+editor_options: 
+  chunk_output_type: console
+---
+
+## Gauss-Legendre quadrature
+
+* Let $x_1,...,x_n \in (-1, 1)$ be the $n$ roots of the $n$th Legendre polynomial $p_n$
+
+\bigskip
+
+* Use $x_1,...,x_n$ as quadrature nodes to approximate integrals:
+$$\int \limits_{-1}^1 f(x)dx \approx  \sum \limits_{i=1}^n w_i f(x_i) \hspace{1cm} w_i = \int\limits_{-1}^1 L_{n,i}(x) dx$$
+
+\bigskip
+
+* If $f(x)$ is a polynomial of degree $\leq 2n-1$, approximation is **exact**:
+$$\int \limits_{-1}^1 f(x)dx =  \sum \limits_{i=1}^n w_i f(x_i)$$
+
+
+## Changing the range of integration
+
+Gauss-Legendre quadrature allows us to approximate $\int \limits_{-1}^1 f(x)dx$.
+
+\bigskip
+
+**Question:** What should I do if I want to approximate
+$$\int \limits_a^b f(x) dx$$
+for a finite interval $[a,b]$?
+
+\vspace{4cm}
+
+## Integrating over an infinite range
+
+Integrals in statistics often involve an infinite range. For example, standard normal cdf:
+$$\int \limits_{-\infty}^t \frac{1}{\sqrt{2 \pi}} e^{-\frac{1}{2}x^2} dx$$
+
+**Question:** How could we use Gauss-Legendre quadrature to approximate the integral?
+
+\vspace{4cm}
+
+## Integrating over an infinite range: truncation
+
+The standard normal density is mostly concentrated around 0, so for many values of $t$
+
+$$\int \limits_{-\infty}^t \frac{1}{\sqrt{2 \pi}} e^{-\frac{1}{2}x^2} dx \approx \int \limits_{-5}^t \frac{1}{\sqrt{2 \pi}} e^{-\frac{1}{2}x^2} dx$$
+
+```{r}
+pnorm(-1)
+pnorm(-1) - pnorm(-5)
+```
+
+## Integrating over an infinite range: truncation
+
+```{r}
+library(rootSolve)
+p4_roots <- uniroot.all(function(x){
+  (1/8) * (35*x^4 - 30*x^2 + 3)}, 
+                        c(-1, 1), tol=1e-12)
+weights <- c((18 - sqrt(30))/36, 
+             (18 + sqrt(30))/36,
+             (18 + sqrt(30))/36,
+             (18 - sqrt(30))/36)
+
+a <- -5; b <- -1
+(b - a)/2*sum(weights*dnorm((b-a)/2*p4_roots + (a+b)/2))
+
+pnorm(-1)
+```
+
+## Integrating over an infinite range: transformation
+
+Find a transformation $x = h(u)$ such that
+
+$$\int \limits_a^b f(x)dx = \int \limits_{-1}^1 f(h(u)) h'(u)du$$
+
+**Question:** For $$\int \limits_{-\infty}^t \frac{1}{\sqrt{2 \pi}} e^{-\frac{1}{2}x^2} dx$$ what transformations could I consider?
+
+## Integrating over an infinite range: transformation
+
+$$\int \limits_{-\infty}^t \frac{1}{\sqrt{2 \pi}} e^{-\frac{1}{2}x^2} dx$$
+
+Let $x = t + \log\left( \dfrac{u+1}{2} \right)$
+
+\vspace{4cm}
+
+## Integrating over an infinite range: transformation
+
+```{r}
+f <- function(u){
+  exp(-0.5*(-1 + log(0.5*(u+1)))^2)/(u+1)
+}
+
+sum(weights * f(p4_roots))/sqrt(2*pi)
+
+pnorm(-1)
+```
+
+## Gauss-Hermite quadrature
+
+Lots of integrals in statistics involve the normal distribution, and so look like
+
+$$\int \limits_{-\infty}^\infty f(x) e^{-\frac{1}{2}x^2} dx$$
+**Gauss-Hermite quadrature** is a quadrature rule that is good at these types of integrals:
+
+$$\int \limits_{-\infty}^\infty f(x) e^{-\frac{1}{2}x^2} dx \approx \sum \limits_{i=1}^n w_i f(x_i)$$
+
+* Need to choose the $x_i$ and $w_i$ differently to Gauss-Legendre quadrature
+
+## Gauss-Hermite quadrature
+
+Gauss-Legendre quadrature: $\int \limits_{-1}^1 f(x) dx \approx \sum \limits_{i=1}^n w_i f(x_i)$
+
+* $w_i = \int \limits_{-1}^1 L_{n,i}(x)dx$
+* $x_1,...,x_n$ are the roots of the $n$th Legendre polynomial $p_n$. Legendre polynomials satisfy $\int \limits_{-1}^1 (c_0 + c_1x + \cdots + c_{n-1}x^{n-1}) p_n(x) dx$
+
+
+Gauss-Hermite quadrature: $\int \limits_{-\infty}^\infty f(x) e^{-\frac{1}{2}x^2} dx \approx \sum \limits_{i=1}^n w_i f(x_i)$
+
+* $w_i =$
+
+
+## Gauss-Hermite quadrature
+
+Gauss-Legendre quadrature: $\int \limits_{-1}^1 f(x) dx \approx \sum \limits_{i=1}^n w_i f(x_i)$
+
+* $w_i = \int \limits_{-1}^1 L_{n,i}(x)dx$
+* $x_1,...,x_n$ are the roots of the $n$th Legendre polynomial $p_n$. Legendre polynomials satisfy $\int \limits_{-1}^1 (c_0 + c_1x + \cdots + c_{n-1}x^{n-1}) p_n(x) dx$
+
+
+Gauss-Hermite quadrature: $\int \limits_{-\infty}^\infty f(x) e^{-\frac{1}{2}x^2} dx \approx \sum \limits_{i=1}^n w_i f(x_i)$
+
+* $w_i = \int \limits_{-\infty}^\infty L_{n,i}(x) e^{-\frac{1}{2}x^2} dx$
+* $x_1,...,x_n$ are the roots of the $n$th **Hermite** polynomial $h_n$. Hermite polynomials satisfy $\int \limits_{-\infty}^\infty (c_0 + c_1x + \cdots + c_{n-1}x^{n-1}) h_n(x) e^{-\frac{1}{2}x^2} dx = 0$
+
+## Example
+
+Hermite polynomial for $n=2$: $h_2(x) = x^2 - 1$
+
+* Roots of $h_2$:
+
+\bigskip
+
+* Weights: $w_i = \int \limits_{-\infty}^\infty L_{n,i}(x) e^{-\frac{1}{2}x^2} dx$
+
+\vspace{5cm}
+
+
+## Example
+
+$$\int \limits_{-\infty}^\infty x^2 e^{-\frac{1}{2}x^2} dx = \hspace{3cm}$$
+
+Gauss-Hermite quadrature with $n=2$: $w_1f(x_1) + w_2f(x_2) =$
+
+\vspace{4cm}
+
+## Example
+
+$$\int \limits_{-\infty}^\infty x^2 e^{-\frac{1}{2}x^2} dx = \sqrt{2 \pi}$$
+
+Gauss-Hermite quadrature with $n=2$: 
+$$w_1f(x_1) + w_2f(x_2) = \sqrt{\frac{\pi}{2}} \cdot  (-1)^2 + \sqrt{\frac{\pi}{2}} \cdot  (1)^2 = \sqrt{2 \pi}$$
+
+```{r}
+nodes <- c(-1, 1)
+weights <- c(sqrt(pi/2), sqrt(pi/2))
+sum(weights * nodes^2)
+sqrt(2*pi)
+```
+
+## Your turn
+
+Try Gauss-Hermite quadrature for calculating expectations of functions of normal distributions:
+
+[https://sta379-s25.github.io/practice_questions/pq_23.html](https://sta379-s25.github.io/practice_questions/pq_23.html)
+
+* Start in class
+* You are welcome and encouraged to work with your neighbors
+* Solutions posted on course website
+
+
