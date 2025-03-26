@@ -14,6 +14,7 @@ March 24
   
 March 26
 : Integrating over other bounds
+  : [slides (pdf)](https://sta379-s25.github.io/slides/lecture_23.pdf), [practice questions](https://sta379-s25.github.io/practice_questions/pq_23.html), [practice question solutions](https://sta379-s25.github.io/practice_questions/pq_23_solutions.html)
 
 March 28
 : Gaussian quadrature summary
