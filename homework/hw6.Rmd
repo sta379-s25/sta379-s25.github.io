@@ -207,7 +207,7 @@ c(t(X) %*% (d -P %*% d))
 
 Now that we have the gradient, we need the Hessian. I won't make you calculate the Hessian here. Rather, it can be shown that the Hessian matrix has the form
 
-$${\bf H}(\beta) = - {\bf X}^T {\bf U} {\bf X}$$
+$${\bf H}(\beta) = {\bf X}^T {\bf U} {\bf X}$$
 where ${\bf U}$ can be calculated in R as follows:
 
 ```{r}

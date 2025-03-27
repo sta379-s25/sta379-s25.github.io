@@ -1941,9 +1941,9 @@ get</p>
 <p>Now that we have the gradient, we need the Hessian. I won’t make you
 calculate the Hessian here. Rather, it can be shown that the Hessian
 matrix has the form</p>
-<p><span class="math display">\[{\bf H}(\beta) = - {\bf X}^T {\bf U}
-{\bf X}\]</span> where <span class="math inline">\({\bf U}\)</span> can
-be calculated in R as follows:</p>
+<p><span class="math display">\[{\bf H}(\beta) = {\bf X}^T {\bf U} {\bf
+X}\]</span> where <span class="math inline">\({\bf U}\)</span> can be
+calculated in R as follows:</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>U <span class="ot">&lt;-</span> P <span class="sc">%*%</span> <span class="fu">diag</span>(d) <span class="sc">%*%</span> <span class="fu">t</span>(P)</span>
 <span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">diag</span>(U) <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fu">diag</span>(P <span class="sc">%*%</span> <span class="fu">diag</span>(d) <span class="sc">%*%</span> <span class="fu">t</span>(<span class="dv">1</span><span class="sc">-</span>P))</span></code></pre></div>
 <div id="question-6-.html" class="section level4 question">
