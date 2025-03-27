@@ -1,0 +1,284 @@
+---
+title: "Homework 7"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+# Gaussian quadrature
+
+### Gauss-Legendre quadrature
+
+If I want to numerically approximate an integral of the form
+
+$$\int \limits_{-1}^1 f(x)dx,$$
+
+one option is to use **Gauss-Legendre** quadrature:
+
+$$\int \limits_{-1}^1 f(x)dx \approx  \sum \limits_{i=1}^n w_i f(x_i)$$
+
+where $x_1,...,x_n$ are the roots of the $n$th **Legendre polynomial**, and the weights $w_i$ are given by
+
+$$w_i = \int\limits_{-1}^1 L_{n,i}(x) dx$$
+
+And as we showed in class, if $f(x)$ is a polynomial of degree $\leq 2n-1$, approximation is exact.
+
+### Gauss-Hermite quadrature
+
+In statistics, we often encounter integrals of the form
+
+$$\int \limits_{-\infty}^\infty f(x) e^{-\frac{1}{2} x^2}dx$$
+
+For these kinds of integrals, we can use **Gauss-Hermite** quadrature:
+
+$$\int \limits_{-\infty}^\infty f(x) e^{-\frac{1}{2} x^2}dx \approx \sum \limits_{i=1}^n w_i f(x_i)$$
+
+where $x_1,...,x_n$ are the roots of the $n$th **Hermite** polynomial, and the weights are given by
+
+$$w_i = \int \limits_{-\infty}^\infty L_{n,i}(x) e^{-\frac{1}{2}x^2} dx$$
+
+If $f(x)$ is a polynomial of degree $\leq 2n-1$, approximation is exact.
+
+## Where do these polynomials come from?
+
+We can put Gaussian quadrature rules into a general framework by saying that we are interested in approximating integrals of the form
+
+$$\int \limits_a^b f(x) \omega(x) dx$$
+for some weighting function $\omega(x)$. 
+
+* Gauss-Legendre quadrature
+    * $\omega(x) = 1$
+    * $a = -1$, $b = 1$
+* Gauss-Hermite quadrature
+    * $\omega(x) = e^{-\frac{1}{2}x^2}$
+    * $a = -\infty$, $b = \infty$
+
+Every weighting function naturally corresponds to the *density* function of some continuous random variable: Gauss-Legendre quadrature corresponds to integrals with respect to a Uniform distribution, and Gauss-Hermite quadrature corresponds to integrals with respect to a Normal distribution.
+
+The approximation is then given by 
+
+$$\int \limits_a^b f(x) \omega(x) dx \approx \sum w_i f(x_i)$$
+where 
+
+$$w_i = \int \limits_a^b L_{n,i}(x) \omega(x) dx$$
+
+Then how do we choose the nodes $x_1,...,x_n$? These are all the roots of appropriate polynomials, we just have to figure out *which* polynomials. 
+
+### The polynomials
+
+For a given weighting function, we need to find a set of polynomials $g_0$, $g_1$, $g_2$,... with the following properties:
+
+* $g_n$ is a polynomial of degree $n$
+* $\int \limits_a^b (c_0 + c_1x + \cdots + c_{n-1} x^{n-1}) g_n(x) dx = 0$ (remember we used this fact to demonstrate why the Legendre polynomials were important!)
+
+To do this, first define the following operator for any two functions $f$ and $g$:
+
+$$\langle f, g\rangle_\omega = \int \limits_a^b f(x)g(x) \omega(x)dx$$
+(If you are interested, this is just an inner product on a function space!)
+
+Similarly,
+
+$$||g||_\omega^2 = \langle g, g \rangle_\omega$$
+
+We then construct the polynomials corresponding to the weighting function $\omega$ by an algorithm called the **Gram-Schmidt** process. Let
+
+$$m_0(x) = 1, \ m_1(x) = x, \ m_2(x) = x^2, \ \dots, m_n(x) = x^n, \ \dots$$
+Then we define
+
+$$g_0(x) = 1$$
+
+$$g_1(x) = m_1(x) - \langle g_0, m_1 \rangle_\omega \frac{g_0(x)}{||g_0||^2_\omega}$$
+$$g_2(x) = m_2(x) - \langle g_0, m_2 \rangle_\omega \frac{g_0(x)}{||g_0||^2_\omega} - \langle g_1, m_2 \rangle_\omega \frac{g_1(x)}{||g_1||^2_\omega}$$
+
+$$g_3(x) = m_3(x) - \langle g_0, m_3 \rangle_\omega \frac{g_0(x)}{||g_0||^2_\omega} - \langle g_1, m_3 \rangle_\omega \frac{g_1(x)}{||g_1||^2_\omega} - \langle g_2, m_3 \rangle_\omega \frac{g_2(x)}{||g_2||^2_\omega}$$
+
+and so on.
+
+## Example: Legendre polynomials
+
+For Gauss-Legendre quadrature, $\omega(x) = 1$. Let $p_n$ be the $n$th Legendre polynomial. Let's use Gram-Schmidt to find the first few Legendre polynomials:
+
+$$p_0(x) =1$$
+
+$$p_1(x) = m_1(x) - \langle p_0, m_1 \rangle_\omega \frac{p_0(x)}{||p_0||^2_\omega}$$
+
+Now, 
+
+$$\langle p_0, m_1 \rangle_\omega = \int \limits_{-1}^1 p_0(x) m_1(x)dx = \int \limits_{-1}^1 xdx = 0$$
+So we conclude that $p_1(x) = m_1(x) = x$, just like we saw in class!
+
+What about $p_2$? From the Gram-Schmidt algorithm,
+
+$$p_2(x) = m_2(x) - \langle p_0, m_2 \rangle_\omega \frac{p_0(x)}{||p_0||^2_\omega} - \langle p_1, m_2 \rangle_\omega \frac{p_1(x)}{||p_1||^2_\omega}$$
+
+Let's figure out how to compute each of these pieces.
+
+$$\langle p_0, m_2 \rangle_\omega = \int \limits_{-1}^1 1\cdot x^2 dx = \frac{2}{3}$$
+$$\langle p_1, m_2 \rangle_\omega = \int \limits_{-1}^1 x \cdot x^2 dx = \int \limits_{-1}^1 x^3 dx = 0$$
+$$||p_0||^2 = \langle p_0, p_0 \rangle_\omega = \int \limits_{-1}^1 1dx = 2$$
+And so 
+
+$$p_2(x) = x^2 - \frac{2}{3} \frac{p_0(x)}{2} = x^2 - \frac{1}{3}$$
+
+This is a scaled version of what we saw in class, but the roots (the important part!) are the same: $\pm 1/\sqrt{3}$.
+
+## Example: Hermite polynomials
+
+For Gauss-Hermite quadrature, $\omega(x) = e^{-\frac{1}{2}x^2}$. Let $h_n$ be the $n$th Hermite polynomial. Let's use Gram-Schmidt to find the first few Hermite polynomials.
+
+$$h_0(x) =1$$
+
+$$h_1(x) = m_1(x) - \langle h_0, m_1 \rangle_\omega \frac{h_0(x)}{||h_0||^2_\omega}$$
+
+Now, 
+
+$$\langle h_0, m_1 \rangle_\omega = \int \limits_{-\infty}^\infty h_0(x) m_1(x) \omega(x)dx = \int \limits_{-\infty}^\infty x e^{-\frac{1}{2}x^2}dx = 0$$
+So we conclude that $h_1(x) = m_1(x) = x$, just like we saw in class!
+
+What about $h_2$? From the Gram-Schmidt algorithm,
+
+$$h_2(x) = m_2(x) - \langle h_0, m_2 \rangle_\omega \frac{h_0(x)}{||h_0||^2_\omega} - \langle h_1, m_2 \rangle_\omega \frac{h_1(x)}{||h_1||^2_\omega}$$
+
+Let's figure out how to compute each of these pieces.
+
+$$\langle h_0, m_2 \rangle_\omega = \int \limits_{-\infty}^\infty x^2 e^{-\frac{1}{2}x^2}dx = \sqrt{2\pi}$$
+$$\langle h_1, m_2 \rangle_\omega = \int \limits_{-1}^1 x^3 e^{-\frac{1}{2}x^2} dx = 0$$
+
+$$||h_0||^2 = \langle h_0, h_0 \rangle_\omega = \int \limits_{-\infty}^\infty e^{-\frac{1}{2}x^2}dx = \sqrt{2\pi}$$
+
+And so
+
+$$h_2(x) = x^2 - \sqrt{2\pi} \frac{h_1(x)}{\sqrt{2\pi}} = x^2 - 1$$
+just like we saw in class!
+
+
+# Gauss-Laguerre quadrature
+
+Another type of integral we often have to deal with in statistics is
+
+$$\int \limits_0^\infty f(x) e^{-x}dx$$
+This comes up when we are dealing with Gamma distributions, for example. 
+
+**Gauss-Laguerre** quadrature approximates these integrals by
+
+$$\int \limits_0^\infty f(x) e^{-x}dx \approx \sum \limits_{i=1}^n w_if(x_i)$$
+where $x_1,...,x_n$ are the roots of the $n$th **Laguerre** polynomial, and 
+
+$$w_i = \int \limits_0^\infty L_{n,i}(x) e^{-x} dx$$
+
+
+:::{.question}
+#### Question 1 (written)
+
+Gauss-Laguerre quadrature is Gaussian quadrature with $a = 0$, $b = \infty$, and $\omega(x) = e^{-x}$. Using the Gram-Schmidt process described above, show that the first few Laguerre polynomials are
+
+$$\ell_0(x) = 1 \hspace{0.5cm} \ell_1(x) = x - 1 \hspace{0.5cm} \ell_2(x) = x^2 - 4x + 2$$
+
+Show all work.
+
+**Hint:** Recall that
+$$\Gamma(z) = \int \limits_0^\infty x^{z-1} e^{-x} dx$$
+and $\Gamma(n) = (n-1)!$ for integers $n$.
+
+:::
+
+:::{.question}
+#### Question 2 (.html)
+
+The 8th Laguerre polynomial is
+
+$$\ell_8(x) = x^8 - 64x^7 + 1568x^6 - 18816x^5 + 117600x^4 - 376320x^3 + \\ \hspace{1cm} 564480x^2 - 322560x + 40320$$
+
+Use the `uniroot.all` function in R to find the 8 roots $x_1,...,x_8$ of $\ell_8$.
+
+**Hint:** The `uniroot.all` function requires you to specify an interval on which to look for roots. Look between 0 and 30.
+:::
+
+Now suppose we want to do 8-point Gauss-Laguerre quadrature. You found the nodes $x_1,...,x_8$ in question 2. Finding the weights can be done by integrating the Lagrange polynomial, but this will be tedious. Fortunately, there is a shortcut: it turns out that for Gauss-Laguerre quadrature,
+
+$$w_i = \frac{||\ell_{n+1}||^2_\omega \ x_i}{(n+1)^2 (\ell_{n+1}(x_i))^2}$$
+
+:::{.question}
+#### Question 3 (.html)
+The 9th Laguerre polynomial is
+
+$$\ell_9(x) = x^9 - 81x^8 + 2592x^7 - 42336x^6 + 381024x^5 - 1905120x^4 + \\ \hspace{1cm}
+    5080320x^3 - 6531840x^2 + 3265920x - 362880$$
+
+And it can be shown that $||\ell_9||_\omega^2 = 362880^2$.
+
+Using this information, and your answer to question 2, find the weights $w_1,...,w_8$ for 8-point Gauss-Laguerre quadrature.
+
+:::
+
+## Application: distribution of the sample correlation
+
+The **correlation** between two random variables is given by
+
+$$\rho = \frac{Cov(X, Y)}{\sqrt{Var(X)Var(Y)}}$$
+and can be estimated by the **sample correlation**. Suppose $(X_1, Y_1),...,(X_n, Y_n)$ are a sample of $n$ paired observations; then the sample correlation is given by
+
+$$R = \frac{\sum \limits_{j=1}^n (X_i - \overline{X})(Y_i - \overline{Y})}{\left[\sum \limits_{j=1}^n(X_j - \overline{X})^2 \sum \limits_{j=1}^n(Y_j - \overline{Y}) \right]^{1/2}}$$
+
+The sample correlation $R$ is a random variable, and so has a distribution. What is that distribution? 
+
+It turns out that if $(X_i, Y_i)$ are sampled from a bivariate normal distribution with correlation $\rho$, then the density function of $R$ is given by
+
+$$f(r) = \begin{cases} 0 & |r| \geq 1 \\ \\ \frac{\Gamma((n-1)/2)}{\Gamma(1/2)\Gamma((n-2)/2)}(1-r^2)^{(n-4)/2} & -1 < r < 1, \rho = 0 \\ 
+\\ \frac{1}{\pi} (n-2)(1 - \rho^2)^{(n-1)/2}(1 - r^2)^{(n-4)/2} \int \limits_0^\infty (\cosh t - \rho r)^{1-n} \ dt & -1 < r < 1, \rho \neq 0 \end{cases}$$
+
+Evaluating this density therefore requires us to evaluate the integral
+
+$$\int \limits_0^\infty (\cosh t - \rho r)^{1-n} \ dt$$
+which we will do numerically.
+
+Since the limits are 0 to $\infty$, let's use Gauss-Laguerre quadrature. We just need to introduce the weight function. Notice that we can simply rewrite
+
+$$\int \limits_0^\infty (\cosh t - \rho r)^{1-n} \ dt = \int \limits_0^\infty (\cosh t - \rho r)^{1-n} e^t e^{-t} \ dt = \int \limits_0^\infty g(t) e^{-t} dt \\ \approx \sum \limits_{i=1}^n w_i g(x_i)$$
+where $g(t) = (\cosh t - \rho r)^{1-n} e^t$, and $x_1,...,x_n$ and $w_1,...,w_n$ are the nodes and weights for $n$-point Gauss-Laguerre quadrature.
+
+:::{.question}
+#### Question 4 (.html)
+
+Using your nodes and weights from questions 2 and 3, use 8-point Gauss-Laguerre quadrature to approximate 
+
+$$\int \limits_0^\infty (\cosh t - \rho r)^{1-n} \ dt$$
+when $\rho = 0.2$, $r = 0.5$, and $n = 10$.
+
+Feel free to evaluate the integral in a tool like WolframAlpha to check that your answer is reasonable. In this case, WolframAlpha gives an approximate value of 1.05331 for the integral. Your answer should be close to this number (though it won't match exactly).
+
+:::
+
+
+:::{.question}
+#### Question 5 (GitHub)
+
+Now write an R function called `my_dcorr`, which uses 8-point Gauss-Laguerre quadrature to approximate the density of the sample correlation. Your function should satisfy the following requirements:
+
+* Inputs:
+    * `r`: a vector of points at which to calculate the density $f(r)$
+    * `n`: the sample size $n$
+    * `rho`: the true correlation $\rho$
+* Output: a vector containing the density $f(r)$ for each entry in `r`
+
+**Error handling:** The true correlation $\rho$ should be between -1 and 1. Throw an error if $|\rho| > 1$
+
+**Other requirements:**
+
+* You are welcome to use helper functions, but you may not use other implementations of this density function
+* Your function should use the 8-point Gauss-Laguerre quadrature rule with the weights and nodes found previously
+
+**Unit tests:** unit tests are provided in `hw7_tests.R`
+
+:::
+
+
+:::{.question}
+#### Question 6 (.html)
+
+Using your `my_dcorr` function from question 5, create a plot of $f(r)$ for values of $r$ between -1 and 1. Use $n = 10$, and make separate curves or plots for $\rho = -0.5, -0.25, 0, 0.25, 0.5$.
+
+:::
+

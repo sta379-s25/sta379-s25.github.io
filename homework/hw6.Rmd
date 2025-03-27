@@ -232,7 +232,7 @@ Numerical integration is used to approximate definite integrals when we can't ge
 
 ## Trapezoid rule
 
-To approximate $\int \limits_a^b f(x) dx$, the (composite) trapezoid rule divides the interval $[a, b]$ into $n$ subintervals of equal length $h = n/(b - a)$. The approximation is
+To approximate $\int \limits_a^b f(x) dx$, the (composite) trapezoid rule divides the interval $[a, b]$ into $n$ subintervals of equal length $h = (b - a)/n$. The approximation is
 
 $$\int \limits_a^b f(x) dx \approx \widehat{T}_n(f) = h \sum \limits_{i=1}^{n-1} f(a + ih) + \frac{h}{2}(f(a) + f(b))$$
 
