@@ -17,4 +17,8 @@ March 26
   : [slides (pdf)](https://sta379-s25.github.io/slides/lecture_23.pdf), [practice questions](https://sta379-s25.github.io/practice_questions/pq_23.html), [practice question solutions](https://sta379-s25.github.io/practice_questions/pq_23_solutions.html)
 
 March 28
-: Gaussian quadrature summary
+: Gaussian quadrature wrap-up
+  : [slides (pdf)](https://sta379-s25.github.io/slides/lecture_24.pdf), [practice questions](https://sta379-s25.github.io/practice_questions/pq_24.html)
+  
+: **Homework 7 released**{: .label .label-yellow }
+  : [HW 7](https://sta379-s25.github.io/homework/hw7.html)

@@ -1,0 +1,82 @@
+---
+title: "Lecture 24: Gaussian quadrature wrap-up"
+author: "Ciaran Evans"
+output: beamer_presentation
+editor_options: 
+  chunk_output_type: console
+---
+
+## Gaussian quadrature so far
+
+Gauss-Legendre quadrature: $\int \limits_{-1}^1 f(x) dx \approx \sum \limits_{i=1}^n w_i f(x_i)$
+
+* $w_i = \int \limits_{-1}^1 L_{n,i}(x)dx$
+* $x_1,...,x_n$ are the roots of the $n$th **Legendre** polynomial $p_n$. Legendre polynomials satisfy $\int \limits_{-1}^1 (c_0 + c_1x + \cdots + c_{n-1}x^{n-1}) p_n(x) dx$
+
+
+Gauss-Hermite quadrature: $\int \limits_{-\infty}^\infty f(x) e^{-\frac{1}{2}x^2} dx \approx \sum \limits_{i=1}^n w_i f(x_i)$
+
+* $w_i = \int \limits_{-\infty}^\infty L_{n,i}(x) e^{-\frac{1}{2}x^2} dx$
+* $x_1,...,x_n$ are the roots of the $n$th **Hermite** polynomial $h_n$. Hermite polynomials satisfy $\int \limits_{-\infty}^\infty (c_0 + c_1x + \cdots + c_{n-1}x^{n-1}) h_n(x) e^{-\frac{1}{2}x^2} dx = 0$
+
+## Other types of integrals
+
+Here is another type of integral that often comes up in statistics:
+
+$$\int \limits_0^\infty f(x) e^{-x} dx$$
+
+**Question:** When might we see this type of integral?
+
+\vspace{2cm}
+
+## Examples
+
+$$\int \limits_0^\infty f(x) e^{-x} dx$$
+
+* Suppose $X \sim Gamma(\alpha, \beta)$. Then
+
+\vspace{-0.5cm}
+
+$$\mathbb{E}[g(X)] = \int \limits_0^\infty g(x) \frac{1}{\Gamma(\alpha) \beta^\alpha} x^{\alpha - 1} e^{-x/\beta} dx$$
+
+* $\Gamma(z) = \int \limits_0^\infty t^{z-1} e^{-t} dt$
+
+* (HW 7) pdf of sample correlation coefficient involves the integral
+
+\vspace{-0.5cm}
+
+$$\int \limits_0^\infty (\cosh t - \rho r)^{1-n} \ dt$$
+
+## Gauss-Laguerre quadrature
+
+$$\int \limits_0^\infty f(x) e^{-x} dx \approx \sum \limits_{i=1}^n w_i f(x_i)$$
+
+* $w_i = \int \limits_0^\infty L_{n,i}(x) e^{-x} dx$
+
+* $x_1,...,x_n$ are the roots of the $n$th **Laguerre** polynomial
+
+* The $n$th Laguerre polynomial $\ell_n$ satisfies
+
+\vspace{-0.5cm}
+
+$$\int \limits_0^\infty (c_0 + c_1x + \cdots + c_{n-1} x^{n-1}) \ell_n(x) e^{-x} dx = 0$$
+
+## Gaussian quadrature in general
+$$\int \limits_a^b f(x) \omega(x) dx$$
+where $\omega(x)$ is some weighting function.
+
+* Gauss-Legendre quadrature: $a = -1$, $b = 1$, $\omega(x) = 1$ (Uniform density)
+* Gauss-Hermite quadrature: $a = -\infty$, $b = \infty$, $\omega(x) = e^{-\frac{1}{2}x^2}$ (Normal density)
+* Gauss-Laguerre quadrature: $a = 0$, $b=\infty$, $\omega(x) = e^{-x}$ (Gamma density)
+
+In general: $\int \limits_a^b f(x) \omega(x) dx \approx \sum \limits_{i=1}^n w_i f(x_i)$
+
+* Choose nodes $x_1,...,x_n$ as roots of family of polynomials corresponding to $\omega$
+
+## HW 7
+
+[https://sta379-s25.github.io/homework/hw7.html](https://sta379-s25.github.io/homework/hw7.html)
+
+* Derive a few Laguerre polynomials
+* Use Gauss-Laguerre quadrature to approximate density of sample correlation coefficient
+
