@@ -7,6 +7,29 @@ output:
 link-citations: yes
 ---
 
+**Due:** Friday April 4, 10pm
+
+**Submission:** For this assignment, you will submit three files:
+
+* A pdf containing your written answer to question 1 (submitted to Canvas)
+* A knitted html or pdf file (from an R Markdown or Quarto document) showing your code, results, and answers for questions 2-4 and 6 (submitted to Canvas)
+* An R script (`hw7_code.R`) containing your function for question 5 (submitted to GitHub)
+
+**Grading:** You will receive a score out of 6 for the number of questions mastered. To master a question, you must satisfy the following requirements:
+
+* Function implementations must pass all specified unit tests, *as written* (you may not modify the unit tests which I provide)
+* Your code must meet all requirements described in the questions below (matching the requested inputs and outputs)
+* You must comment your code
+* Your written solutions must be complete and correct, with no missing steps or mistakes
+* Responses to questions asking for description or explanation must be complete, thorough, and correct
+* Your work must abide by the academic honesty requirements in the syllabus 
+
+If you make an honest effort to answer all questions, but you do not master all of the questions on your first submission, you will have one resubmission attempt after receiving feedback.
+
+**Resources:** 
+
+* *Computational Statistics* (Givens and Hoeting) Chapter 5.1, 5.3
+
 # Gaussian quadrature
 
 ### Gauss-Legendre quadrature
