@@ -1,0 +1,204 @@
+---
+title: "Lecture 25: Monte Carlo Integration"
+author: "Ciaran Evans"
+output: beamer_presentation
+editor_options: 
+  chunk_output_type: console
+---
+
+## Motivating example
+
+Suppose we wish to calculate the integral
+
+$$\int \limits_{-\infty}^\infty x^4 \frac{1}{\sqrt{2 \pi}} e^{-\frac{1}{2}x^2} dx$$
+
+**Question:** How could we calculate or approximate this integral?
+
+\vspace{4cm}
+
+## Estimation via simulation
+
+We want to approximate
+
+$$\theta = \int \limits_{-\infty}^\infty x^4 \frac{1}{\sqrt{2 \pi}} e^{-\frac{1}{2}x^2} dx = \mathbb{E}[X^4] \hspace{1cm} X \sim N(0, 1)$$
+
+* Sample $X_1,...,X_n \overset{iid}{\sim} N(0, 1)$
+* Estimate: 
+
+$$\widehat{\theta} = \hspace{3cm}$$
+
+## Estimation via simulation
+
+```{r}
+n <- 100
+x <- rnorm(n)
+mean(x^4)
+```
+
+True value: $\theta = 3$
+
+**Question:** Why are these numbers different?
+
+\vspace{2cm}
+
+## Repeating many times
+
+```{r, eval=F}
+n <- 100; nsim <- 1000
+theta_hat <- rep(NA, nsim)
+for(i in 1:nsim){
+  x <- rnorm(n)
+  theta_hat[i] <- mean(x^4)
+}
+```
+
+```{r, fig.width=3, fig.height=2, echo=F, message=F, warning=F}
+library(tidyverse)
+n <- 100; nsim <- 1000
+theta_hat <- rep(NA, nsim)
+for(i in 1:nsim){
+  x <- rnorm(n)
+  theta_hat[i] <- mean(x^4)
+}
+data.frame(theta_hat) |>
+    ggplot(aes(x = theta_hat)) +
+    geom_histogram(fill=NA, color="black") +
+    theme_classic() +
+  theme(text = element_text(size=7)) +
+  geom_vline(xintercept = 3, color="orange")
+```
+
+
+## Repeating many times
+
+
+```{r, fig.width=3.5, fig.height=2.5, echo=F, message=F, warning=F}
+data.frame(theta_hat) |>
+    ggplot(aes(x = theta_hat)) +
+    geom_histogram(fill=NA, color="black") +
+    theme_classic() +
+  theme(text = element_text(size=7)) +
+  geom_vline(xintercept = 3, color="orange")
+```
+
+**Question:** Since $\widehat{\theta}$ is different for each sample, how do I measure the overall performance of $\widehat{\theta}$ as an estimate of $\theta$?
+
+\vspace{3cm}
+
+## MSE
+
+$$MSE(\widehat{\theta}) = \text{Bias}(\widehat{\theta})^2 + Var(\widehat{\theta}) = (\mathbb{E}(\widehat{\theta}) - \theta)^2 + Var(\widehat{\theta})$$
+
+* $\mathbb{E}(\widehat{\theta}) = \mathbb{E} \left( \frac{1}{n} \sum \limits_{i=1}^n X_i^4 \right) =$
+
+\bigskip
+
+\bigskip
+
+* $Var(\widehat{\theta}) = Var \left( \frac{1}{n} \sum \limits_{i=1}^n X_i^4 \right) =$
+
+\vspace{3cm}
+
+## Monte Carlo Integration
+
+**Goal:** Want to estimate
+
+$$\theta = \int \limits_{\mathcal{X}} g(x) f(x) dx = \mathbb{E}[g(X)]$$
+where $f$ is a density and $X \sim f$ is a random variable with density $f$.
+
+* Sample $X_1,...,X_n \overset{iid}{\sim} f$
+* **Monte Carlo estimate:** $\widehat{\theta} = \frac{1}{n} \sum \limits_{i=1}^n g(X_i)$
+* Numerical integration: 
+    * error comes from approximation of integrand (e.g. polynomial interpolation)
+    * error decreases as number of nodes increases
+* Monte Carlo integration:
+    * error comes from variability of random samples
+    * error decreases as sample size $n$ increases
+    
+    
+## Activity, Part I
+
+Work with your neighbor on the questions on the handout / course website:
+
+Then we will discuss as a class
+
+
+* Use Monte Carlo integration to approximate another integral
+* Explore variability of estimate
+
+## Activity, Part I
+
+$$\theta = \int \limits_0^1 \dfrac{e^{-x}}{1 + x^2} dx$$
+
+Monte Carlo integration: write
+
+$$\theta = \int \limits_0^1 g(x) f(x) dx = \mathbb{E}[g(X)] \hspace{1cm} X \sim f$$
+
+**Question:** What could we use for $g$ and $f$ here?
+
+\vspace{3cm}
+
+## Activity, Part I
+
+
+```{r}
+g <- function(x){
+  exp(-x)/(1 + x^2)
+}
+
+n <- 10
+x <- runif(n)
+mean(g(x))
+```
+
+**Question:** How variable is this estimate?
+
+\vspace{2cm}
+
+## Activity, Part I
+
+```{r}
+n <- 10
+nsim <- 1000
+theta_hat <- rep(NA, nsim)
+
+for(i in 1:nsim){
+  x <- runif(n)
+  theta_hat[i] <- mean(g(x))
+}
+
+var(theta_hat)
+sd(theta_hat)
+```
+
+## Another perspective
+
+$$\theta = \int \limits_0^1 \dfrac{e^{-x}}{1 + x^2} dx = \int \limits_0^1 g(x) f(x) dx$$
+
+So far: 
+
+* $g(x) = \dfrac{e^{-x}}{1 + x^2}$, $f(x) = 1$
+
+**Question:** Is this the only way we can choose $g$ and $f$ for this problem?
+
+\vspace{4cm}
+
+## Activity, Part II
+
+$$\theta = \int \limits_0^1 \dfrac{e^{-x}}{1 + x^2} dx = \int \limits_0^1 g(x) f(x) dx$$
+
+A couple different options:
+
+* $f_1(x) = 1$, $g_1(x) = \dfrac{e^{-x}}{1 + x^2}$
+
+\bigskip
+
+* $f_2(x) = \dfrac{4}{\pi(1 + x^2)}$, $g_2(x) = \frac{\pi}{4} e^{-x}$
+
+\bigskip
+
+**Activity:** Work with your neighbor to compare the MSE of these two options. Which one better estimates $\theta$?
+
+
+
+

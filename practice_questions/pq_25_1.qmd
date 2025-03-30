@@ -1,0 +1,38 @@
+---
+title: "Activity: Intro to Monte Carlo Integration, Part I"
+format: html
+---
+
+## Monte Carlo Integration
+
+Suppose we wish to estimate the quantity
+$$\theta = \int \limits_{\mathcal{X}} g(x) f(x) dx,$$
+where $f$ is some density function. Then, we recognize that 
+$$\theta = \mathbb{E}[g(X)]$$
+where $X \sim f$ is a random variable with density $f$.
+
+**Monte Carlo integration** estimates $\theta$ by generating a sample from $f$, and using the sample mean to approximate the true mean. In particular:
+
+* Sample $X_1,...,X_n \overset{iid}{\sim} f$
+* **Monte Carlo estimate:** $\widehat{\theta} = \frac{1}{n} \sum \limits_{i=1}^n g(X_i)$
+
+As shown in the slides, $\mathbb{E}[\widehat{\theta}] = \theta$ and so
+$$MSE(\widehat{\theta}) = Var(\widehat{\theta}) = \frac{1}{n} Var(g(X))$$
+As the sample size $n$ increases, the variability (i.e., the error) in our estimate $\widehat{\theta}$ decreases.
+
+
+## Part I
+
+Suppose we wish to calculate the quantity
+
+$$\theta = \int \limits_0^1 \dfrac{e^{-x}}{1 + x^2} dx$$
+
+1. **Question:** Find a pdf $f$ and function $g$ such that $\theta = \int \limits_0^1 g(x) f(x) dx$.
+
+2. **Question:** Sample $n=10$ observations $X_1,...,X_{10}$ from the distribution with pdf $f$, and report the Monte Carlo estimate $\widehat{\theta}$.
+
+3. **Question:** Repeat question 2 many times to approximate $MSE(\widehat{\theta})$ when $n = 10$.
+
+4. **Question:** Now repeat question 3 with different values of $n$, and plot $MSE(\widehat{\theta})$ agains $n$. 
+
+
