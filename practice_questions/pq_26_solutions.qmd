@@ -1,0 +1,86 @@
+---
+title: "Importance sampling practice questions: solutions"
+format: html
+---
+
+1. 
+
+```{r}
+n <- 100
+nsim <- 10000
+theta_hat1 <- rep(NA,nsim)
+
+for(i in 1:nsim){
+  x <- runif(n)
+  theta_hat1[i] <- mean(sin(pi*x))
+}
+
+var(theta_hat1)
+```
+
+2. Here is a plot of $\sin(\pi x)$, with a $Beta(2, 2)$ pdf in blue:
+
+```{r}
+gridpts <- seq(0, 1, 0.01)
+plot(gridpts, sin(pi*gridpts), type="l", ylim=c(0, 1.5), xlab="x", ylab="")
+lines(gridpts, dbeta(gridpts, 2, 2), col="blue")
+```
+The $Beta(2, 2)$ pdf has a shape that is more similar to $\sin(\pi x)$. Using the $Beta(2, 2)$ pdf:
+
+```{r}
+n <- 100
+nsim <- 10000
+theta_hat2 <- rep(NA,nsim)
+
+for(i in 1:nsim){
+  x <- rbeta(n, 2, 2)
+  theta_hat2[i] <- mean(sin(pi*x)/dbeta(x, 2, 2))
+}
+
+var(theta_hat2)
+```
+
+This leads to a big reduction in variance:
+
+```{r}
+var(theta_hat2)/var(theta_hat1)
+
+(var(theta_hat1) - var(theta_hat2))/var(theta_hat1)
+```
+
+
+3. The true value of $\theta$ is $\theta = 2/\pi$, which means that the *optimal* choice of $f$ would be $f(x) = \frac{\pi}{2} \sin(\pi x)$. Plotting $\frac{\pi}{2} \sin(\pi x)$, it looks like a $Beta(2.15, 2.15)$ matches very closely:
+
+```{r}
+plot(gridpts, pi/2 * sin(pi*gridpts), type="l", xlab="x", ylab="")
+lines(gridpts, dbeta(gridpts, 2.15, 2.15), col="blue")
+```
+If we use this Beta pdf:
+
+```{r}
+n <- 100
+nsim <- 10000
+theta_hat3 <- rep(NA,nsim)
+
+for(i in 1:nsim){
+  x <- rbeta(n, 2.15, 2.15)
+  theta_hat3[i] <- mean(sin(pi*x)/dbeta(x, 2.15, 2.15))
+}
+
+var(theta_hat3)
+```
+
+This is a big reduction in variance, even compared to the $Beta(2, 2)$ pdf:
+
+```{r}
+var(theta_hat3)/var(theta_hat2)
+```
+
+**Important:** the purpose of question 3 is to demonstrate that matching $h(x)$ very closely leads to very small variance. In practice, we don't know the correct normalizing constant ($\pi/2$ in this case), so we wouldn't be able to make the plot shown in question 3.
+
+
+
+
+
+
+

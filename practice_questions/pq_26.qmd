@@ -1,0 +1,38 @@
+---
+title: "Practice questions: Importance sampling"
+format: html
+---
+
+## Importance sampling
+
+For any density function $f$ supported on the domain of integration $\mathcal{X}$:
+
+$$\theta = \int \limits_{\mathcal{X}} h(x) dx = \int \limits_{\mathcal{X}} \frac{h(x)}{f(x)}f(x) dx$$
+
+* $X_1,...,X_n \overset{iid}{\sim} f$
+
+\bigskip
+
+* $\widehat{\theta} = \frac{1}{n} \sum \limits_{i=1}^n \dfrac{h(X_i)}{f(X_i)}$
+
+\bigskip
+
+* $Var(\widehat{\theta}) = \frac{1}{n} Var \left( \dfrac{h(X)}{f(X)} \right)$
+
+**Importance sampling** tries to decrease the variance of the estimator by making $f$ "close to" $h$.
+
+### Questions
+
+Suppose we wish to estimate
+
+$$\theta = \int \limits_0^1 \sin(\pi x) dx$$
+(Ignore for now that wecan calculate this interval in closed form).
+
+1. Approximate the variance of the Monte Carlo estimate of $\theta$ using $f(x) = 1$ (Uniform density) and $n = 100$
+
+2. Find a different Beta distribution that more closely resembles $\sin(\pi x)$, and approximate the variance of the Monte Carlo estimate using that Beta pdf as $f(x)$. How does the variance compare to question 1?
+
+3. Try different values for $\alpha, \beta$ in the $Beta(\alpha, \beta)$ distribution. Which ones give the best variance for the Monte Carlo estimate?
+
+
+
