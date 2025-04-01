@@ -162,7 +162,7 @@ $$\theta = \int \limits_{\mathcal{X}} h(x) dx = \int \limits_{\mathcal{X}} \frac
 
 \bigskip
 
-* $Var(\widehat{\theta})$ is minimized if $f(x) = \dfrac{|h(x)|}{\int |h(x)| dx}$
+* $Var(\widehat{\theta})$ is minimized if $f(x) = \dfrac{|h(x)|}{\int |h(t)| dt}$
 
 \bigskip
 
