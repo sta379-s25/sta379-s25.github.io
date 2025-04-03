@@ -1,0 +1,45 @@
+---
+title: "Practice questions: antithetic variables"
+format: html
+---
+
+# Antithetic variables
+
+Suppose we want to estimate
+
+$$\theta = \mathbb{E}[g(U)] \hspace{1cm} U \sim Uniform(0, 1)$$
+
+**Basic Monte Carlo estimate:**
+
+* Sample $U_1,...,U_n \overset{iid}{\sim} Uniform(0, 1)$
+
+* $\widehat{\theta}_{MC} = \frac{1}{n} \sum \limits_{i=1}^n g(X_i)$
+
+* $Var(\widehat{\theta}_{MC}) = \dfrac{Var(g(X))}{n}$
+
+**Antithetic Monte Carlo estimate:**
+
+* Sample $U_1,...,U_{n/2} \overset{iid}{\sim} Uniform(0, 1)$
+
+* $\widehat{\theta}_{AS} = \frac{1}{n} \sum \limits_{i=1}^{n/2} (g(U_i) + g(1 - U_i))$
+
+* $Var(\widehat{\theta}_{AS}) = \dfrac{(1 + \rho)Var(g(X))}{n}$ where $\rho = Cor(g(U), g(1 - U))$
+
+If $g(U)$ and $g(1-U)$ are negatively correlated (a sufficient condition is that $g$ is a monotone function), then the **antithetic Monte Carlo estimate** reduces the variance.
+
+## Questions
+
+Suppose we want to estimate
+
+$$\theta = \int \limits_0^1 \log(x + 1)e^x dx = \mathbb{E}[g(U)]$$
+where $U \sim Uniform(0, 1)$ and $g(x) = \log(x + 1)e^x$. We can see that $g$ is a monotone function, so antithetic sampling can be used to reduce the variance of an estimate of $\theta$.
+
+1. Use simple Monte Carlo integration with $n = 1000$ to compute $\widehat{\theta}_{MC}$.
+
+2. Repeat question 1 many times, and approximate $Var(\widehat{\theta}_{MC})$
+
+3. Now use antithetic sampling with $n=1000$ (so $n/2 = 500$) to compute $\widehat{\theta}_{AS}$
+
+4. Repeat question 3 many times, and approximate $Var(\widehat{\theta}_{AS})$. What is the reduction in variance compared to $\widehat{\theta}_{MC}$?
+
+

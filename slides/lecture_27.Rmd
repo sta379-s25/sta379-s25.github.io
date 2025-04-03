@@ -1,0 +1,178 @@
+---
+title: "Lecture 27: Antithetic variables"
+author: "Ciaran Evans"
+output: beamer_presentation
+editor_options: 
+  chunk_output_type: console
+---
+
+## Course logistics
+
+* Project 2 due April 18
+
+\bigskip
+
+* No more HW until after project 2
+
+\bigskip
+
+* Next week:
+    * Monday: project work day
+    * Wednesday: begin EM algorithm
+
+## Warmup: variance reduction
+
+Work with your neighbor on the questions on the handout / course website:
+
+[https://sta379-s25.github.io/practice_questions/pq_27_warmup.html](https://sta379-s25.github.io/practice_questions/pq_27_warmup.html)
+
+Then we will discuss as a class
+
+
+* Use Monte Carlo integration to approximate another integral
+* Explore variability of two different estimators
+
+## Warmup
+
+$$\theta = \int \limits_{-\infty}^\infty \frac{x}{2^x - 1} \frac{1}{\sqrt{2\pi}}e^{-\frac{1}{2}x^2} dx = \mathbb{E}[g(X)]$$
+
+Basic Monte Carlo estimator:
+
+* Sample $X_1,...,X_n \overset{iid}{\sim} N(0, 1)$
+* $\widehat{\theta}_1 = \frac{1}{n} \sum \limits_{i=1}^n g(X_i)$
+
+**Question:** From your Monte Carlo integration, what is the approximate value of $\theta$?
+
+## Warmup
+
+```{r}
+g <- function(x){
+  x/(2^x - 1)
+}
+n <- 1000; nsim <- 1000
+theta_hat1 <- rep(NA, nsim)
+
+for(i in 1:nsim){
+  x <- rnorm(n)
+  theta_hat1[i] <- mean(g(x))
+}
+
+mean(theta_hat1)
+var(theta_hat1)
+```
+
+
+## Warmup
+
+$$\widehat{\theta}_2 = \frac{1}{n} \sum \limits_{i=1}^{n/2} (g(X_i) + g(-X_i))$$
+
+**Questions:** 
+
+* How does $\mathbb{E}[\widehat{\theta}_2]$ compare to $\mathbb{E}[\widehat{\theta}_2]$?
+
+\bigskip
+
+* How does $Var(\widehat{\theta}_2)$ compare to $Var(\widehat{\theta}_1)$?
+
+
+## Warmup
+
+```{r}
+theta_hat2 <- rep(NA, nsim)
+
+for(i in 1:nsim){
+  x <- rnorm(n/2)
+  theta_hat2[i] <- sum(g(x) + g(-x))/n
+}
+
+mean(theta_hat2)
+var(theta_hat2)
+(var(theta_hat1) - var(theta_hat2))/var(theta_hat1) * 100
+```
+
+## Warmup
+
+$$\widehat{\theta}_1 = \frac{1}{n} \sum \limits_{i=1}^n g(X_i) \hspace{1cm} \widehat{\theta}_2 = \frac{1}{n} \sum \limits_{i=1}^{n/2} (g(X_i) + g(-X_i))$$
+where $X_1,...,X_n \overset{iid}{\sim} N(0, 1)$
+
+* $\mathbb{E}[\widehat{\theta}_1] = \theta \hspace{1cm} Var(\widehat{\theta}_1) = \dfrac{Var(g(X))}{n}$
+
+\bigskip
+
+* $\mathbb{E}[\widehat{\theta}_2] =$
+
+\vspace{1.5cm}
+
+
+* $Var(\widehat{\theta}_2) =$
+
+
+\vspace{4cm}
+
+
+## Reducing variation
+
+Let $Y, Y^*$ be two random variables with the same distribution, with mean $\mu$ and variance $\sigma^2$.
+
+* $\mathbb{E} \left( \dfrac{Y + Y^*}{2} \right) = \mu$
+
+* If $Y, Y^*$ are independent, then
+
+$$Var \left( \dfrac{Y + Y^*}{2} \right) = \frac{1}{4} \left(Var(Y) + Var(Y^*) \right) = \frac{\sigma^2}{2}$$
+
+* If $Y, Y^*$ are correlated, with correlation $\rho$, then
+
+$$Var \left( \dfrac{Y + Y^*}{2} \right) = \frac{1}{4} \left(Var(Y) + Var(Y^*) + 2Cov(Y, Y^*)\right) = \frac{\sigma^2}{2} + \frac{\rho \sigma^2}{2}$$
+
+## Reducing variation: antithetic variables
+
+Suppose that we want to estimate
+
+\vspace{-0.5cm}
+
+$$\theta = \mathbb{E}[g(X)] \hspace{1cm} X \sim N(0, 1)$$
+
+* Sample $X_1,...,X_{n/2} \overset{iid}{\sim} N(0, 1)$
+
+\bigskip
+
+* Antithetic Monte Carlo estimate: 
+
+$$\widehat{\theta}_{AS} = \frac{1}{n} \sum \limits_{i=1}^{n/2} (g(X_i) + g(-X_i))$$
+
+\bigskip
+
+* $\mathbb{E}[\widehat{\theta}_{AS}] = \theta \hspace{1cm} Var(\widehat{\theta}_{AS}) = \dfrac{(1 + \rho)Var(g(X))}{n} \hspace{1cm}$ where $\rho = Cor(g(X), g(-X))$
+
+\bigskip
+
+* **Theorem:** If $g$ is a *monotone* function, then $\rho \leq 0$ (and so we reduce the variance)
+
+
+## Another example
+
+Suppose we want to estimate 
+
+$$\theta = \int \limits_0^1 \log(x + 1)e^x dx$$
+
+**Question:** How would we do this with the basic Monte Carlo approach we learned previously?
+
+\vspace{4cm}
+
+## Antithetic variables
+
+$$\theta = \int \limits_0^1 \log(x + 1)e^x dx = \mathbb{E}[g(U)] \hspace{1cm} U \sim Uniform(0, 1)$$
+**Antithetic sampling:** 
+
+* **Theorem:** If $g$ is *monotone*, then $Cor(g(U), \ g(1 - U)) \leq 0$
+
+* Sample $U_1,...,U_{n/2} \overset{iid}{\sim} Uniform(0, 1)$
+
+* $\widehat{\theta}_{AS} = \frac{1}{n} \sum \limits_{i=1}^{n/2} (g(U_i) + g(1 - U_i))$
+
+* $Var(\widehat{\theta}_{AS}) = \dfrac{(1 + \rho)Var(g(X))}{n}$ where $\rho = Cor(g(U), g(1 - U))$
+
+
+
+
+

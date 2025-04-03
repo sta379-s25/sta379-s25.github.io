@@ -1,0 +1,42 @@
+---
+title: "Warmup: variance reduction in Monte Carlo integration"
+format: html
+---
+
+# Monte Carlo integration
+
+Suppose we wish to approximate the integral
+
+$$\theta = \int \limits_{-\infty}^\infty \frac{x}{2^x - 1} \frac{1}{\sqrt{2\pi}}e^{-\frac{1}{2}x^2} dx = \mathbb{E}[g(X)]$$
+
+where $X \sim N(0, 1)$ and $g(x) = \dfrac{x}{2^x - 1}$.
+
+The basic Monte Carlo approach is to do the following:
+
+* Sample $X_1,...,X_n \overset{iid}{\sim} N(0, 1)$
+* $\widehat{\theta}_1 = \frac{1}{n} \sum \limits_{i=1}^n g(X_i)$
+
+## Questions
+
+1. Use Monte Carlo integration with $n = 1000$ to estimate $\theta$. Repeat the process many times to approximate $\mathbb{E}[\widehat{\theta}_1]$ and $Var(\widehat{\theta}_1)$.
+
+# A different Monte Carlo estimator
+
+Now consider the estimator
+
+$$\widehat{\theta}_2 = \frac{1}{n} \sum \limits_{i=1}^{n/2} (g(X_i) + g(-X_i))$$
+where $X_1,...,X_{n/2} \sim N(0, 1)$ as before.
+
+## Questions
+
+2. Use $n = 1000$ (so $n/2 = 500$) to compute this second estimator $\widehat{\theta}_2$. Repeat the process many times to approximate $\mathbb{E}[\widehat{\theta}_2]$ and $Var(\widehat{\theta}_2)$.
+
+3. What is the percent reduction in variance of $\widehat{\theta}_2$ compared to $\widehat{\theta}_1$? Remember that the percent reduction in variance is calculated by
+
+$$100 \cdot\dfrac{Var(\widehat{\theta}_1) - Var(\widehat{\theta}_2)}{Var(\widehat{\theta}_1)}$$
+
+4. Using R, estimate the correlation $cor(g(X_i), g(-X_i))$ with $X_i \sim N(0, 1)$ and $g$ given as above (the `cor` function will be helpful). How is the correlation related to the percent reduction in variance?
+
+
+
+
