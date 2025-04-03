@@ -1,0 +1,56 @@
+---
+title: "Antithetic variables practice questions: solutions"
+format: html
+---
+
+2.
+
+```{r}
+g <- function(x){
+  log(x + 1)*exp(x)
+}
+
+n <- 1000
+nsim <- 1000
+
+theta_hat_mc <- rep(NA, nsim)
+
+for(i in 1:nsim){
+  u <- runif(n)
+  theta_hat_mc[i] <- mean(g(u))
+}
+
+var(theta_hat_mc)
+```
+
+4.
+
+```{r}
+theta_hat_as <- rep(NA, nsim)
+
+for(i in 1:nsim){
+  u <- runif(n/2)
+  theta_hat_as[i] <- sum(g(u) + g(1-u))/n
+}
+
+var(theta_hat_as)
+```
+
+Reduction in variance:
+
+```{r}
+(var(theta_hat_mc) - var(theta_hat_as))/var(theta_hat_mc)
+```
+
+The reduction in variance is the same as $-\rho$:
+
+```{r}
+u <- runif(10000)
+cor(g(u), g(1-u))
+```
+
+
+
+
+
+

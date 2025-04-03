@@ -64,11 +64,11 @@ var(theta_hat1)
 
 ## Warmup
 
-$$\widehat{\theta}_2 = \frac{1}{n} \sum \limits_{i=1}^{n/2} (g(X_i) + g(-X_i))$$
+$$\widehat{\theta}_1 = \frac{1}{n} \sum \limits_{i=1}^n g(X_i) \hspace{1cm} \widehat{\theta}_2 = \frac{1}{n} \sum \limits_{i=1}^{n/2} (g(X_i) + g(-X_i))$$
 
 **Questions:** 
 
-* How does $\mathbb{E}[\widehat{\theta}_2]$ compare to $\mathbb{E}[\widehat{\theta}_2]$?
+* How does $\mathbb{E}[\widehat{\theta}_2]$ compare to $\mathbb{E}[\widehat{\theta}_1]$?
 
 \bigskip
 
@@ -170,9 +170,17 @@ $$\theta = \int \limits_0^1 \log(x + 1)e^x dx = \mathbb{E}[g(U)] \hspace{1cm} U 
 
 * $\widehat{\theta}_{AS} = \frac{1}{n} \sum \limits_{i=1}^{n/2} (g(U_i) + g(1 - U_i))$
 
-* $Var(\widehat{\theta}_{AS}) = \dfrac{(1 + \rho)Var(g(X))}{n}$ where $\rho = Cor(g(U), g(1 - U))$
+* $Var(\widehat{\theta}_{AS}) = \dfrac{(1 + \rho)Var(g(U))}{n}$ where $\rho = Cor(g(U), g(1 - U))$
 
+## Your turn
 
+Try antithetic sampling with uniform random variables:
+
+[https://sta379-s25.github.io/practice_questions/pq_27.html](https://sta379-s25.github.io/practice_questions/pq_27.html)
+
+* Start in class
+* Welcome to work with a neighbor
+* Solutions are posted on the course website
 
 
 

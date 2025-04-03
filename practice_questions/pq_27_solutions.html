@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Practice questions: antithetic variables</title>
+<title>Antithetic variables practice questions: solutions</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,19 +20,53 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
-<script src="pq_27_files/libs/clipboard/clipboard.min.js"></script>
-<script src="pq_27_files/libs/quarto-html/quarto.js"></script>
-<script src="pq_27_files/libs/quarto-html/popper.min.js"></script>
-<script src="pq_27_files/libs/quarto-html/tippy.umd.min.js"></script>
-<script src="pq_27_files/libs/quarto-html/anchor.min.js"></script>
-<link href="pq_27_files/libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="pq_27_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="pq_27_files/libs/bootstrap/bootstrap.min.js"></script>
-<link href="pq_27_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="pq_27_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="pq_27_solutions_files/libs/clipboard/clipboard.min.js"></script>
+<script src="pq_27_solutions_files/libs/quarto-html/quarto.js"></script>
+<script src="pq_27_solutions_files/libs/quarto-html/popper.min.js"></script>
+<script src="pq_27_solutions_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="pq_27_solutions_files/libs/quarto-html/anchor.min.js"></script>
+<link href="pq_27_solutions_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="pq_27_solutions_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="pq_27_solutions_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="pq_27_solutions_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="pq_27_solutions_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -47,7 +81,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Practice questions: antithetic variables</h1>
+<h1 class="title">Antithetic variables practice questions: solutions</h1>
 </div>
 
 
@@ -62,35 +96,60 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
-<section id="antithetic-variables" class="level1">
-<h1>Antithetic variables</h1>
-<p>Suppose we want to estimate</p>
-<p><span class="math display">\[\theta = \mathbb{E}[g(U)] \hspace{1cm} U \sim Uniform(0, 1)\]</span></p>
-<p><strong>Basic Monte Carlo estimate:</strong></p>
-<ul>
-<li><p>Sample <span class="math inline">\(U_1,...,U_n \overset{iid}{\sim} Uniform(0, 1)\)</span></p></li>
-<li><p><span class="math inline">\(\widehat{\theta}_{MC} = \frac{1}{n} \sum \limits_{i=1}^n g(U_i)\)</span></p></li>
-<li><p><span class="math inline">\(Var(\widehat{\theta}_{MC}) = \dfrac{Var(g(U))}{n}\)</span></p></li>
-</ul>
-<p><strong>Antithetic Monte Carlo estimate:</strong></p>
-<ul>
-<li><p>Sample <span class="math inline">\(U_1,...,U_{n/2} \overset{iid}{\sim} Uniform(0, 1)\)</span></p></li>
-<li><p><span class="math inline">\(\widehat{\theta}_{AS} = \frac{1}{n} \sum \limits_{i=1}^{n/2} (g(U_i) + g(1 - U_i))\)</span></p></li>
-<li><p><span class="math inline">\(Var(\widehat{\theta}_{AS}) = \dfrac{(1 + \rho)Var(g(U))}{n}\)</span> where <span class="math inline">\(\rho = Cor(g(U), g(1 - U))\)</span></p></li>
-</ul>
-<p>If <span class="math inline">\(g(U)\)</span> and <span class="math inline">\(g(1-U)\)</span> are negatively correlated (a sufficient condition is that <span class="math inline">\(g\)</span> is a monotone function), then the <strong>antithetic Monte Carlo estimate</strong> reduces the variance.</p>
-<section id="questions" class="level2">
-<h2 class="anchored" data-anchor-id="questions">Questions</h2>
-<p>Suppose we want to estimate</p>
-<p><span class="math display">\[\theta = \int \limits_0^1 \log(x + 1)e^x dx = \mathbb{E}[g(U)]\]</span> where <span class="math inline">\(U \sim Uniform(0, 1)\)</span> and <span class="math inline">\(g(x) = \log(x + 1)e^x\)</span>. We can see that <span class="math inline">\(g\)</span> is a monotone function, so antithetic sampling can be used to reduce the variance of an estimate of <span class="math inline">\(\theta\)</span>.</p>
-<ol type="1">
-<li><p>Use simple Monte Carlo integration with <span class="math inline">\(n = 1000\)</span> to compute <span class="math inline">\(\widehat{\theta}_{MC}\)</span>.</p></li>
-<li><p>Repeat question 1 many times, and approximate <span class="math inline">\(Var(\widehat{\theta}_{MC})\)</span></p></li>
-<li><p>Now use antithetic sampling with <span class="math inline">\(n=1000\)</span> (so <span class="math inline">\(n/2 = 500\)</span>) to compute <span class="math inline">\(\widehat{\theta}_{AS}\)</span></p></li>
-<li><p>Repeat question 3 many times, and approximate <span class="math inline">\(Var(\widehat{\theta}_{AS})\)</span>. What is the reduction in variance compared to <span class="math inline">\(\widehat{\theta}_{MC}\)</span>?</p></li>
+<ol start="2" type="1">
+<li></li>
 </ol>
-</section>
-</section>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="cf">function</span>(x){</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">log</span>(x <span class="sc">+</span> <span class="dv">1</span>)<span class="sc">*</span><span class="fu">exp</span>(x)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>nsim <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>theta_hat_mc <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, nsim)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>nsim){</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  u <span class="ot">&lt;-</span> <span class="fu">runif</span>(n)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  theta_hat_mc[i] <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">g</span>(u))</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(theta_hat_mc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.0002750519</code></pre>
+</div>
+</div>
+<ol start="4" type="1">
+<li></li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>theta_hat_as <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, nsim)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>nsim){</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  u <span class="ot">&lt;-</span> <span class="fu">runif</span>(n<span class="sc">/</span><span class="dv">2</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  theta_hat_as[i] <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">g</span>(u) <span class="sc">+</span> <span class="fu">g</span>(<span class="dv">1</span><span class="sc">-</span>u))<span class="sc">/</span>n</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(theta_hat_as)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.362627e-05</code></pre>
+</div>
+</div>
+<p>Reduction in variance:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>(<span class="fu">var</span>(theta_hat_mc) <span class="sc">-</span> <span class="fu">var</span>(theta_hat_as))<span class="sc">/</span><span class="fu">var</span>(theta_hat_mc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.9504593</code></pre>
+</div>
+</div>
+<p>The reduction in variance is the same as <span class="math inline">\(-\rho\)</span>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>u <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">10000</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(<span class="fu">g</span>(u), <span class="fu">g</span>(<span class="dv">1</span><span class="sc">-</span>u))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] -0.9536526</code></pre>
+</div>
+</div>
 
 </main>
 <!-- /main column -->

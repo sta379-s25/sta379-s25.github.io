@@ -13,9 +13,9 @@ $$\theta = \mathbb{E}[g(U)] \hspace{1cm} U \sim Uniform(0, 1)$$
 
 * Sample $U_1,...,U_n \overset{iid}{\sim} Uniform(0, 1)$
 
-* $\widehat{\theta}_{MC} = \frac{1}{n} \sum \limits_{i=1}^n g(X_i)$
+* $\widehat{\theta}_{MC} = \frac{1}{n} \sum \limits_{i=1}^n g(U_i)$
 
-* $Var(\widehat{\theta}_{MC}) = \dfrac{Var(g(X))}{n}$
+* $Var(\widehat{\theta}_{MC}) = \dfrac{Var(g(U))}{n}$
 
 **Antithetic Monte Carlo estimate:**
 
@@ -23,7 +23,7 @@ $$\theta = \mathbb{E}[g(U)] \hspace{1cm} U \sim Uniform(0, 1)$$
 
 * $\widehat{\theta}_{AS} = \frac{1}{n} \sum \limits_{i=1}^{n/2} (g(U_i) + g(1 - U_i))$
 
-* $Var(\widehat{\theta}_{AS}) = \dfrac{(1 + \rho)Var(g(X))}{n}$ where $\rho = Cor(g(U), g(1 - U))$
+* $Var(\widehat{\theta}_{AS}) = \dfrac{(1 + \rho)Var(g(U))}{n}$ where $\rho = Cor(g(U), g(1 - U))$
 
 If $g(U)$ and $g(1-U)$ are negatively correlated (a sufficient condition is that $g$ is a monotone function), then the **antithetic Monte Carlo estimate** reduces the variance.
 
