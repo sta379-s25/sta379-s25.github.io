@@ -16,5 +16,6 @@ April 2
 
 April 4
 : Reducing variance -- antithetic variables
+  : [slides (pdf)](https://sta379-s25.github.io/slides/lecture_27.pdf),  [warmup](https://sta379-s25.github.io/practice_questions/pq_27_warmup.html),  [practice questions](https://sta379-s25.github.io/practice_questions/pq_27.html), [practice question solutions](https://sta379-s25.github.io/practice_questions/pq_27_solutions.html)
 
 : *Statistical Computing with R* (Rizzo), Chapter 5.4
