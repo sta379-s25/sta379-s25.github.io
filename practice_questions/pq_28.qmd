@@ -1,0 +1,35 @@
+---
+title: "Practice questions: antithetic variables with inverse transform"
+format: html
+---
+
+## Monte Carlo integration
+
+Suppose we want to approximate the integral
+
+$$\theta = \int \limits_1^\infty e^{-x} \frac{4}{x^5} dx = \mathbb{E}[g(X)]$$
+where $g(x) = e^{-x}$ and $X$ has pdf $f(x) = \dfrac{4}{x^5}$, $x > 1$.
+
+To use Monte Carlo integration, we need to be able to sample this random variable $X$. Using the inverse transform method,
+
+$$X = F^{-1}(U) \hspace{1cm} U \sim Uniform(0, 1)$$
+
+where in this case, 
+
+$$F^{-1}(U) = (1 - U)^{-1/4}$$
+
+
+## Anithetic sampling with inverse transform
+
+* Sample $U_1,...,U_{n/2} \overset{iid}{\sim} Uniform(0, 1)$
+
+* $\widehat{\theta}_{AS} = \frac{1}{n} \sum \limits_{i=1}^{n/2} (g(F^{-1}(U_i)) + g(F^{-1}(1 - U_i)))$
+
+## Questions
+
+1. Using R, approximate the variance of $\widehat{\theta}_{AS}$ for this example with $n = 200$.
+
+2. Compare the variance of $\widehat{\theta}_{AS}$ to the variance of the simple Monte Carlo estimator for this example, with $n = 200$.
+
+
+

@@ -1,0 +1,67 @@
+---
+title: "Warmup: antithetic sampling"
+format: html
+---
+
+# Monte Carlo integration
+
+Suppose we wish to approximate the integral
+
+$$\theta = \int \limits_0^1 e^x dx = \mathbb{E}[g(U)]$$
+
+where $U \sim Uniform(0, 1)$ and $g(x) = e^x$.
+
+## Simple Monte Carlo estimate
+
+The simple Monte Carlo estimate does the following:
+
+* Sample $U_1,...,U_n \overset{iid}{\sim} Uniform(0, 1)$
+* $\widehat{\theta}_{MC} = \frac{1}{n} \sum \limits_{i=1}^n g(U_i)$
+
+Here is code to approximate the variance of the simple MC estimate with $n = 1000$:
+
+```{r}
+g <- function(x){
+  exp(x)
+}
+
+n <- 1000
+nsim <- 1000
+
+theta_hat_mc <- rep(NA, nsim)
+for(i in 1:nsim){
+  u <- runif(n)
+  theta_hat_mc[i] <- mean(g(u))
+}
+
+var(theta_hat_mc)
+```
+
+## Antithetic sampling
+
+One method for reducing the variance of a Monte Carlo estimate is with **antithetic sampling**:
+
+* Sample $U_1,...,U_{n/2} \sim Uniform(0, 1)$
+* $\widehat{\theta}_{AS} = \frac{1}{n} \sum \limits_{i=1}^{n/2} (g(U_i) + g(1 - U_i))$
+
+## Questions
+
+1. Using R, approximate the variance of the antithetic estimator $\widehat{\theta}_{AS}$ with $n = 1000$, and compute the percent reduction in variance compared to the simple estimator $\widehat{\theta}_{MC}$.
+
+2. Using R, approximate $\rho = Cor(g(U), g(1 - U))$ and compare to the percent reduction in variance from question 1.
+
+```{r, include=F}
+theta_hat_as <- rep(NA, nsim)
+for(i in 1:nsim){
+  u <- runif(n/2)
+  theta_hat_as[i] <- sum(g(u) + g(1-u))/n
+}
+
+var(theta_hat_as)
+
+(var(theta_hat_mc) - var(theta_hat_as))/var(theta_hat_mc)
+
+u <- runif(10000)
+cor(g(u), g(1-u))
+```
+

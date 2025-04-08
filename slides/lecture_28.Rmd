@@ -1,0 +1,141 @@
+---
+title: "Lecture 28: Antithetic variables"
+author: "Ciaran Evans"
+output: beamer_presentation
+editor_options: 
+  chunk_output_type: console
+---
+
+## Warmup: antithetic sampling
+
+Work with your neighbor on the questions on the handout / course website:
+
+[https://sta379-s25.github.io/practice_questions/pq_28_warmup.html](https://sta379-s25.github.io/practice_questions/pq_28_warmup.html)
+
+Then we will discuss as a class
+
+
+* Use Monte Carlo integration to approximate another integral
+* Explore variability of two different estimators
+
+## Warmup: antithetic sampling
+
+```{r, include=F}
+g <- function(x){
+  exp(x)
+}
+
+n <- 1000
+nsim <- 1000
+
+theta_hat_mc <- rep(NA, nsim)
+for(i in 1:nsim){
+  u <- runif(n)
+  theta_hat_mc[i] <- mean(g(u))
+}
+
+var(theta_hat_mc)
+```
+
+
+```{r}
+theta_hat_as <- rep(NA, nsim)
+for(i in 1:nsim){
+  u <- runif(n/2)
+  theta_hat_as[i] <- sum(g(u) + g(1-u))/n
+}
+
+(var(theta_hat_mc) - var(theta_hat_as))/var(theta_hat_mc)
+
+u <- runif(10000)
+cor(g(u), g(1-u))
+```
+
+\vspace{3cm}
+
+## Antithetic variables
+
+$$\theta = \mathbb{E}[g(U)] \hspace{1cm} U \sim Uniform(0, 1)$$
+**Antithetic sampling:** 
+
+* **Theorem:** If $g$ is *monotone*, then $Cor(g(U), \ g(1 - U)) \leq 0$
+
+* Sample $U_1,...,U_{n/2} \overset{iid}{\sim} Uniform(0, 1)$
+
+* $\widehat{\theta}_{AS} = \frac{1}{n} \sum \limits_{i=1}^{n/2} (g(U_i) + g(1 - U_i))$
+
+* $Var(\widehat{\theta}_{AS}) = \dfrac{(1 + \rho)Var(g(U))}{n}$ where $\rho = Cor(g(U), g(1 - U))$
+
+
+## Another example
+
+Suppose we want to approximate the integral
+
+$$\theta = \int \limits_1^\infty e^{-x} \frac{4}{x^5} dx = \mathbb{E}[e^{-X}]$$
+where $X$ has pdf $f(x) = \dfrac{4}{x^5}$, $x > 1$.
+
+**Simple Monte Carlo:**
+
+* $X_1,...,X_n \overset{iid}{\sim} f$
+* $\widehat{\theta}_{MC} = \frac{1}{n} \sum \limits_{i=1}^n e^{-X_i}$
+
+**Question:** How do we sample $X_i \sim f$?
+
+\vspace{3cm}
+
+## Another example
+
+Suppose we want to approximate the integral
+
+$$\theta = \int \limits_1^\infty e^{-x} \frac{4}{x^5} dx = \mathbb{E}[e^{-X}]$$
+where $X$ has pdf $f(x) = \dfrac{4}{x^5}$, $x > 1$.
+
+**Simple Monte Carlo:**
+
+* $U_1,...,U_n \overset{iid}{\sim} Uniform(0, 1)$
+* $X_i = F^{-1}(U_i)$
+* $\widehat{\theta}_{MC} = \frac{1}{n} \sum \limits_{i=1}^n e^{-X_i} = \frac{1}{n} \sum \limits_{i=1}^n e^{-F^{-1}(U_i)}$
+
+**Question:** Can we use antithetic sampling here?
+
+
+## Another example
+
+Suppose we want to approximate the integral
+
+$$\theta = \int \limits_1^\infty e^{-x} \frac{4}{x^5} dx = \mathbb{E}[e^{-X}]$$
+where $X$ has pdf $f(x) = \dfrac{4}{x^5}$, $x > 1$.
+
+\vspace{5cm}
+
+
+## Antithetic sampling with inverse transform
+
+Suppose we want to approximate
+
+$$\theta = \mathbb{E}[g(X)] \hspace{1cm} X \sim f$$
+If we can generate $X$ with the inverse transform method, then
+
+$$\theta = \mathbb{E}[g(F^{-1}(U))] \hspace{1cm} U \sim Uniform(0, 1)$$
+
+**Antithetic sampling:** 
+
+* **Theorem:** If $g$ is *monotone*, then $Cor(g(F^{-1}(U)), \ g(F^{-1}(1 - U))) \leq 0$
+
+* Sample $U_1,...,U_{n/2} \overset{iid}{\sim} Uniform(0, 1)$
+
+* $\widehat{\theta}_{AS} = \frac{1}{n} \sum \limits_{i=1}^{n/2} (g(F^{-1}(U_i)) + g(F^{-1}(1 - U_i)))$
+
+
+## Your turn
+
+Try antithetic sampling with the inverse transform method:
+
+[https://sta379-s25.github.io/practice_questions/pq_28.html](https://sta379-s25.github.io/practice_questions/pq_28.html)
+
+* Start in class
+* Welcome to work with a neighbor
+* Solutions are posted on the course website
+
+
+

@@ -1,0 +1,91 @@
+\documentclass[12pt]{article}
+\usepackage{url}
+\usepackage{alltt}
+\usepackage{bm}
+\usepackage{bbm}
+\linespread{1}
+\textwidth 6.5in
+\oddsidemargin 0.in
+\addtolength{\topmargin}{-1in}
+\addtolength{\textheight}{2in}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{bbm}
+
+\newcommand{\indep}{\perp \!\!\! \perp}
+
+\begin{document}
+
+
+\begin{center}
+\Large
+Warmup: antithetic sampling \\
+\normalsize
+\vspace{5mm}
+\end{center}
+
+\noindent \textbf{Group members:}
+
+\section*{Monte Carlo integration}
+
+Suppose we wish to approximate the integral
+
+$$\theta = \int \limits_0^1 e^x dx = \mathbb{E}[g(U)]$$
+
+\noindent where $U \sim Uniform(0, 1)$ and $g(x) = e^x$.
+
+\subsection*{Simple Monte Carlo estimate}
+
+The simple Monte Carlo estimate does the following:
+
+\begin{enumerate}
+\item Sample $U_1,...,U_n \overset{iid}{\sim} Uniform(0, 1)$
+
+\item $\widehat{\theta}_{MC} = \frac{1}{n} \sum \limits_{i=1}^n g(U_i)$
+\end{enumerate}
+
+\noindent Here is code to approximate the variance of the simple MC estimate with $n = 1000$:
+
+\begin{verbatim}
+g <- function(x){
+  exp(x)
+}
+
+n <- 1000
+nsim <- 1000
+
+theta_hat_mc <- rep(NA, nsim)
+for(i in 1:nsim){
+  u <- runif(n)
+  theta_hat_mc[i] <- mean(g(u))
+}
+
+var(theta_hat_mc)
+\end{verbatim}
+
+\subsection*{Antithetic sampling}
+
+One method for reducing the variance of a Monte Carlo estimate is with \textbf{antithetic sampling}:
+
+\begin{itemize}
+\item Sample $U_1,...,U_{n/2} \sim Uniform(0, 1)$
+
+\item $\widehat{\theta}_{AS} = \frac{1}{n} \sum \limits_{i=1}^{n/2} (g(U_i) + g(1 - U_i))$
+\end{itemize}
+
+\newpage
+
+\subsection*{Questions}
+
+\begin{enumerate}
+\item Using R, approximate the variance of the antithetic estimator $\widehat{\theta}_{AS}$ with $n = 1000$, and compute the percent reduction in variance compared to the simple estimator $\widehat{\theta}_{MC}$.
+
+\vspace{6cm}
+
+\item Using R, approximate $\rho = Cor(g(U), g(1 - U))$ and compare to the percent reduction in variance from question 1.
+\end{enumerate}
+
+
+\end{document}

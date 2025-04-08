@@ -1,0 +1,49 @@
+---
+title: "Antithetic variables with inverse transform: solutions"
+format: html
+---
+
+1.
+
+```{r}
+g <- function(x){
+  exp(-x)
+}
+
+Finv <- function(u){
+  (1 - u)^{-1/4}
+}
+
+n <- 200
+nsim <- 10000
+
+theta_hat_as <- rep(NA, nsim)
+for(i in 1:nsim){
+  u <- runif(n/2)
+  theta_hat_as[i] <- sum(g(Finv(u)) + g(Finv(1-u)))/n
+}
+
+var(theta_hat_as)
+```
+
+2.
+
+```{r}
+theta_hat_mc <- rep(NA, nsim)
+for(i in 1:nsim){
+  u <- runif(n)
+  x <- Finv(u)
+  theta_hat_mc[i] <- mean(g(x))
+}
+
+var(theta_hat_mc)
+
+(var(theta_hat_mc) - var(theta_hat_as))/var(theta_hat_mc)
+
+u <- runif(10000)
+cor(g(Finv(u)), g(Finv(1-u)))
+```
+
+
+
+
