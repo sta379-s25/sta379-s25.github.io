@@ -1,0 +1,238 @@
+---
+title: "Lecture 29: Introducing the EM algorithm"
+author: "Ciaran Evans"
+output: beamer_presentation
+editor_options: 
+  chunk_output_type: console
+---
+
+## Plan for next week
+
+* Monday: continue EM algorithm
+
+\bigskip
+
+* Wednesday and Friday: project work days
+
+\bigskip
+
+* Extra office hours on Tuesday, Wednesday, and Thursday
+
+## Motivation: penguins data
+
+Data on 276 penguins (Adelie or Gentoo) on three different islands (Torgersen, Biscoe, Dream) near Antartica. Variables include
+
+* species
+* island
+* characteristics like bill length, flipper length, etc.
+
+## Motivation: penguins data
+
+```{r, fig.width=3.5, fig.height=2.5, message=F, warning=F, echo=F}
+library(tidyverse)
+library(palmerpenguins)
+
+penguins |>
+  filter(species != "Chinstrap") |>
+  ggplot(aes(x = flipper_length_mm)) +
+  geom_histogram(fill="transparent", color="black") +
+  labs(x = "Flipper length (mm)") +
+  theme_classic()
+```
+
+**Question:** What do you notice about the distribution of flipper length? Why might this be the case?
+
+## Motivation: penguins data
+
+
+```{r, fig.width=4, fig.height=2, message=F, warning=F, echo=F}
+penguins |>
+  filter(species != "Chinstrap") |>
+  ggplot(aes(x = flipper_length_mm)) +
+  geom_histogram(fill="transparent", color="black") +
+  labs(x = "Flipper length (mm)") +
+  theme_classic() +
+  facet_wrap(~species)
+```
+
+**Question:** How could I model the distribution of flipper length in each group? What parameters would I estimate?
+
+\vspace{3cm}
+
+## Motivation: penguins data
+
+
+```{r, fig.width=4, fig.height=3, message=F, warning=F, echo=F}
+mean_adelie <- penguins |>
+  filter(species == "Adelie") |>
+  pull(flipper_length_mm) |>
+  mean(na.rm=T)
+
+sd_adelie <- penguins |>
+  filter(species == "Adelie") |>
+  pull(flipper_length_mm) |>
+  sd(na.rm=T)
+
+mean_gentoo <- penguins |>
+  filter(species == "Gentoo") |>
+  pull(flipper_length_mm) |>
+  mean(na.rm=T)
+
+sd_gentoo <- penguins |>
+  filter(species == "Gentoo") |>
+  pull(flipper_length_mm) |>
+  sd(na.rm=T)
+
+prop_adelie = sum(penguins$species == "Adelie")/sum(penguins$species != "Chinstrap")
+
+penguins |>
+  filter(species != "Chinstrap") |>
+  ggplot(aes(x = flipper_length_mm)) +
+  geom_histogram(fill="transparent", color="black", aes(y = after_stat(density))) +
+  labs(x = "Flipper length (mm)") +
+  theme_classic() +
+  stat_function(fun = function(x){prop_adelie*dnorm(x, mean_adelie, sd_adelie)},
+                color = "blue") +
+  stat_function(fun = function(x){(1 - prop_adelie)*dnorm(x, mean_gentoo, sd_gentoo)},
+                color = "red")
+```
+
+## Writing down a model
+
+
+```{r, fig.width=3, fig.height=2, message=F, warning=F, echo=F}
+
+penguins |>
+  filter(species != "Chinstrap") |>
+  ggplot(aes(x = flipper_length_mm)) +
+  geom_histogram(fill="transparent", color="black", aes(y = after_stat(density))) +
+  labs(x = "Flipper length (mm)") +
+  theme_classic() +
+  stat_function(fun = function(x){prop_adelie*dnorm(x, mean_adelie, sd_adelie)},
+                color = "blue") +
+  stat_function(fun = function(x){(1 - prop_adelie)*dnorm(x, mean_gentoo, sd_gentoo)},
+                color = "red")
+```
+
+
+\vspace{3cm}
+
+
+## Time between Old Faithful geyser eruptions
+
+```{r, fig.width=3.5, fig.height=2.5, message=F, warning=F, echo=F}
+library(MASS)
+
+geyser |>
+  ggplot(aes(x = waiting)) +
+  geom_histogram(fill="transparent", color="black") +
+  labs(x = "Time between eruptions (minutes)") +
+  theme_classic()
+```
+
+**Question:** What do you notice about the distribution of waiting times? Why might this be the case?
+
+## Time between Old Faithful geyser eruptions
+
+```{r, fig.width=3.5, fig.height=2.5, message=F, warning=F, echo=F}
+geyser |>
+  ggplot(aes(x = waiting)) +
+  geom_histogram(fill="transparent", color="black") +
+  labs(x = "Time between eruptions (minutes)") +
+  theme_classic()
+```
+
+**Question:** It seems like there are two groups here, but we don't know what they are. What should we do to estimate both the groups and their distributions?
+
+## Time between Old Faithful geyser eruptions
+
+
+```{r, fig.width=3, fig.height=2, message=F, warning=F, echo=F}
+geyser |>
+  ggplot(aes(x = waiting)) +
+  geom_histogram(fill="transparent", color="black") +
+  labs(x = "Time between eruptions (minutes)") +
+  theme_classic()
+```
+
+**Model:**
+
+\vspace{3cm}
+
+## Gaussian mixture model
+
+* Observe data $X_1,...,X_n$
+
+\bigskip
+
+* Assume each observation $i$ comes from one of $k$ groups. Let $Z_i \in \{1,...,k\}$ denote the group assignment 
+    * The group $Z$ is an unobserved (**latent**) variable
+
+**Model:**
+
+\vspace{5cm}
+
+## Estimating model parameters: EM algorithm
+
+The **EM algorithm** allows us to estimate both the unknown group assignments, *and* the parameters for each group's distribution (we will discuss the details later). In R:
+
+```{r, eval=F}
+library(mixtools)
+
+normalmixEM(geyser$waiting, lambda = c(0.5, 0.5), k=2)
+```
+
+* `normalmixEM`: function for estimating parameters in a mixture of normal distributions
+* `lambda`: initial guess at the proportion of data in each group
+* `k`: number of groups
+
+## Estimating model parameters: EM algorithm
+
+```{r, include=F}
+set.seed(3)
+```
+
+
+```{r, message=F}
+library(mixtools)
+
+em_res <- normalmixEM(geyser$waiting, lambda = c(0.5, 0.5), 
+                      k=2)
+
+em_res$lambda
+em_res$mu
+em_res$sigma
+```
+
+## Fitted parameters
+
+```{r, fig.width=3.5, fig.height=2.5, message=F, warning=F, echo=F}
+geyser |>
+  ggplot(aes(x = waiting)) +
+  geom_histogram(fill="transparent", color="black", aes(y = after_stat(density))) +
+  labs(x = "Time between eruptions (minutes)") +
+  theme_classic() +
+  stat_function(fun = function(x){0.308*dnorm(x, 54.203, 4.951)},
+                color = "blue") +
+  stat_function(fun = function(x){(1 - 0.308)*dnorm(x, 80.360, 7.508)},
+                color = "red")
+```
+
+* Estimated proportion of data in each group: 0.308, 0.692
+* Estimated group means: $\widehat{\mu}_1 = 54.203$, $\widehat{\mu}_2 = 80.360$
+* Estimated group sd: $\widehat{\sigma}_1 = 4.951$, $\widehat{\sigma}_2 = 7.508$
+
+
+## Your turn
+
+Simulate data from a Gaussian mixture and explore parameter estimation:
+
+[https://sta379-s25.github.io/practice_questions/pq_29.html](https://sta379-s25.github.io/practice_questions/pq_29.html)
+
+* Start in class
+* Welcome to work with a neighbor
+* Solutions will be posted later on the course website
+
+
+
+
