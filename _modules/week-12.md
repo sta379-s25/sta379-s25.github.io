@@ -14,3 +14,4 @@ April 9
 April 11
 
 : Begin EM algorithm
+  : [slides (pdf)](https://sta379-s25.github.io/slides/lecture_29.pdf), [practice questions](https://sta379-s25.github.io/practice_questions/pq_29.html)
