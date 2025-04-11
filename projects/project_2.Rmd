@@ -59,7 +59,7 @@ In previous stats courses, you have discussed the assumptions typically made whe
 
 $$\mathbb{E}[{\bf y} | {\bf X}] = {\bf X} \beta \hspace{0.5cm} \text{captures shape, and zero-mean assumption for } \varepsilon$$
 
-$$Var({\bf y} | {\bf X}) = \sigma^2 {\bf I} \hspace{0.5cm} \text{captures the constant variance assumption, and } Cov(Y_i, Y_j) = 0$$
+$$Var({\bf y} | {\bf X}) = \sigma^2 {\bf I} \hspace{0.5cm} \text{captures the constant variance assumption, and } Cov(Y_i, Y_j | {\bf X}) = 0$$
 
 ## Dependent data
 
@@ -71,7 +71,7 @@ $$\mathbb{E}[{\bf y}_i | {\bf X}_i] = {\bf X}_i \beta$$
 However, we need to modify the variance structure to account for the groups in the data. Since the groups are independent, $Cov(Y_{i_1,j_1}, Y_{i_2, j_2}) = 0$ for any $i_1 \neq i_2$ (different groups). Within the groups, though, there *will* be correlation, which we can write as 
 
 $$Var({\bf y}_i | {\bf X}_i) = \sigma^2 {\bf R}_i(\rho)$$
-Here $\sigma^2 = Var(Y_{ij})$, and ${\bf R}_i(\rho)$ describes the correlation structure. For the purposes of this assignment, we will focus on one of the most common correlation structures, called the *exchangeable* correlation structure:
+Here ${\bf R}_i(\rho)$ describes the correlation structure. For the purposes of this assignment, we will focus on one of the most common correlation structures, called the *exchangeable* correlation structure:
 
 $${\bf R}_i(\rho) = \begin{bmatrix}
     1 & \rho &  \cdots & \rho \\
@@ -80,7 +80,7 @@ $${\bf R}_i(\rho) = \begin{bmatrix}
     \rho & \rho &  \cdots & 1
     \end{bmatrix}$$
     
-That is, $\rho = Corr(Y_{i,j_1}, Y_{i,j_2})$ for any two observations $j_1 \neq j_2$ within the same group.
+That is, $\rho = Corr(Y_{i,j_1}, Y_{i,j_2} | X_{i,j_1}, X_{i,j_2})$ for any two observations $j_1 \neq j_2$ within the same group.
 
 ## More flexible models
 
@@ -136,7 +136,7 @@ $$Y_{ij} = \beta_0 + u_i + \beta_1 X_{ij} + \varepsilon_{ij}$$
 with $u_i$ and $\varepsilon_{ij}$ generated as described above, show that
 $$Var(Y_{ij} | X_{ij}) = \sigma_u^2 + \sigma_\varepsilon^2,$$
 and
-$$Cov(Y_{ij}, Y_{ik}) = \sigma_u^2$$
+$$Cov(Y_{ij}, Y_{ik} | X_{ij}, X_{ik}) = \sigma_u^2$$
 for two observations $Y_{ij}, Y_{ik}$ from the same group ($j \neq k$).
 
 :::
@@ -146,7 +146,7 @@ for two observations $Y_{ij}, Y_{ik}$ from the same group ($j \neq k$).
 #### Question 2 (written)
 
 From question 2, conclude that
-$$\rho := Corr(Y_{ij}, Y_{ik}) = \frac{\sigma_u^2}{\sigma_u^2 + \sigma_\varepsilon^2},$$
+$$\rho := Corr(Y_{ij}, Y_{ik} | X_{ij}, X_{ik}) = \frac{\sigma_u^2}{\sigma_u^2 + \sigma_\varepsilon^2},$$
 and therefore observations from the same group are *dependent* whenever $\sigma_u^2 > 0$.
 
 (If you have taken STA 214, you may recognize this as the intraclass correlation coefficient!)
@@ -503,12 +503,12 @@ Here let $N = \sum \limits_{i=1}^m n_i$ be the total number of observations acro
     * $r_{ij} = \dfrac{Y_{ij} - \widehat{\mu}_{ij}}{\sqrt{V(\widehat{\mu}_{ij})}}$
 * **Step 3:** Calculate estimates $\rho^{(0)}$ and $\phi^{(0)}$:
     * $\phi^{(0)} = \dfrac{1}{N - k - 1} \sum \limits_{i=1}^m \sum \limits_{j=1}^{n_i} r_{ij}^2$
-    * $\rho^{(0)} = \dfrac{1}{m \widehat{\rho}^{(0)}} \sum \limits_{i=1}^m \frac{1}{n_i(n_i - 1)} \sum \limits_{j \neq l} r_{ij}r_{il}$
+    * $\rho^{(0)} = \dfrac{1}{m \phi^{(0)}} \sum \limits_{i=1}^m \frac{1}{n_i(n_i - 1)} \sum \limits_{j \neq l} r_{ij}r_{il}$
 * **Step 4:** Calculate ${\bf H}(\beta^{0})$ and $\Psi(\beta^{(0)})$
 * **Step 5:** Update:
     * $s_0 = -({\bf H}(\beta^{0}))^{-1}\Psi(\beta^{(0)})$
     * $\beta^{(1)} = \beta^{(0)} + s_0$
-* **Step 6:** Iterate: repeat steps 2 -- 5. I.e., if $\beta^{(t)}$ is estimated coefficients on iteration $t$, then use $\beta^{(t)}$ to calculate the $\widehat{\mu}_i$, the $r_{ij}$, $\phi^{(t)}$, $\rho^{(0)}$, ${\bf H}(\beta^{t})$, and $\Psi(\beta^{(t)})$. Then update:
+* **Step 6:** Iterate: repeat steps 2 -- 5. I.e., if $\beta^{(t)}$ is estimated coefficients on iteration $t$, then use $\beta^{(t)}$ to calculate the $\widehat{\mu}_i$, the $r_{ij}$, $\phi^{(t)}$, $\rho^{(t)}$, ${\bf H}(\beta^{t})$, and $\Psi(\beta^{(t)})$. Then update:
     * $s_t = -({\bf H}(\beta^{t}))^{-1}\Psi(\beta^{(t)})$
     * $\beta^{(t+1)} = \beta^{(t)} + s_t$
 * **Step 7:** Stop when the algorithm converges (see below), or when a maximum number of iterations is reached.

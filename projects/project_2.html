@@ -1796,7 +1796,7 @@ follows:</p>
 } \varepsilon\]</span></p>
 <p><span class="math display">\[Var({\bf y} | {\bf X}) = \sigma^2 {\bf
 I} \hspace{0.5cm} \text{captures the constant variance assumption, and }
-Cov(Y_i, Y_j) = 0\]</span></p>
+Cov(Y_i, Y_j | {\bf X}) = 0\]</span></p>
 </div>
 <div id="dependent-data" class="section level2">
 <h2>Dependent data</h2>
@@ -1821,8 +1821,7 @@ for any <span class="math inline">\(i_1 \neq i_2\)</span> (different
 groups). Within the groups, though, there <em>will</em> be correlation,
 which we can write as</p>
 <p><span class="math display">\[Var({\bf y}_i | {\bf X}_i) = \sigma^2
-{\bf R}_i(\rho)\]</span> Here <span class="math inline">\(\sigma^2 =
-Var(Y_{ij})\)</span>, and <span class="math inline">\({\bf
+{\bf R}_i(\rho)\]</span> Here <span class="math inline">\({\bf
 R}_i(\rho)\)</span> describes the correlation structure. For the
 purposes of this assignment, we will focus on one of the most common
 correlation structures, called the <em>exchangeable</em> correlation
@@ -1833,8 +1832,8 @@ structure:</p>
     \vdots  &amp; \vdots &amp; \ddots &amp; \vdots \\
     \rho &amp; \rho &amp;  \cdots &amp; 1
     \end{bmatrix}\]</span></p>
-<p>That is, <span class="math inline">\(\rho = Corr(Y_{i,j_1},
-Y_{i,j_2})\)</span> for any two observations <span class="math inline">\(j_1 \neq j_2\)</span> within the same group.</p>
+<p>That is, <span class="math inline">\(\rho = Corr(Y_{i,j_1}, Y_{i,j_2}
+| X_{i,j_1}, X_{i,j_2})\)</span> for any two observations <span class="math inline">\(j_1 \neq j_2\)</span> within the same group.</p>
 </div>
 <div id="more-flexible-models" class="section level2">
 <h2>More flexible models</h2>
@@ -1913,14 +1912,13 @@ other.</p>
 <p>For the model <span class="math display">\[Y_{ij} = \beta_0 + u_i +
 \beta_1 X_{ij} + \varepsilon_{ij}\]</span> with <span class="math inline">\(u_i\)</span> and <span class="math inline">\(\varepsilon_{ij}\)</span> generated as described
 above, show that <span class="math display">\[Var(Y_{ij} | X_{ij}) =
-\sigma_u^2 + \sigma_\varepsilon^2,\]</span> and <span class="math display">\[Cov(Y_{ij}, Y_{ik}) = \sigma_u^2\]</span> for two
-observations <span class="math inline">\(Y_{ij}, Y_{ik}\)</span> from
-the same group (<span class="math inline">\(j \neq k\)</span>).</p>
+\sigma_u^2 + \sigma_\varepsilon^2,\]</span> and <span class="math display">\[Cov(Y_{ij}, Y_{ik} | X_{ij}, X_{ik}) =
+\sigma_u^2\]</span> for two observations <span class="math inline">\(Y_{ij}, Y_{ik}\)</span> from the same group (<span class="math inline">\(j \neq k\)</span>).</p>
 </div>
 <div id="question-2-written" class="section level4 question">
 <h4>Question 2 (written)</h4>
 <p>From question 2, conclude that <span class="math display">\[\rho :=
-Corr(Y_{ij}, Y_{ik}) = \frac{\sigma_u^2}{\sigma_u^2 +
+Corr(Y_{ij}, Y_{ik} | X_{ij}, X_{ik}) = \frac{\sigma_u^2}{\sigma_u^2 +
 \sigma_\varepsilon^2},\]</span> and therefore observations from the same
 group are <em>dependent</em> whenever <span class="math inline">\(\sigma_u^2 &gt; 0\)</span>.</p>
 <p>(If you have taken STA 214, you may recognize this as the intraclass
@@ -2296,9 +2294,9 @@ residuals:
 <ul>
 <li><span class="math inline">\(\phi^{(0)} = \dfrac{1}{N - k - 1} \sum
 \limits_{i=1}^m \sum \limits_{j=1}^{n_i} r_{ij}^2\)</span></li>
-<li><span class="math inline">\(\rho^{(0)} = \dfrac{1}{m
-\widehat{\rho}^{(0)}} \sum \limits_{i=1}^m \frac{1}{n_i(n_i - 1)} \sum
-\limits_{j \neq l} r_{ij}r_{il}\)</span></li>
+<li><span class="math inline">\(\rho^{(0)} = \dfrac{1}{m \phi^{(0)}}
+\sum \limits_{i=1}^m \frac{1}{n_i(n_i - 1)} \sum \limits_{j \neq l}
+r_{ij}r_{il}\)</span></li>
 </ul></li>
 <li><strong>Step 4:</strong> Calculate <span class="math inline">\({\bf
 H}(\beta^{0})\)</span> and <span class="math inline">\(\Psi(\beta^{(0)})\)</span></li>
@@ -2310,7 +2308,7 @@ H}(\beta^{0}))^{-1}\Psi(\beta^{(0)})\)</span></li>
 s_0\)</span></li>
 </ul></li>
 <li><strong>Step 6:</strong> Iterate: repeat steps 2 – 5. I.e., if <span class="math inline">\(\beta^{(t)}\)</span> is estimated coefficients on
-iteration <span class="math inline">\(t\)</span>, then use <span class="math inline">\(\beta^{(t)}\)</span> to calculate the <span class="math inline">\(\widehat{\mu}_i\)</span>, the <span class="math inline">\(r_{ij}\)</span>, <span class="math inline">\(\phi^{(t)}\)</span>, <span class="math inline">\(\rho^{(0)}\)</span>, <span class="math inline">\({\bf H}(\beta^{t})\)</span>, and <span class="math inline">\(\Psi(\beta^{(t)})\)</span>. Then update:
+iteration <span class="math inline">\(t\)</span>, then use <span class="math inline">\(\beta^{(t)}\)</span> to calculate the <span class="math inline">\(\widehat{\mu}_i\)</span>, the <span class="math inline">\(r_{ij}\)</span>, <span class="math inline">\(\phi^{(t)}\)</span>, <span class="math inline">\(\rho^{(t)}\)</span>, <span class="math inline">\({\bf H}(\beta^{t})\)</span>, and <span class="math inline">\(\Psi(\beta^{(t)})\)</span>. Then update:
 <ul>
 <li><span class="math inline">\(s_t = -({\bf
 H}(\beta^{t}))^{-1}\Psi(\beta^{(t)})\)</span></li>

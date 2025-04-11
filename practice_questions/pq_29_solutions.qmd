@@ -1,0 +1,151 @@
+---
+title: "Introducing Gaussian mixture models: solutions"
+format: html
+---
+
+1. Decreasing the distance between $\mu_1$ and $\mu_2$ (or increasing the standard deviations) makes it harder to see the two groups:
+
+```{r}
+n <- 300
+group_lambda <- c(0.5, 0.5)
+group_mu <- c(0, 2)
+group_sd <- c(1, 1)
+
+z <- sample(c(1, 2), n, replace=T, prob=group_lambda)
+x <- rnorm(n, mean=group_mu[z], sd=group_sd[z])
+
+hist(x)
+```
+
+Increasing the distance (or decreasing the standard deviations) makes it easier to distinguish the groups:
+
+```{r}
+n <- 300
+group_lambda <- c(0.5, 0.5)
+group_mu <- c(0, 2)
+group_sd <- c(0.25, 0.25)
+
+z <- sample(c(1, 2), n, replace=T, prob=group_lambda)
+x <- rnorm(n, mean=group_mu[z], sd=group_sd[z])
+
+hist(x)
+```
+
+Changing the proportions changes the relative size of the two groups:
+
+```{r}
+n <- 300
+group_lambda <- c(0.75, 0.25)
+group_mu <- c(0, 4)
+group_sd <- c(1, 1)
+
+z <- sample(c(1, 2), n, replace=T, prob=group_lambda)
+x <- rnorm(n, mean=group_mu[z], sd=group_sd[z])
+
+hist(x)
+```
+
+2. As an example, suppose we fix $\lambda$ and $\sigma$, and experiment with different values of $\mu$. With $\mu_1 = 0$ and $\mu_2 = 4$:
+
+```{r}
+library(mixtools)
+
+sink(nullfile()) # suppress output printed by normalmixEM
+n <- 300
+group_lambda <- c(0.5, 0.5)
+group_mu <- c(0, 4)
+group_sd <- c(1, 1)
+
+nsim <- 1000
+mu_ests <- matrix(nrow=nsim, ncol=2)
+for(i in 1:nsim){
+  z <- sample(c(1, 2), n, replace=T, prob=group_lambda)
+  x <- rnorm(n, mean=group_mu[z], sd=group_sd[z])
+  em_res <- normalmixEM(x, lambda = c(0.5, 0.5), k=2)
+  mu_ests[i,] <- em_res$mu
+}
+sink() # go back to normal
+
+hist(apply(mu_ests, 1, max)) # distribution of the larger mean
+hist(apply(mu_ests, 1, min)) # distribution of the smaller mean
+
+# MSE
+mean((apply(mu_ests, 1, max) - 4)^2)
+mean((apply(mu_ests, 1, min) - 0)^2)
+```
+
+But now with $\mu_1 = 0$ and $\mu_2 = 3$, we have much more variability in our estimates:
+
+```{r}
+sink(nullfile()) # suppress output printed by normalmixEM
+n <- 300
+group_lambda <- c(0.5, 0.5)
+group_mu <- c(0, 3)
+group_sd <- c(1, 1)
+
+nsim <- 1000
+mu_ests <- matrix(nrow=nsim, ncol=2)
+for(i in 1:nsim){
+  z <- sample(c(1, 2), n, replace=T, prob=group_lambda)
+  x <- rnorm(n, mean=group_mu[z], sd=group_sd[z])
+  em_res <- normalmixEM(x, lambda = c(0.5, 0.5), k=2)
+  mu_ests[i,] <- em_res$mu
+}
+sink() # go back to normal
+
+hist(apply(mu_ests, 1, max)) # distribution of the larger mean
+hist(apply(mu_ests, 1, min)) # distribution of the smaller mean
+
+# MSE
+mean((apply(mu_ests, 1, max) - 3)^2)
+mean((apply(mu_ests, 1, min) - 0)^2)
+```
+
+
+3.
+
+```{r}
+n <- 300
+group_lambda <- c(0.5, 0.5)
+group_mu <- c(0, 4)
+group_sd <- c(1, 1)
+
+z <- sample(c(1, 2), n, replace=T, prob=group_lambda)
+x <- rnorm(n, mean=group_mu[z], sd=group_sd[z])
+em_res <- normalmixEM(x, lambda = c(0.5, 0.5), k=2)
+
+est_probs <- (em_res$lambda[2] * dnorm(x, em_res$mu[2], em_res$sigma[2]))/(
+  em_res$lambda[2] * dnorm(x, em_res$mu[2], em_res$sigma[2]) + em_res$lambda[1] * dnorm(x, em_res$mu[1], em_res$sigma[1])
+)
+
+head(est_probs)
+em_res$posterior[,2] |> head()
+```
+
+4.
+
+```{r}
+c(1-mean(est_probs), mean(est_probs))
+em_res$lambda
+```
+
+5.
+
+```{r}
+sum(x*(1-est_probs))/sum(1-est_probs)
+sum(x*est_probs)/sum(est_probs)
+
+em_res$mu
+```
+
+
+6.
+
+```{r}
+sqrt(sum((x - em_res$mu[1])^2 * (1-est_probs))/sum(1-est_probs))
+sqrt(sum((x - em_res$mu[2])^2 * est_probs)/sum(est_probs))
+
+em_res$sigma
+```
+
+
