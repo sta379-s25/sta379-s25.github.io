@@ -1,0 +1,56 @@
+---
+title: "Activity: Fitting Gaussian mixture models"
+format: html
+---
+
+## Gaussian mixture model
+
+Suppose we observe data $X_1,...,X_n$, and we assume that each observation $i$ comes from one of $k$ groups. Let $Z_i \in \{1,...,k\}$ denote the group assignment. The one-dimensional Gaussian mixture model assumes that
+
+$$P(Z_i = j) = \lambda_j \hspace{1cm} j \in \{1,...,k\}$$
+
+and
+
+$$X_i | (Z_i = j) \sim N(\mu_j, \sigma_j^2)$$
+
+That is, the probability of belonging to group $j$ is $\lambda_j$, and the distribution of each group is Gaussian with its own mean $\mu_j$ and variance $\sigma_j^2$.
+
+## Parameter estimation
+
+Gaussian mixture models alternate between estimating the posterior probabilities $P(Z_i = j | X_i)$, and estimating the model parameters $\lambda$, $\mu$, and $\sigma$. The algorithm is:
+
+1. Initialize parameter guesses $\lambda^{(0)}$, $\mu^{(0)}$, $\sigma^{(0)}$
+
+2. Given current parameter estimates, compute $P^{(0)}(Z_i = j | X_i)$ for all $i, j$
+$$P^{(0)}(Z_i = j | X_i) = \dfrac{\lambda_j^{(0)} f^{(0)}(X_i | Z_i = j)}{\lambda_1^{(0)} f^{(0)}(X_i | Z_i = 1) + \cdots + \lambda_k^{(0)} f^{(0)}(X_i |Z_i = k)}$$
+where $f^{(0)}(X|Z = j)$ is the $N(\mu_j^{(0)}, (\sigma_j^{(0)})^2)$ density.
+
+3. Given current posterior probabilities $P^{(0)}(Z_i = j | X_i)$, update parameter estimates to $\lambda^{(1)}$, $\mu^{(1)}$, $\sigma^{(1)}$
+    * $\lambda_j^{(1)} = \frac{1}{n} \sum \limits_{i=1}^n P^{(0)}(Z_i = j | X_i)$
+    * $\mu_j^{(1)} = \dfrac{\sum \limits_{i=1}^n X_i P^{(0)}(Z_i = j | X_i)}{\sum \limits_{i=1}^n {P^{(0)}(Z_i = j | X_i)}}$
+    * $\sigma_j^{(1)} = \sqrt{\dfrac{\sum \limits_{i=1}^n (X_i - \mu_j^{(1)})^2 P^{(0)}(Z_i = j | X_i)}{\sum \limits_{i=1}^n {P^{(0)}(Z_i = j | X_i)}}}$
+
+4. Iterate: repeat steps 2--3 until convergence
+
+## Your task
+
+1. Using the code below, simulate data from a Gaussian mixture model with 2 groups:
+
+```{r}
+n <- 300
+group_lambda <- c(0.75, 0.25)
+group_mu <- c(0, 4)
+group_sd <- c(1, 1)
+
+z <- sample(c(1, 2), n, replace=T, prob=group_lambda)
+x <- rnorm(n, mean=group_mu[z], sd=group_sd[z])
+```
+
+2. Estimate the parameters using the algorithm described above, beginning with $\lambda^{(0)} = (0.5, 0.5)$, $\mu^{(0)} = (1, 5)$, and $\sigma^{(0)} = (0.5, 0.5)$. To define convergence in this activity, let $\theta = (\lambda, \mu, \sigma)$ be the combined vector of all model parameters. Stop when 
+$$|| \theta^{(k+1)} - \theta^{(k)} || < 10^{-6}$$
+or when 1000 iterations has been reached.
+
+3. Compare your results to the model fit from the `normalmixEM` function in the `mixtools` package.
+
+
+

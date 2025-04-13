@@ -1,0 +1,242 @@
+---
+title: "Lecture 30: Fitting Gaussian mixture models"
+author: "Ciaran Evans"
+output: beamer_presentation
+editor_options: 
+  chunk_output_type: console
+---
+
+## Last time
+
+```{r, fig.width=3.5, fig.height=2.5, message=F, warning=F, echo=F}
+library(MASS)
+library(tidyverse)
+
+geyser |>
+  ggplot(aes(x = waiting)) +
+  geom_histogram(fill="transparent", color="black") +
+  labs(x = "Time between eruptions (minutes)") +
+  theme_classic()
+```
+
+## Last time: Gaussian mixture model
+
+* Observe data $X_1,...,X_n$
+
+\bigskip
+
+* Assume each observation $i$ comes from one of $k$ groups. Let $Z_i \in \{1,...,k\}$ denote the group assignment 
+    * The group $Z$ is an unobserved (**latent**) variable
+
+**Model:** 
+
+* $P(Z_i = j) = \lambda_j$
+
+\bigskip
+
+* $X_i | (Z_i = j) \sim N(\mu_j, \sigma_j^2)$
+
+## Last time: Gaussian mixture model
+
+```{r, include=F}
+library(mixtools)
+
+em_res <- normalmixEM(geyser$waiting, lambda = c(0.5, 0.5), 
+                      k=2)
+```
+
+```{r, fig.width=3.5, fig.height=2.5, message=F, warning=F, echo=F}
+geyser |>
+  ggplot(aes(x = waiting)) +
+  geom_histogram(fill="transparent", color="black", aes(y = after_stat(density))) +
+  labs(x = "Time between eruptions (minutes)") +
+  theme_classic() +
+  stat_function(fun = function(x){0.308*dnorm(x, 54.203, 4.951)},
+                color = "blue") +
+  stat_function(fun = function(x){(1 - 0.308)*dnorm(x, 80.360, 7.508)},
+                color = "red")
+```
+
+## Group probabilities
+
+We never get to see the true group labels $Z_i$. Instead, we estimate the **probability** of belonging to each group.
+
+```{r, fig.width=3.5, fig.height=2.25, message=F, warning=F, echo=F}
+geyser |>
+  ggplot(aes(x = waiting)) +
+  geom_histogram(fill="transparent", color="black", aes(y = after_stat(density))) +
+  labs(x = "Time between eruptions (minutes)") +
+  theme_classic() +
+  stat_function(fun = function(x){0.308*dnorm(x, 54.203, 4.951)},
+                color = "blue") +
+  stat_function(fun = function(x){(1 - 0.308)*dnorm(x, 80.360, 7.508)},
+                color = "red") +
+  geom_vline(xintercept = 81, lwd=1, col="orange")
+```
+
+**Question:** If $X_i = 81$, do you think it is more likely that $Z_i = 1$ or $Z_i = 2$?
+
+## Group probabilities
+
+We never get to see the true group labels $Z_i$. Instead, we estimate the **probability** of belonging to each group.
+
+```{r, fig.width=3.5, fig.height=2.25, message=F, warning=F, echo=F}
+geyser |>
+  ggplot(aes(x = waiting)) +
+  geom_histogram(fill="transparent", color="black", aes(y = after_stat(density))) +
+  labs(x = "Time between eruptions (minutes)") +
+  theme_classic() +
+  stat_function(fun = function(x){0.308*dnorm(x, 54.203, 4.951)},
+                color = "blue") +
+  stat_function(fun = function(x){(1 - 0.308)*dnorm(x, 80.360, 7.508)},
+                color = "red") +
+  geom_vline(xintercept = 52, lwd=1, col="orange")
+```
+
+**Question:** If $X_i = 52$, do you think it is more likely that $Z_i = 1$ or $Z_i = 2$?
+
+
+## Group probabilities
+
+We never get to see the true group labels $Z_i$. Instead, we estimate the **probability** of belonging to each group.
+
+```{r, fig.width=3.5, fig.height=2.25, message=F, warning=F, echo=F}
+geyser |>
+  ggplot(aes(x = waiting)) +
+  geom_histogram(fill="transparent", color="black", aes(y = after_stat(density))) +
+  labs(x = "Time between eruptions (minutes)") +
+  theme_classic() +
+  stat_function(fun = function(x){0.308*dnorm(x, 54.203, 4.951)},
+                color = "blue") +
+  stat_function(fun = function(x){(1 - 0.308)*dnorm(x, 80.360, 7.508)},
+                color = "red") +
+  geom_vline(xintercept = 65, lwd=1, col="orange")
+```
+
+**Question:** If $X_i = 65$, do you think it is more likely that $Z_i = 1$ or $Z_i = 2$?
+
+
+## Gaussian mixture model: posterior probabilities
+
+**Model:** $P(Z_i = j) = \lambda_j \hspace{1cm} X_i | (Z_i = j) \sim N(\mu_j, \sigma_j^2)$
+
+**Parameters:** $\lambda = (\lambda_1,...,\lambda_k)$, $\mu = (\mu_1,...,\mu_k)$, $\sigma = (\sigma_1,...,\sigma_k)$
+
+Given $\lambda$, $\mu$, and $\sigma$, we would like to calculate the **posterior probability** $P(Z_i = j | X_i)$
+
+\vspace{5cm}
+
+## Estimating model parameters
+
+* If we know **true** group labels $Z_i$, it is easy to estimate $\lambda$, $\mu$, $\sigma$
+* We don't have the true $Z_i$, but we **do** have $P(Z_i = j | X_i)$
+* How do we estimate $\lambda$, $\mu$, $\sigma$ using the $P(Z_i = j | X_i)$?
+
+**Example:** Suppose we observe 6 points:
+
+\begin{tabular}{c|cccccc}
+$X$ & 45 & 50 & 65 & 66 & 80 & 90 \\
+$P(Z=2|X)$ & 1 & 1 & 0 & 0 & 0 & 0
+\end{tabular}
+
+**Question:** What is your estimate $\widehat{\lambda}_2 = \widehat{P}(Z = 2)$?
+
+\vspace{4cm}
+
+## Estimating model parameters
+
+* If we know **true** group labels $Z_i$, it is easy to estimate $\lambda$, $\mu$, $\sigma$
+* We don't have the true $Z_i$, but we **do** have $P(Z_i = j | X_i)$
+* How do we estimate $\lambda$, $\mu$, $\sigma$ using the $P(Z_i = j | X_i)$?
+
+**Example:** Suppose we observe 6 points:
+
+\begin{tabular}{c|cccccc}
+$X$ & 45 & 50 & 65 & 66 & 80 & 90 \\
+$P(Z=2|X)$ & 1 & 0.75 & 0.25 & 0 & 0 & 0
+\end{tabular}
+
+**Question:** What is your estimate $\widehat{\lambda}_2 = \widehat{P}(Z = 2)$?
+
+\vspace{4cm}
+
+## Estimating model parameters
+
+* If we know **true** group labels $Z_i$, it is easy to estimate $\lambda$, $\mu$, $\sigma$
+* We don't have the true $Z_i$, but we **do** have $P(Z_i = j | X_i)$
+* How do we estimate $\lambda$, $\mu$, $\sigma$ using the $P(Z_i = j | X_i)$?
+
+**Example:** Suppose we observe 6 points:
+
+\begin{tabular}{c|cccccc}
+$X$ & 45 & 50 & 65 & 66 & 80 & 90 \\
+$P(Z=2|X)$ & 1 & 1 & 0 & 0 & 0 & 0
+\end{tabular}
+
+**Question:** What is your estimate $\widehat{\mu}_2$?
+
+\vspace{4cm}
+
+## Estimating model parameters
+
+* If we know **true** group labels $Z_i$, it is easy to estimate $\lambda$, $\mu$, $\sigma$
+* We don't have the true $Z_i$, but we **do** have $P(Z_i = j | X_i)$
+* How do we estimate $\lambda$, $\mu$, $\sigma$ using the $P(Z_i = j | X_i)$?
+
+**Example:** Suppose we observe 6 points:
+
+\begin{tabular}{c|cccccc}
+$X$ & 45 & 50 & 65 & 66 & 80 & 90 \\
+$P(Z=2|X)$ & 1 & 0.75 & 0.25 & 0 & 0 & 0
+\end{tabular}
+
+**Question:** What is your estimate $\widehat{\mu}_2$?
+
+\vspace{4cm}
+
+## Posterior probabilities and parameter estimation
+
+* **If** we know the parameters $\lambda$, $\mu$, $\sigma$, we can calculate posterior probabilities:
+
+\vspace{-0.3cm}
+
+$$P(Z_i = j | X_i) = \dfrac{\lambda_j f(X_i | Z_i = j)}{\lambda_1 f(X_i | Z_i = 1) + \cdots + \lambda_k f(X_i |Z_i = k)}$$
+
+
+* **If** we know the posterior probabilities, we can estimate the model parameters $\lambda$, $\mu$, and $\sigma$:
+
+    * $\widehat{\lambda}_j = \frac{1}{n} \sum \limits_{i=1}^n P(Z_i = j | X_i)$
+    * $\widehat{\mu}_j = \dfrac{\sum \limits_{i=1}^n X_i P(Z_i = j | X_i)}{\sum \limits_{i=1}^n {P(Z_i = j | X_i)}}$
+    * $\widehat{\sigma}_j = \sqrt{\dfrac{\sum \limits_{i=1}^n (X_i - \widehat{\mu}_j)^2 P(Z_i = j | X_i)}{\sum \limits_{i=1}^n {P(Z_i = j | X_i)}}}$
+
+
+## Putting everything together
+
+**Model:** $P(Z_i = j) = \lambda_j \hspace{1cm} X_i | (Z_i = j) \sim N(\mu_j, \sigma_j^2)$
+
+**Parameters:** $\lambda = (\lambda_1,...,\lambda_k)$, $\mu = (\mu_1,...,\mu_k)$, $\sigma = (\sigma_1,...,\sigma_k)$
+
+**Estimation:**
+
+1. Initialize parameter guesses $\lambda^{(0)}$, $\mu^{(0)}$, $\sigma^{(0)}$
+
+2. Given current parameter estimates, compute $P^{(0)}(Z_i = j | X_i)$ for all $i, j$
+
+3. Given current posterior probabilities $P^{(0)}(Z_i = j | X_i)$, update parameter estimates to $\lambda^{(1)}$, $\mu^{(1)}$, $\sigma^{(1)}$
+
+4. Iterate: repeat steps 2--3 until convergence
+
+## Your turn
+
+Implement the algorithm to fit a Gaussian mixture model:
+
+[https://sta379-s25.github.io/practice_questions/pq_30.html](https://sta379-s25.github.io/practice_questions/pq_30.html)
+
+* Start in class
+* Welcome to work with a neighbor
+* Solutions will be posted later on the course website
+
+
+
+
+
