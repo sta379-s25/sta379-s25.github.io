@@ -1,0 +1,85 @@
+---
+title: "Fitting Gaussian mixture models: solutions"
+format: html
+---
+
+```{r, message=F, warning=F}
+library(mixtools)
+library(MASS)
+
+old_faithful <- cbind(geyser$duration[1:298], geyser$waiting[2:299])
+
+calc_probs <- function(x, lambda, mu, sigma){
+  (lambda[2] * dmvnorm(x, mu[[2]], sigma[[2]]))/(
+    lambda[2] * dmvnorm(x, mu[[2]], sigma[[2]]) + 
+      lambda[1] * dmvnorm(x, mu[[1]], sigma[[1]])
+  )
+}
+
+
+update_lambda <- function(probs){
+  lambda2 <- mean(probs)
+  return(c(1-lambda2, lambda2))
+}
+
+update_mu <- function(x, probs){
+  mu1 <- colSums(x * (1-probs))/sum(1 - probs)
+  mu2 <- colSums(x*probs)/sum(probs)
+  return(list("mu1" = mu1, "mu2" = mu2))
+}
+
+update_sigma <- function(x, probs, mu){
+  x1 <- sweep(x, 2, mu[[1]], "-")
+  x2 <- sweep(x, 2, mu[[2]], "-")
+  
+  sigma1 <- (t(x1) %*% diag(1 - probs) %*% x1)/sum(1 - probs)
+  sigma2 <- (t(x2) %*% diag(probs) %*% x2)/sum(probs)
+  
+  return(list("sigma1" = sigma1, "sigma2" = sigma2))
+}
+
+
+gaussian_em2 <- function(x, lambda, mu, sigma, epsilon = 1e-6, max_iter = 1000){
+  norm_diff <- epsilon + 1
+  theta <- c(lambda, unlist(mu), unlist(sigma))
+  iter_count <- 0
+  while(norm_diff > epsilon && iter_count < max_iter){
+    probs <- calc_probs(x, lambda, mu, sigma)
+    lambda <- update_lambda(probs)
+    mu <- update_mu(x, probs)
+    sigma <- update_sigma(x, probs, mu)
+    theta_new <- c(lambda, unlist(mu), unlist(sigma))
+    norm_diff <- sqrt(sum((theta_new - theta)^2))
+    theta <- theta_new
+    iter_count <- iter_count + 1
+  }
+  
+  return(list("lambda" = lambda,
+              "mu" = mu,
+              "sigma" = sigma,
+              "iterations" = iter_count))
+}
+```
+
+```{r}
+em_res1 <- mvnormalmixEM(old_faithful, 
+                        lambda = c(0.5, 0.5), k=2)
+
+em_res2 <- gaussian_em2(old_faithful, c(0.5, 0.5), 
+                        mu = list(c(2.5, 60), c(4.5, 90)),
+                        sigma = list(diag(2), diag(2)))
+```
+
+```{r}
+em_res1$lambda
+em_res2$lambda
+
+em_res1$mu
+em_res2$mu
+
+em_res1$sigma
+em_res2$sigma
+```
+
+
+

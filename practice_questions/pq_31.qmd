@@ -1,0 +1,126 @@
+---
+title: "Activity: Fitting Gaussian mixture models"
+format: html
+---
+
+## Gaussian mixture model
+
+Suppose we observe data $X_1,...,X_n \in \mathbb{R}^d$, and we assume that each observation $i$ comes from one of $k$ groups. Let $Z_i \in \{1,...,k\}$ denote the group assignment. The multivariate Gaussian mixture model assumes that
+
+$$P(Z_i = j) = \lambda_j \hspace{1cm} j \in \{1,...,k\}$$
+
+and
+
+$$X_i | (Z_i = j) \sim MVN(\mu_j, \Sigma_j)$$
+
+where $MVN(\mu_j, \Sigma_j)$ is the multivariate normal distribution with mean vector $\mu_j \in \mathbb{R}^d$, and variance-covariance matrix $\Sigma_j \in \mathbb{R}^{d \times d}$
+
+That is, the probability of belonging to group $j$ is $\lambda_j$, and the distribution of each group is multivariate Gaussian with its own mean $\mu_j$ and variance-covariance matrix $\Sigma_j$.
+
+## Parameter estimation
+
+Gaussian mixture models alternate between estimating the posterior probabilities $P(Z_i = j | X_i)$, and estimating the model parameters $\lambda = (\lambda_1,...,\lambda_k)$, $\mu = (\mu_1,...,\mu_k)$, and $\Sigma = (\Sigma_1,...,\Sigma_k)$. The algorithm is:
+
+1. Initialize parameter guesses $\lambda^{(0)}$, $\mu^{(0)}$, $\Sigma^{(0)}$
+
+2. Given current parameter estimates, compute $P^{(0)}(Z_i = j | X_i)$ for all $i, j$
+$$P^{(0)}(Z_i = j | X_i) = \dfrac{\lambda_j^{(0)} f^{(0)}(X_i | Z_i = j)}{\lambda_1^{(0)} f^{(0)}(X_i | Z_i = 1) + \cdots + \lambda_k^{(0)} f^{(0)}(X_i |Z_i = k)}$$
+where $f^{(0)}(X|Z = j)$ is the $MVN(\mu_j^{(0)}, \Sigma_j^{(0)})$ density.
+
+3. Given current posterior probabilities $P^{(0)}(Z_i = j | X_i)$, update parameter estimates to $\lambda^{(1)}$, $\mu^{(1)}$, $\Sigma^{(1)}$
+    * $\lambda_j^{(1)} = \frac{1}{n} \sum \limits_{i=1}^n P^{(0)}(Z_i = j | X_i)$
+    * $\mu_j^{(1)} = \dfrac{\sum \limits_{i=1}^n X_i P^{(0)}(Z_i = j | X_i)}{\sum \limits_{i=1}^n {P^{(0)}(Z_i = j | X_i)}}$
+    * $\Sigma_j^{(1)} = \dfrac{\sum \limits_{i=1}^n (X_i - \mu_j^{(1)})(X_i - \mu_j^{(1)})^T P^{(0)}(Z_i = j | X_i)}{\sum \limits_{i=1}^n {P^{(0)}(Z_i = j | X_i)}}$
+
+4. Iterate: repeat steps 2--3 until convergence
+
+## Your task
+
+The code below creates the a matrix called `old_faithful` which stores the geyser data we have used as an example in class, and then uses the `mixtools` package to fit a 2-component multivariate Gaussian mixture model:
+
+```{r, message=F, warning=F}
+library(mixtools)
+library(MASS)
+
+old_faithful <- cbind(geyser$duration[1:298], geyser$waiting[2:299])
+em_res1 <- mvnormalmixEM(old_faithful, 
+                        lambda = c(0.5, 0.5), k=2)
+```
+
+### Calculating posterior probabilities
+
+Suppose we initialize the EM algorithm at the following points:
+
+$$\lambda^{(0)} = (0.5, 0.5) \hspace{1cm} \mu_1^{(0)} = (2.5, 60) \hspace{0.5cm} \mu_2^{(0)} = (4.5, 90) \hspace{1cm} \Sigma_1^{(0)} = \Sigma_2^{(0)} = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}$$
+
+1. Fill in the following code to calculate the posterior probabilities $P^{(0)}(Z_i = 2 | X_i)$. (The `dmvnorm` function in the `mixtools` package provides the density of a multivariate normal distribution).
+
+```{r, eval=F}
+lambda <- c(0.5, 0.5)
+mu = list(c(2.5, 60), c(4.5, 90))
+sigma = list(diag(2), diag(2))
+x <- old_faithful
+
+probs <- (... * dmvnorm(x, mu = ..., sigma = ...)) /
+  (... * dmvnorm(x, mu = ..., sigma = ...) + ... * dmvnorm(x, mu = ..., sigma = ...))
+```
+
+### Updating group probabilities
+
+We first use the posterior probabilities to re-estimate $\lambda_j$ for each group. We have
+
+$$\lambda_j^{(1)} = \frac{1}{n} \sum \limits_{i=1}^n P^{(0)}(Z_i = j | X_i)$$
+
+2. Using the posterior probabilities from question 1, calculate $\lambda_1^{(1)}$ and $\lambda_2^{(1)}$.
+
+### Updating the mean
+
+Now we want to use these posterior probabilities to re-estimate the mean in each group. We have that
+
+$$\mu_j^{(1)} = \dfrac{\sum \limits_{i=1}^n X_i P^{(0)}(Z_i = j | X_i)}{\sum \limits_{i=1}^n {P^{(0)}(Z_i = j | X_i)}}$$
+
+Note that in this expression, the $X_i$ are $d$-dimensional **vectors**. In R, we could calculate the updated means with a for loop, or we could use the `colSums` function (which calculates the sum for each column in a matrix). In this case, our matrix is `x` (the geyser data).
+
+3. Fill in the following code to calculate the updated mean $\mu_2^{(1)}$ in group 2, using the posterior probabilities from question 1:
+
+```{r, eval=F}
+mu2 <- colSums(x*...)/sum(...)
+```
+
+4. Now modify your code in question 3 to calculate the updated mean $\mu^{(1)}_1$ in group 1.
+
+### Updating the variance-covariance matrix
+
+We also want to update the variance-covariance matrix in each group. The update rule is
+
+$$\Sigma_j^{(1)} = \dfrac{\sum \limits_{i=1}^n (X_i - \mu_j^{(1)})(X_i - \mu_j^{(1)})^T P^{(0)}(Z_i = j | X_i)}{\sum \limits_{i=1}^n {P^{(0)}(Z_i = j | X_i)}}$$
+
+As with the mean, we could calculate this with a for loop, but we can also use a matrix shortcut. Let 
+
+$${\bf X} = \begin{pmatrix} X_{11} & X_{12} \\ X_{21} & X_{22} \\ \vdots & \vdots \\ X_{n1} & X_{n2} \end{pmatrix}$$
+and subtract the mean for group $j$:
+
+$${\bf X}_j^* = \begin{pmatrix} X_{11} & X_{12} \\ X_{21} & X_{22} \\ \vdots & \vdots \\ X_{n1} & X_{n2} \end{pmatrix} - \begin{pmatrix} \mu_{j1}^{(1)} & \mu_{j2}^{(1)} \\ \mu_{j1}^{(1)} & \mu_{j2}^{(1)} \\ \vdots & \vdots \\ \mu_{j1}^{(1)} & \mu_{j2}^{(1)} \end{pmatrix}$$
+
+Then,
+
+$$\Sigma_j^{(1)} = \frac{1}{\sum_{i=1}^n P^{(0)}(Z_i = j | X_i)}  ({\bf X}_j^*)^T {\bf P}_j {\bf X}_j^*$$
+
+where ${\bf P}_j = \text{diag}(P^{(0)}(Z_i = j | X_i))$.
+
+5. Fill in the code below to calculate $\Sigma_1^{(1)}$ and $\Sigma_2^{(1)}$:
+
+```{r, eval=F}
+x1 <- sweep(x, 2, mu1, "-")
+x2 <- sweep(x, 2, mu2, "-")
+
+sigma1 <- (t(x1) %*% diag(...) %*% x1)/sum(...)
+sigma2 <- (t(x2) %*% diag(..) %*% x2)/sum(...)
+```
+
+
+### Iterating
+
+6. Repeat the process (computing posterior probabilities and updating the parameters) 50 times. Compare your final parameter estimates with the results of the `mvnormalmixEM` function.
+
+

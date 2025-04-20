@@ -1,0 +1,114 @@
+---
+title: "Fitting Gaussian mixture models: solutions"
+format: html
+---
+
+```{r, message=F, warning=F}
+library(mixtools)
+library(MASS)
+
+old_faithful <- cbind(geyser$duration[1:298], geyser$waiting[2:299])
+em_res1 <- mvnormalmixEM(old_faithful, 
+                        lambda = c(0.5, 0.5), k=2)
+```
+
+1.
+
+```{r}
+lambda <- c(0.5, 0.5)
+mu = list(c(2.5, 60), c(4.5, 90))
+sigma = list(diag(2), diag(2))
+x <- old_faithful
+
+probs <- (lambda[2] * dmvnorm(x, mu = mu[[2]], sigma = sigma[[2]])) /
+  (lambda[1] * dmvnorm(x, mu = mu[[1]], sigma = sigma[[1]]) + 
+     lambda[2] * dmvnorm(x, mu = mu[[2]], sigma = sigma[[2]]))
+
+head(probs)
+```
+
+2.
+
+```{r}
+lambda <- c(mean(1 - probs),
+            mean(probs))
+
+lambda
+```
+
+3.
+
+```{r}
+mu2 <- colSums(x*probs)/sum(probs)
+mu2
+```
+
+4.
+
+```{r}
+mu1 <- colSums(x*(1-probs))/sum(1-probs)
+mu1
+```
+
+```{r}
+mu <- list(mu1, mu2)
+```
+
+
+5.
+
+```{r}
+x1 <- sweep(x, 2, mu1, "-")
+x2 <- sweep(x, 2, mu2, "-")
+
+sigma1 <- (t(x1) %*% diag(1-probs) %*% x1)/sum(1-probs)
+sigma2 <- (t(x2) %*% diag(probs) %*% x2)/sum(probs)
+
+sigma1
+sigma2
+```
+
+6.
+
+```{r}
+x <- old_faithful
+
+lambda <- c(0.5, 0.5)
+mu = list(c(2.5, 60), c(4.5, 90))
+sigma = list(diag(2), diag(2))
+
+for(i in 1:50){
+  # posterior probabilities
+  probs <- (lambda[2] * dmvnorm(x, mu = mu[[2]], sigma = sigma[[2]])) /
+    (lambda[1] * dmvnorm(x, mu = mu[[1]], sigma = sigma[[1]]) + 
+      lambda[2] * dmvnorm(x, mu = mu[[2]], sigma = sigma[[2]]))
+  
+  # update lambda
+  lambda <- c(mean(1 - probs),
+            mean(probs))
+  
+  # update mu
+  mu1 <- colSums(x*(1-probs))/sum(1-probs)
+  mu2 <- colSums(x*probs)/sum(probs)
+  mu <- list(mu1, mu2)
+  
+  # update sigma
+  x1 <- sweep(x, 2, mu1, "-")
+  x2 <- sweep(x, 2, mu2, "-")
+  
+  sigma1 <- (t(x1) %*% diag(1-probs) %*% x1)/sum(1-probs)
+  sigma2 <- (t(x2) %*% diag(probs) %*% x2)/sum(probs)
+  sigma <- list(sigma1, sigma2)
+}
+
+em_res1$lambda
+lambda
+
+em_res1$mu
+mu
+
+em_res1$sigma
+sigma
+```
+
+

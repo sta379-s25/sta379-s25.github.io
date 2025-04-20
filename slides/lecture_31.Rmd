@@ -1,0 +1,244 @@
+---
+title: "Lecture 31: Gaussian mixture models with multivariate data"
+author: "Ciaran Evans"
+output: beamer_presentation
+editor_options: 
+  chunk_output_type: console
+---
+
+## Previously
+
+```{r, fig.width=3.5, fig.height=2.5, message=F, warning=F, echo=F}
+library(MASS)
+library(tidyverse)
+library(mixtools)
+
+geyser |>
+  ggplot(aes(x = waiting)) +
+  geom_histogram(fill="transparent", color="black") +
+  labs(x = "Time between eruptions (minutes)") +
+  theme_classic()
+```
+
+## Previously: Gaussian mixture model
+
+* Observe data $X_1,...,X_n$
+
+\bigskip
+
+* Assume each observation $i$ comes from one of $k$ groups. Let $Z_i \in \{1,...,k\}$ denote the group assignment 
+    * The group $Z$ is an unobserved (**latent**) variable
+
+**Model:** 
+
+* $P(Z_i = j) = \lambda_j$
+
+\bigskip
+
+* $X_i | (Z_i = j) \sim N(\mu_j, \sigma_j^2)$
+
+## Posterior probabilities and parameter estimation
+
+* **If** we know the parameters $\lambda$, $\mu$, $\sigma$, we can calculate posterior probabilities:
+
+\vspace{-0.3cm}
+
+$$P(Z_i = j | X_i) = \dfrac{\lambda_j f(X_i | Z_i = j)}{\lambda_1 f(X_i | Z_i = 1) + \cdots + \lambda_k f(X_i |Z_i = k)}$$
+
+
+* **If** we know the posterior probabilities, we can estimate the model parameters $\lambda$, $\mu$, and $\sigma$:
+
+    * $\widehat{\lambda}_j = \frac{1}{n} \sum \limits_{i=1}^n P(Z_i = j | X_i)$
+    * $\widehat{\mu}_j = \dfrac{\sum \limits_{i=1}^n X_i P(Z_i = j | X_i)}{\sum \limits_{i=1}^n {P(Z_i = j | X_i)}}$
+    * $\widehat{\sigma}_j = \sqrt{\dfrac{\sum \limits_{i=1}^n (X_i - \widehat{\mu}_j)^2 P(Z_i = j | X_i)}{\sum \limits_{i=1}^n {P(Z_i = j | X_i)}}}$
+
+
+## Putting everything together
+
+**Model:** $P(Z_i = j) = \lambda_j \hspace{1cm} X_i | (Z_i = j) \sim N(\mu_j, \sigma_j^2)$
+
+**Parameters:** $\lambda = (\lambda_1,...,\lambda_k)$, $\mu = (\mu_1,...,\mu_k)$, $\sigma = (\sigma_1,...,\sigma_k)$
+
+**Estimation:**
+
+1. Initialize parameter guesses $\lambda^{(0)}$, $\mu^{(0)}$, $\sigma^{(0)}$
+
+2. Given current parameter estimates, compute $P^{(0)}(Z_i = j | X_i)$ for all $i, j$
+
+3. Given current posterior probabilities $P^{(0)}(Z_i = j | X_i)$, update parameter estimates to $\lambda^{(1)}$, $\mu^{(1)}$, $\sigma^{(1)}$
+
+4. Iterate: repeat steps 2--3 until convergence
+
+
+## Multivariate data
+
+Penguin data:
+
+```{r echo=F, message=F, warning=F, fig.width=3.25, fig.height=2.5}
+library(palmerpenguins)
+
+penguins |>
+  ggplot(aes(x = bill_depth_mm, y = bill_length_mm)) +
+  geom_point(size=1) +
+  labs(x = "Bill depth (mm)", y = "Bill length (mm)") +
+  theme_classic()
+```
+
+**Question:** What do you notice about this scatterplot?
+
+## Multivariate data
+
+
+```{r echo=F, message=F, warning=F, fig.width=3.25, fig.height=3}
+library(palmerpenguins)
+
+penguins |>
+  ggplot(aes(x = bill_depth_mm, y = bill_length_mm, color = species)) +
+  geom_point(size=1) +
+  labs(x = "Bill depth (mm)", y = "Bill length (mm)") +
+  theme_classic() +
+  theme(legend.position = "bottom")
+```
+
+## Multivariate data
+
+```{r echo=F, message=F, warning=F, fig.width=3.25, fig.height=2.5}
+data.frame(x = geyser$waiting[2:299], y = geyser$duration[1:298]) |>
+  ggplot(aes(x = y, y = x)) +
+  geom_point(size = 0.5) +
+  labs(y = "Time between eruptions (minutes)",
+       x = "Duration of eruption (minutes)") +
+  theme_classic()
+```
+
+**Question:** How should we generalize our Gaussian mixture model to multivariate data?
+
+## Multivariate normal distribution
+
+**Definition:** Let $X = (X_1,...,X_k)^T$. We say that $X \sim N(\mu, \Sigma)$ if for any ${\bf a} \in \mathbb{R}^k$, ${\bf a}^T X$ follows a (univariate) normal distribution.
+
+* $\mu =$
+
+\vspace{2cm}
+
+* $\Sigma =$
+
+\vspace{2cm}
+
+## Multivariate normal distribution
+
+```{r, echo=F, message=F, warning=F, fig.align='center', fig.width=3.5, fig.height=3.5}
+library(MASS)
+library(patchwork)
+library(tidyverse)
+y <- mvrnorm(1000, mu=c(0, 0), Sigma = diag(2))
+
+p1 <- data.frame(x1 = y[,1], x2 = y[,2]) |>
+  ggplot(aes(x = x1, y = x2)) +
+  geom_point(alpha = 0.2, size=0.3) +
+  stat_ellipse(type="norm", level = 0.5) +
+  stat_ellipse(type="norm", level = 0.7) +
+  stat_ellipse(type="norm", level = 0.9) +
+  theme_classic()
+
+y <- mvrnorm(1000, mu=c(0, 0), Sigma = diag(c(1, 5)))
+
+p2 <- data.frame(x1 = y[,1], x2 = y[,2]) |>
+  ggplot(aes(x = x1, y = x2)) +
+  geom_point(alpha = 0.2, size=0.3) +
+  stat_ellipse(type="norm", level = 0.5) +
+  stat_ellipse(type="norm", level = 0.7) +
+  stat_ellipse(type="norm", level = 0.9) +
+  theme_classic() +
+  scale_x_continuous(limits = c(-6, 6)) +
+  scale_y_continuous(limits = c(-6, 6))
+
+y <- mvrnorm(1000, mu=c(0, 0), Sigma = matrix(c(1, 0.75, 0.75, 1), nrow=2))
+
+p3 <- data.frame(x1 = y[,1], x2 = y[,2]) |>
+  ggplot(aes(x = x1, y = x2)) +
+  geom_point(alpha = 0.2, size=0.3) +
+  stat_ellipse(type="norm", level = 0.5) +
+  stat_ellipse(type="norm", level = 0.7) +
+  stat_ellipse(type="norm", level = 0.9) +
+  theme_classic() +
+  scale_x_continuous(limits = c(-3, 3)) +
+  scale_y_continuous(limits = c(-3, 3))
+
+(p1 + p2)/(p3 + plot_spacer())
+
+#alpha_levels <- c(0.5, 0.9)
+#contour_data <- data.table::rbindlist(lapply(alpha_levels,ellipse,x=diag(2),
+#      scale=c(1,1),  ## needed for positional matching
+#      centre=c(0, 0)))
+```
+
+## Multivariate Gaussian mixture model
+
+
+```{r, include=F}
+old_faithful <- cbind(geyser$duration[1:298], geyser$waiting[2:299])
+em_res <- mvnormalmixEM(old_faithful, 
+                        lambda = c(0.5, 0.5), k=2)
+```
+
+```{r, eval=F}
+em_res <- mvnormalmixEM(old_faithful, 
+                        lambda = c(0.5, 0.5), k=2)
+```
+
+
+```{r echo=F, message=F, warning=F, fig.width=2.5, fig.height=1.7}
+data.frame(x = geyser$waiting[2:299], y = geyser$duration[1:298]) |>
+  ggplot(aes(x = y, y = x)) +
+  geom_point(size = 0.5, alpha=0.3) +
+  #geom_point(aes(x = 2, y = 55), color="red") +
+  annotate("point", x = c(2, 4.25), y = c(55.43, 81.11), color="red") +
+  labs(y = "Time between eruptions (minutes)",
+       x = "Duration of eruption (minutes)") +
+  theme_classic()
+```
+
+
+```{r}
+em_res$mu[[1]]
+em_res$mu[[2]]
+```
+
+
+## Multivariate Gaussian mixture model
+
+```{r echo=F, message=F, warning=F, fig.width=3.25, fig.height=3}
+data.frame(x = geyser$waiting[2:299], y = geyser$duration[1:298]) |>
+  ggplot(aes(x = y, y = x)) +
+  geom_point(size = 0.5, alpha=0.3) +
+  #geom_point(aes(x = 2, y = 55), color="red") +
+  annotate("point", x = c(2, 4.25), y = c(55.43, 81.11), color="red") +
+  labs(y = "Time between eruptions (minutes)",
+       x = "Duration of eruption (minutes)") +
+  stat_ellipse(aes(group = as.factor(round(em_res$posterior[,2]))),
+               type="norm", level = 0.5) +
+  stat_ellipse(aes(group = as.factor(round(em_res$posterior[,2]))),
+               type="norm", level = 0.7) +
+  stat_ellipse(aes(group = as.factor(round(em_res$posterior[,2]))),
+               type="norm", level = 0.9) +
+  theme_classic()
+```
+
+## Your turn
+
+Implement the algorithm to fit a Gaussian mixture model:
+
+[https://sta379-s25.github.io/practice_questions/pq_31.html](https://sta379-s25.github.io/practice_questions/pq_31.html)
+
+* Start in class
+* Welcome to work with a neighbor
+* Solutions will be posted later on the course website
+
+
+
+
+
+
+
+

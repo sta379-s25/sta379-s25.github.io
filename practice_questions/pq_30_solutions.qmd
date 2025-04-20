@@ -1,0 +1,81 @@
+---
+title: "Fitting Gaussian mixture models: solutions"
+format: html
+---
+
+```{r, message=F, warning=F}
+library(mixtools)
+
+calc_probs <- function(x, lambda, mu, sigma){
+  (lambda[2] * dnorm(x, mu[2], sigma[2]))/(
+    lambda[2] * dnorm(x, mu[2], sigma[2]) + lambda[1] * dnorm(x, mu[1], sigma[1])
+  )
+}
+
+
+update_lambda <- function(probs){
+  lambda2 <- mean(probs)
+  return(c(1-lambda2, lambda2))
+}
+
+update_mu <- function(x, probs){
+  mu1 <- sum(x*(1-probs))/sum(1-probs)
+  mu2 <- sum(x*probs)/sum(probs)
+  return(c(mu1, mu2))
+}
+
+update_sigma <- function(x, probs, mu){
+  var1 <- sum((x - mu[1])^2 * (1-probs))/sum(1-probs)
+  var2 <- sum((x - mu[2])^2 * probs)/sum(probs)
+  return(c(sqrt(var1), sqrt(var2)))
+}
+
+
+gaussian_em2 <- function(x, lambda, mu, sigma, epsilon = 1e-6, max_iter = 1000){
+  norm_diff <- epsilon + 1
+  theta <- c(lambda, mu, sigma)
+  iter_count <- 0
+  while(norm_diff > epsilon && iter_count < max_iter){
+    probs <- calc_probs(x, lambda, mu, sigma)
+    lambda <- update_lambda(probs)
+    mu <- update_mu(x, probs)
+    sigma <- update_sigma(x, probs, mu)
+    theta_new <- c(lambda, mu, sigma)
+    norm_diff <- sqrt(sum((theta_new - theta)^2))
+    theta <- theta_new
+    iter_count <- iter_count + 1
+  }
+  
+  return(list("lambda" = lambda,
+              "mu" = mu,
+              "sigma" = sigma,
+              "iterations" = iter_count))
+}
+
+
+
+
+
+n <- 300
+group_lambda <- c(0.75, 0.25)
+group_mu <- c(0, 4)
+group_sd <- c(1, 1)
+
+z <- sample(c(1, 2), n, replace=T, prob=group_lambda)
+x <- rnorm(n, mean=group_mu[z], sd=group_sd[z])
+
+
+em_res1 <- gaussian_em2(x, c(0.5, 0.5), c(1, 5), c(0.5, 0.5))
+
+em_res2 <- normalmixEM(x, lambda = c(0.5, 0.5), k=2)
+
+em_res1$lambda
+em_res2$lambda
+
+em_res1$mu
+em_res2$mu
+
+em_res1$sigma
+em_res2$sigma
+```
+
