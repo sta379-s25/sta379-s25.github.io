@@ -1,0 +1,155 @@
+---
+title: "Homework 8"
+output: 
+  rmdformats::robobook:
+    css: "homework.css"
+    highlight: pygments
+link-citations: yes
+---
+
+**Due:** Monday April 28, 10pm
+
+**Submission:** For this assignment, you will submit one file:
+
+* An R script (`hw8_code.R`) containing your function for question 1 (submitted to GitHub)
+
+**Grading:** You will receive a score out of 1 for the number of questions mastered. To master a question, you must satisfy the following requirements:
+
+* Function implementations must pass all specified unit tests, *as written* (you may not modify the unit tests which I provide)
+* Your code must meet all requirements described in the questions below (matching the requested inputs and outputs)
+* You must comment your code
+* Your work must abide by the academic honesty requirements in the syllabus 
+
+If you make an honest effort to answer all questions, but you do not master all of the questions on your first submission, you will have one resubmission attempt after receiving feedback.
+
+**Resources:** The solutions to the class activity on Monday, April 21 may be very helpful!
+
+# Multivariate Gaussian mixture model
+
+Suppose we observe data $X_1,...,X_n \in \mathbb{R}^d$, and we assume that each observation $i$ comes from one of $k$ groups. Let $Z_i \in \{1,...,k\}$ denote the group assignment. The multivariate Gaussian mixture model assumes that
+
+$$P(Z_i = j) = \lambda_j \hspace{1cm} j \in \{1,...,k\}$$
+
+and
+
+$$X_i | (Z_i = j) \sim MVN(\mu_j, \Sigma_j)$$
+
+where $MVN(\mu_j, \Sigma_j)$ is the multivariate normal distribution with mean vector $\mu_j \in \mathbb{R}^d$, and variance-covariance matrix $\Sigma_j \in \mathbb{R}^{d \times d}$
+
+That is, the probability of belonging to group $j$ is $\lambda_j$, and the distribution of each group is multivariate Gaussian with its own mean $\mu_j$ and variance-covariance matrix $\Sigma_j$.
+
+## Parameter estimation
+
+Gaussian mixture models alternate between estimating the posterior probabilities $P(Z_i = j | X_i)$, and estimating the model parameters $\lambda = (\lambda_1,...,\lambda_k)$, $\mu = (\mu_1,...,\mu_k)$, and $\Sigma = (\Sigma_1,...,\Sigma_k)$. The algorithm is:
+
+1. Initialize parameter guesses $\lambda^{(0)}$, $\mu^{(0)}$, $\Sigma^{(0)}$
+
+2. Given current parameter estimates, compute $P^{(0)}(Z_i = j | X_i)$ for all $i, j$
+$$P^{(0)}(Z_i = j | X_i) = \dfrac{\lambda_j^{(0)} f^{(0)}(X_i | Z_i = j)}{\lambda_1^{(0)} f^{(0)}(X_i | Z_i = 1) + \cdots + \lambda_k^{(0)} f^{(0)}(X_i |Z_i = k)}$$
+where $f^{(0)}(X|Z = j)$ is the $MVN(\mu_j^{(0)}, \Sigma_j^{(0)})$ density.
+
+3. Given current posterior probabilities $P^{(0)}(Z_i = j | X_i)$, update parameter estimates to $\lambda^{(1)}$, $\mu^{(1)}$, $\Sigma^{(1)}$
+    * $\lambda_j^{(1)} = \frac{1}{n} \sum \limits_{i=1}^n P^{(0)}(Z_i = j | X_i)$
+    * $\mu_j^{(1)} = \dfrac{\sum \limits_{i=1}^n X_i P^{(0)}(Z_i = j | X_i)}{\sum \limits_{i=1}^n {P^{(0)}(Z_i = j | X_i)}}$
+    * $\Sigma_j^{(1)} = \dfrac{\sum \limits_{i=1}^n (X_i - \mu_j^{(1)})(X_i - \mu_j^{(1)})^T P^{(0)}(Z_i = j | X_i)}{\sum \limits_{i=1}^n {P^{(0)}(Z_i = j | X_i)}}$
+
+4. Iterate: repeat steps 2--3 until convergence
+
+## Convergence
+
+Define the log-likelihood
+
+$$\ell(\lambda, \mu, \Sigma) = \sum \limits_{i=1}^n \log \left( \sum \limits_{j=1}^k \lambda_j f(X_i | Z_i = j) \right)$$
+where $f(X | Z = j)$ is the $MVN(\mu_j, \Sigma_j)$ density.
+
+We say that the algorithm has converged when
+
+$$| \ell(\lambda^{(t+1)}, \mu^{(t+1)}, \Sigma^{(t+1)}) - \ell(\lambda^{(t)}, \mu^{(t)}, \Sigma^{(t)})| < \varepsilon$$
+for some small number $\varepsilon$ (e.g., $10^{-8}$).
+
+## Initialization
+
+A common approach to initialize the EM algorithm for a Gaussian mixture model is to use the k-means clustering algorithm. The k-means clustering algorithm assigns each observation in the data to one of $k$ groups.
+
+Here is an example of the k-means clustering algorithm in R, with $k=3$ groups:
+
+```{r, message=F, echo=F}
+library(tidyverse)
+library(palmerpenguins)
+
+x <- penguins |>
+    dplyr::select(bill_length_mm, bill_depth_mm) |>
+    drop_na()
+
+em_init <- kmeans(x, 3)
+```
+
+The estimated means for each group are contained in the `centers` attribute:
+
+```{r}
+em_init$centers
+```
+
+And the group assignments are stored in the `cluster` attribute:
+
+```{r, eval=F}
+em_init$cluster
+```
+
+We can see that the k-means algorithm does a reasonable job finding the clusters due to different penguin species, but it certainly isn't perfect:
+
+```{r}
+x |>
+  ggplot(aes(x = bill_length_mm, y = bill_depth_mm, 
+             color = as.factor(em_init$cluster))) +
+  geom_point() +
+  theme_bw() +
+  labs(x = "Bill length", y = "Bill depth", color = "Group")
+```
+
+Now we can use those group assignments to estimate the initial parameters $\lambda^{(0)}$, $\mu^{(0)}$, and $\Sigma^{(0)}$. Let $G_i$ be the group assignment from k-means for the $i$th observation in the data (i.e., the `cluster` attribute in R). Then,
+
+$$\lambda_j^{(0)} = \frac{1}{n} \sum \limits_{i=1}^n \mathbb{I}\{G_i = j\}$$
+
+
+$$\mu_j^{(0)} = \dfrac{\sum \limits_{i=1}^n X_i \mathbb{I}\{G_i = j\}}{\sum \limits_{i=1}^n {\mathbb{I}\{G_i = j\}}}$$
+
+$$\Sigma_j^{(0)} = \dfrac{\sum \limits_{i=1}^n (X_i - \mu_j^{(0)})(X_i - \mu_j^{(0)})^T \mathbb{I}\{G_i = j\}}{\sum \limits_{i=1}^n {\mathbb{I}\{G_i = j\}}}$$
+
+where $\mathbb{I}\{G_i = j\} = 1$ if $G_i = j$, and $=0$ otherwise.
+
+## Your task
+
+:::{.question}
+#### Question 1 (GitHub)
+
+Write an R function called `mv_gaussian_mix`, which fits a multivariate Gaussian mixture model using the method described above. Your function should satisfy the following requirements:
+
+* Inputs:
+    * `x`: a $n \times d$ matrix containing the observed data ($n$ = number of observations, $d$ = number of observed variables)
+    * `k`: desired number of groups
+    * `epsilon`: the value $\varepsilon$ for convergence (default: $10^{-8}$)
+    * `max_iter`: the maximum number of iterations
+* Output: a list containing the following named entries:
+    * `lambda`: a vector of the estimated probabilities $\lambda$
+    * `mu`: a list of the estimated means $\mu$. The length of the list is the number of groups $k$, and each entry in `mu` is a $d$-dimensional vector
+    * `sigma`: a list of the estimated variance-covariance matrices $\Sigma$. The length of the list is the number of groups $k$, and each entry in `sigma` is a $d\times d$ matrix
+    * `loglik`: the log-likelihood $\ell(\lambda^{(t)}, \mu^{(t)}, \Sigma^{(t)})$ at convergence
+    * `iterations`: the number of iterations
+
+**Other requirements and hints:**
+
+* You are welcome to use helper functions, but you may not use other implementations of the EM algorithm for Gaussian mixtures
+* You are welcome to use the `dmvnorm` function in the `mixtools` package
+* You should use the k-means clustering algorithm to initialize the EM algorithm. You can use the `kmeans` function in R; you do not need to implement k-means yourself
+* The class activity on April 21 has some hints on computing the parameter updates; see also the solutions to that activity
+
+**Unit tests:** unit tests are provided in `hw8_tests.R`
+
+:::
+
+
+
+
+
+
