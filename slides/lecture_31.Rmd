@@ -6,6 +6,22 @@ editor_options:
   chunk_output_type: console
 ---
 
+## Course logistics
+
+* HW 8 released, due Monday 4/28
+
+\bigskip
+
+* This week: wrap up Gaussian mixtures and EM algorithm
+
+\bigskip
+
+* Course evals: Wednesday during class
+
+\bigskip
+
+* Monday 4/28: wrap-up work day
+
 ## Previously
 
 ```{r, fig.width=3.5, fig.height=2.5, message=F, warning=F, echo=F}
@@ -233,7 +249,7 @@ Implement the algorithm to fit a Gaussian mixture model:
 
 * Start in class
 * Welcome to work with a neighbor
-* Solutions will be posted later on the course website
+* Solutions are posted on the course website
 
 
 
