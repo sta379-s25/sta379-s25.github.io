@@ -1,11 +1,38 @@
----
-title: "Activity: Fitting Gaussian mixture models"
-format: html
----
+\documentclass[12pt]{article}
+\usepackage{url}
+\usepackage{alltt}
+\usepackage{bm}
+\usepackage{bbm}
+\linespread{1}
+\textwidth 6.5in
+\oddsidemargin 0.in
+\addtolength{\topmargin}{-1in}
+\addtolength{\textheight}{2in}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{bbm}
+
+\setlength\parindent{0pt}
+
+\newcommand{\indep}{\perp \!\!\! \perp}
+
+\begin{document}
+
+
+\begin{center}
+\Large
+Activity: Fitting Gaussian mixture models \\
+\normalsize
+\vspace{5mm}
+\end{center}
+
+\noindent \textbf{Group members:}\\
 
 The goal of this activity is to derive the iterative procedure used to fit Gaussian mixture models. For the purposes of this activity, we will restrict ourselves to the univariate case.
 
-# Gaussian mixture model
+\section*{Gaussian mixture model}
 
 Suppose we observe data $X_1,...,X_n$, and we assume that each observation $i$ comes from one of $k$ groups. Let $Z_i \in \{1,...,k\}$ denote the group assignment. The one-dimensional Gaussian mixture model assumes that
 
@@ -17,12 +44,11 @@ $$X_i | (Z_i = j) \sim N(\mu_j, \sigma_j^2)$$
 
 That is, the probability of belonging to group $j$ is $\lambda_j$, and the distribution of each group is Gaussian with its own mean $\mu_j$ and variance $\sigma_j^2$.
 
-
-# Parameter estimation
+\section*{Parameter estimation}
 
 How do we estimate the parameters in a Gaussian mixture model? As we have seen throughout the course, fitting a statistical model involves optimizing some function of the data (e.g., minimizing the residual sum of squares for a linear regression model).
 
-In the case of the Gaussian mixture model, the quantity we **want** to optimize is called the **log-likelihood**, and it is given by
+In the case of the Gaussian mixture model, the quantity we \textbf{want} to optimize is called the \textbf{log-likelihood}, and it is given by
 
 $$\ell(\lambda, \mu, \sigma) = \sum \limits_{i=1}^n \log \left( \sum \limits_{j=1}^k \lambda_j f(X_i | Z_i = j) \right)$$
 where
@@ -30,12 +56,11 @@ where
 $$f(X_i | Z_i = j) = \frac{1}{\sqrt{2 \pi \sigma_j^2}} \exp \left\lbrace -\frac{1}{2\sigma_j^2} (X_i - \mu_j)^2 \right\rbrace$$
 is the $N(\mu_j, \sigma_j^2)$ density.
 
+\subsection*{Example}
 
-## Example
+The following code simulates data from a 2-component Gaussian mixture model, and fits the model with the \verb;mixtools; package:
 
-The following code simulates data from a 2-component Gaussian mixture model, and fits the model with the `mixtools` package:
-
-```{r, message=F, warning=F}
+\begin{verbatim}
 library(mixtools)
 
 set.seed(8675309)
@@ -49,17 +74,17 @@ z <- sample(c(1, 2), n, replace=T, prob=group_lambda)
 x <- rnorm(n, mean=group_mu[z], sd=group_sd[z])
 
 em_res <- normalmixEM(x, k=2)
-```
+\end{verbatim}
 
 The log-likelihood $\ell(\widehat{\lambda}, \widehat{\mu}, \widehat{\sigma})$ of the estimated parameters is provided by
 
-```{r}
+\begin{verbatim}
 em_res$loglik
-```
+\end{verbatim}
 
 To verify that this log-likelihood is calculated using the formula above, here is a function which calculates the log-likelihood for a univariate Gaussian mixture:
 
-```{r}
+\begin{verbatim}
 compute_loglik <- function(x, lambda, mu, sigma){
   indiv_logliks <- rep(0, length(x))
   for(i in 1:length(lambda)){
@@ -68,27 +93,28 @@ compute_loglik <- function(x, lambda, mu, sigma){
   
   sum(log(indiv_logliks))
 }
-```
+\end{verbatim}
 
-1. **Question:** Use this `compute_loglik` function to compute $\ell(\widehat{\lambda}, \widehat{\mu}, \widehat{\sigma})$ for the fitted model, and verify the result agrees with `em_res$loglik`.
+\begin{enumerate}
+\item \textbf{Question:} Use this \verb;compute_loglik; function to compute $\ell(\widehat{\lambda}, \widehat{\mu}, \widehat{\sigma})$ for the fitted model, and verify the result agrees with \verb;em_res$loglik;.
 
-```{r, include=F}
-compute_loglik(x, em_res$lambda, em_res$mu, em_res$sigma)
-```
+\vspace{2.5cm}
 
+\item \textbf{Question:} \verb;em_res$all.loglik; will return the log-likelihood at each iteration of the EM algorithm used to fit the Gaussian mixture model. Plot the values in \verb;em_res$all.loglik;, and verify they are increasing.
+\end{enumerate}
 
-2. **Question:** `em_res$all.loglik` will return the log-likelihood at each iteration of the EM algorithm used to fit the Gaussian mixture model. Plot the values in `em_res$all.loglik`, and verify they are increasing.
+\newpage
 
-## The challenge with maximizing the log-likelihood
+\subsection*{The challenge with maximizing the log-likelihood}
 
-For other models in this course, we have optimized quantities like the log-likelihood directly (by taking a derivative, and either solving in closed form or using an iterative procedure like gradient descent or Newton's method). However, the log-likelihood for the Gaussian mixture model is **hard** to optimize directly.
+For other models in this course, we have optimized quantities like the log-likelihood directly (by taking a derivative, and either solving in closed form or using an iterative procedure like gradient descent or Newton's method). However, the log-likelihood for the Gaussian mixture model is \textbf{hard} to optimize directly.\\
 
-Why? Because there is a *sum inside a log*:
+Why? Because there is a \textit{sum inside a log}:
 
 $$\ell(\lambda, \mu, \sigma) = \sum \limits_{i=1}^n \log \left( \sum \limits_{j=1}^k \lambda_j f(X_i | Z_i = j) \right)$$
 So what do we do instead?
 
-## Introducing a new quantity to maximize
+\subsection*{Introducing a new quantity to maximize}
 
 Let $\theta = (\lambda, \mu, \sigma)$ be the collection of all parameters we are trying to estimate for the Gaussian mixture model. Let $\theta^{(t)}$ be our current estimates of these parameters, at iteration $t$, and let
 
@@ -99,16 +125,19 @@ $$Q(\theta | \theta^{(t)}) = \sum \limits_{i=1}^n \sum \limits_{j=1}^k \gamma_{i
 
 To important results can be shown (you do not need to prove these results!):
 
-* $\ell(\lambda, \mu, \sigma) \geq Q(\theta | \theta^{(t)})$ (this is a result of a probability inequality called *Jensen's inequality*)
-* Maximizing $Q(\theta | \theta^{(t)})$ helps us maximize $\ell(\lambda, \mu, \sigma)$
+\begin{itemize}
+\item $\ell(\lambda, \mu, \sigma) \geq Q(\theta | \theta^{(t)})$ (this is a result of a probability inequality called \textit{Jensen's inequality})
 
-### Example
+\item Maximizing $Q(\theta | \theta^{(t)})$ helps us maximize $\ell(\lambda, \mu, \sigma)$
+\end{itemize}
 
-Suppose we start our estimation procedure at the initial values $\lambda^{(0)} = (0.5, 0.5)$, $\mu^{(0)} = (1, 5)$, and $\sigma^{(0)} = (0.5, 0.5)$.
+\subsubsection*{Example}
+
+Suppose we start our estimation procedure at the initial values $\lambda^{(0)} = (0.5, 0.5)$, $\mu^{(0)} = (1, 5)$, and $\sigma^{(0)} = (0.5, 0.5)$.\\
 
 The code below calculates the posterior probabilities $\gamma_{ij}^{(0)}$:
 
-```{r}
+\begin{verbatim}
 calc_probs <- function(x, lambda, mu, sigma){
   (lambda[2] * dnorm(x, mu[2], sigma[2]))/(
     lambda[2] * dnorm(x, mu[2], sigma[2]) + lambda[1] * dnorm(x, mu[1], sigma[1])
@@ -120,11 +149,11 @@ mu <- c(1, 5)
 sigma <- c(1, 1)
 
 probs <- calc_probs(x, lambda, mu, sigma)
-```
+\end{verbatim}
 
 Now we wish to update our parameter estimates. Let's start with updating $\mu_1$, to get $\mu_1^{(1)}$. The code below plots both $\ell$ and $Q$ as a function of $\mu_1$, when we keep $\lambda_1^{(0)} = \lambda_2^{(0)} = 0.5$, $\mu_2^{(0)} = 5$, and $\sigma_1^{(0)} = \sigma_2^{(0)}= 1$.
 
-```{r, eval=F}
+\begin{verbatim}
 compute_q <- function(x, lambda, mu, sigma, probs){
   sum(probs*log(lambda[2]*dnorm(x, mean=mu[2], sd=sigma[2])) + 
     (1-probs)*log(lambda[1]*dnorm(x, mean=mu[1], sd=sigma[1]))) - 
@@ -144,19 +173,26 @@ lines(mu1_vals, q_vals, col="red")
 legend("bottom",
        legend=c("True log-likelihood (l)","Lower bound (Q)"), 
        col=c("black", "red"), lty=c(1, 1))
-```
+\end{verbatim}
 
+\begin{enumerate}
+\item[3.] \textbf{Question:} Make the plot, and verify that $Q \leq \ell$ at all points.
 
-3. **Question:** Make the plot, and verify that $Q \leq \ell$ at all points.
+\vspace{2.5cm}
 
-4. **Question:** The current guess for $\mu_1$ is $\mu_1^{(0)} = 1$. How do $Q$ and $\ell$ compare at $\mu_1 = 1$?
+\item[4.] \textbf{Question:} The current guess for $\mu_1$ is $\mu_1^{(0)} = 1$. How do $Q$ and $\ell$ compare at $\mu_1 = 1$?
 
-5. **Question:** Approximately which value of $\mu_1$ maximizes $Q$? Is the log-likelihood $\ell$ also higher at this value of $\mu_1$ than at $\mu_1^{(0)} = 1$?
+\vspace{2.5cm}
 
+\item[5.] \textbf{Question:} Approximately which value of $\mu_1$ maximizes $Q$? Is the log-likelihood $\ell$ also higher at this value of $\mu_1$ than at $\mu_1^{(0)} = 1$?
+
+\end{enumerate}
+
+\newpage
 
 Likewise, we can make a similar plot for $\mu_2$. The code below plots both $\ell$ and $Q$ as a function of $\mu_2$, when we keep $\lambda_1^{(0)} = \lambda_2^{(0)} = 0.5$, $\mu_1^{(0)} = 1$, and $\sigma_1^{(0)} = \sigma_2^{(0)}= 1$.
 
-```{r, eval=F}
+\begin{verbatim}
 mu2_vals <- seq(2, 6, 0.01)
 
 loglik_vals <- sapply(mu2_vals, 
@@ -170,14 +206,19 @@ lines(mu2_vals, q_vals, col="red")
 legend("bottom",
        legend=c("True log-likelihood (l)","Lower bound (Q)"), 
        col=c("black", "red"), lty=c(1, 1))
-```
+\end{verbatim}
 
+\begin{enumerate}
+\item[6.] \textbf{Question:} The current guess for $\mu_2$ is $\mu_2^{(0)} = 5$. How do $Q$ and $\ell$ compare at $\mu_2 = 5$?
 
-6. **Question:** The current guess for $\mu_2$ is $\mu_2^{(0)} = 5$. How do $Q$ and $\ell$ compare at $\mu_2 = 5$?
+\vspace{2.5cm}
 
-7. **Question:** Approximately which value of $\mu_2$ maximizes $Q$? Is the log-likelihood $\ell$ also higher at this value of $\mu_2$ than at $\mu_2^{(0)} = 5$?
+\item[7.] \textbf{Question:} Approximately which value of $\mu_2$ maximizes $Q$? Is the log-likelihood $\ell$ also higher at this value of $\mu_2$ than at $\mu_2^{(0)} = 5$?
 
-### Updating $\mu$
+\vspace{2.5cm}
+\end{enumerate}
+
+\subsubsection*{Updating $\mu$}
 
 The update rule for $\mu$ is
 
@@ -185,7 +226,7 @@ $$\mu_j^{(1)} = \dfrac{\sum \limits_{i=1}^n X_i P^{(0)}(Z_i = j | X_i)}{\sum \li
 
 The code below calculates the updated means $\mu^{(1)}$ for the 2-component Gaussian mixture:
 
-```{r, eval=F}
+\begin{verbatim}
 update_mu <- function(x, probs){
   mu1 <- sum(x*(1-probs))/sum(1-probs)
   mu2 <- sum(x*probs)/sum(probs)
@@ -193,11 +234,15 @@ update_mu <- function(x, probs){
 }
 
 update_mu(x, probs)
-```
+\end{verbatim}
 
-8. **Question:** Run the code. How do the values $\mu_1^{(1)}$ and $\mu_2^{(1)}$ compare to your answers in questions 5 and 7?
+\begin{enumerate}
+\item[8.] \textbf{Question:} Run the code. How do the values $\mu_1^{(1)}$ and $\mu_2^{(1)}$ compare to your answers in questions 5 and 7?
 
-# Doing the calculus
+\vspace{4cm}
+\end{enumerate}
+
+\section*{Doing the calculus}
 
 We have defined
 
@@ -207,13 +252,18 @@ Substituting the $N(\mu_j, \sigma_j^2)$ pdf, we have
 
 $$Q(\theta | \theta^{(t)}) = \sum \limits_{i=1}^n \sum \limits_{j=1}^k \gamma_{ij}^{(t)} \log \left(\lambda_j \frac{1}{\sqrt{2 \pi \sigma_j^2}} \exp \left\lbrace -\frac{1}{2 \sigma_j^2} (X_i - \mu_j)^2 \right\rbrace \right) - \sum \limits_{i=1}^n \sum \limits_{j=1}^k \gamma_{ij}^{(t)} \log(\gamma_{ij}^{(t)})$$
 
-9. **Question:** Show that
+\begin{enumerate}
+\item[9.] \textbf{Question:} Show that
 
 $$\frac{\partial Q}{\partial \mu_j} = \frac{1}{\sigma_j^2} \sum \limits_{i=1}^n \gamma_{ij}^{(t)} (X_i - \mu_j)$$
 
-10. **Question:** To solve for $\mu_j$, we set $\frac{\partial Q}{\partial \mu_j} = 0$. Verify that the value of $\mu_j$ which solves this equation is
+\newpage
+
+\item[10.] \textbf{Question:} To solve for $\mu_j$, we set $\frac{\partial Q}{\partial \mu_j} = 0$. Verify that the value of $\mu_j$ which solves this equation is
 
 $$\mu_j = \frac{\sum \limits_{i=1}^n \gamma_{ij}^{(t)} X_i}{\sum \limits_{i=1}^n \gamma_{ij}^{(t)}}$$
 
 That is, we have derived our update rule for the means!
+\end{enumerate}
 
+\end{document}
