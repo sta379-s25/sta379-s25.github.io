@@ -129,7 +129,7 @@ Write an R function called `mv_gaussian_mix`, which fits a multivariate Gaussian
     * `x`: a $n \times d$ matrix containing the observed data ($n$ = number of observations, $d$ = number of observed variables)
     * `k`: desired number of groups
     * `epsilon`: the value $\varepsilon$ for convergence (default: $10^{-8}$)
-    * `max_iter`: the maximum number of iterations
+    * `max_iter`: the maximum number of iterations (default: 1000)
 * Output: a list containing the following named entries:
     * `lambda`: a vector of the estimated probabilities $\lambda$
     * `mu`: a list of the estimated means $\mu$. The length of the list is the number of groups $k$, and each entry in `mu` is a $d$-dimensional vector

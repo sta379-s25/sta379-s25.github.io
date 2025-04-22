@@ -10,7 +10,8 @@ April 21
   : [HW 8](https://sta379-s25.github.io/homework/hw8.html)
   
 April 23
-: EM algorithm
+: Fitting Gaussian mixture models
+  : [Activity](https://sta379-s25.github.io/practice_questions/pq_32.html)
 
 April 25
 : EM algorithm
