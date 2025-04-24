@@ -15,4 +15,5 @@ April 23
 
 April 25
 : EM algorithm
+  : [slides (pdf)](https://sta379-s25.github.io/slides/lecture_33.pdf)
 

@@ -1,0 +1,148 @@
+---
+title: "Lecture 33: Gaussian mixture models and the EM algorithm"
+author: "Ciaran Evans"
+output: beamer_presentation
+editor_options: 
+  chunk_output_type: console
+---
+
+## Previously: Gaussian mixture model
+
+* Observe data $X_1,...,X_n$
+
+\bigskip
+
+* Assume each observation $i$ comes from one of $k$ groups. Let $Z_i \in \{1,...,k\}$ denote the group assignment 
+    * The group $Z$ is an unobserved (**latent**) variable
+
+**Model:** 
+
+* $P(Z_i = j) = \lambda_j$
+
+\bigskip
+
+* $X_i | (Z_i = j) \sim N(\mu_j, \sigma_j^2)$
+
+## Posterior probabilities and parameter estimation
+
+* Posterior probabilities:
+
+\vspace{-0.3cm}
+
+$$P(Z_i = j | X_i) = \dfrac{\lambda_j f(X_i | Z_i = j)}{\lambda_1 f(X_i | Z_i = 1) + \cdots + \lambda_k f(X_i |Z_i = k)}$$
+
+
+* Parameter updates:
+
+    * $\widehat{\lambda}_j = \frac{1}{n} \sum \limits_{i=1}^n P(Z_i = j | X_i)$
+    * $\widehat{\mu}_j = \dfrac{\sum \limits_{i=1}^n X_i P(Z_i = j | X_i)}{\sum \limits_{i=1}^n {P(Z_i = j | X_i)}}$
+    * $\widehat{\sigma}_j = \sqrt{\dfrac{\sum \limits_{i=1}^n (X_i - \widehat{\mu}_j)^2 P(Z_i = j | X_i)}{\sum \limits_{i=1}^n {P(Z_i = j | X_i)}}}$
+    
+**Today:** where do these estimates come from??
+
+## Parameter estimation
+
+The quantity we \textbf{want} to optimize is called the \textbf{log-likelihood}, and it is given by
+
+$$\ell(\lambda, \mu, \sigma) = \sum \limits_{i=1}^n \log \left( \sum \limits_{j=1}^k \lambda_j f(X_i | Z_i = j) \right)$$
+
+**Question:** We have discussed optimization extensively in this course. How do we usually try to optimize a function?
+
+## Parameter estimation
+
+Let $\theta = (\lambda, \mu, \sigma)$ be the collection of all parameters we are trying to estimate for the Gaussian mixture model. Let $\theta^{(t)}$ be our current estimates of these parameters, at iteration $t$, and let
+
+$$\gamma_{ij}^{(t)} = P^{(t)}(Z_i = j | X_i, \theta^{(t)})$$
+be the posterior probabilities calculated with $\theta^{(t)}$. Then define
+
+$$Q(\theta | \theta^{(t)}) = \sum \limits_{i=1}^n \sum \limits_{j=1}^k \gamma_{ij}^{(t)} \log (\lambda_j f(X_i | Z_i = j)) - \sum \limits_{i=1}^n \sum \limits_{j=1}^k \gamma_{ij}^{(t)} \log(\gamma_{ij}^{(t)})$$
+
+* $\ell(\lambda, \mu, \sigma) \geq Q(\theta | \theta^{(t)})$
+
+* Maximizing $Q(\theta | \theta^{(t)})$ helps us maximize $\ell(\lambda, \mu, \sigma)$
+
+## Example
+
+* $\mu^{(t)} = (1, 5)$
+* Want to find $\mu_1$, $\mu_2$ to maximize $Q$. Look at different possibilities for $\mu_2$:
+
+```{r, echo=F, fig.width=6, fig.height=4}
+set.seed(8675309)
+
+n <- 300
+group_lambda <- c(0.75, 0.25)
+group_mu <- c(0, 4)
+group_sd <- c(1, 1)
+
+z <- sample(c(1, 2), n, replace=T, prob=group_lambda)
+x <- rnorm(n, mean=group_mu[z], sd=group_sd[z])
+
+compute_loglik <- function(x, lambda, mu, sigma){
+  indiv_logliks <- rep(0, length(x))
+  for(i in 1:length(lambda)){
+    indiv_logliks <- indiv_logliks + dnorm(x, mean=mu[i], sd=sigma[i]) *lambda[i]
+  }
+  
+  sum(log(indiv_logliks))
+}
+
+calc_probs <- function(x, lambda, mu, sigma){
+  (lambda[2] * dnorm(x, mu[2], sigma[2]))/(
+    lambda[2] * dnorm(x, mu[2], sigma[2]) + lambda[1] * dnorm(x, mu[1], sigma[1])
+  )
+}
+
+lambda <- c(0.5, 0.5)
+mu <- c(1, 5)
+sigma <- c(1, 1)
+
+probs <- calc_probs(x, lambda, mu, sigma)
+
+compute_q <- function(x, lambda, mu, sigma, probs){
+  sum(probs*log(lambda[2]*dnorm(x, mean=mu[2], sd=sigma[2])) + 
+    (1-probs)*log(lambda[1]*dnorm(x, mean=mu[1], sd=sigma[1]))) - 
+    sum(probs*log(probs)) - sum((1-probs)*log(1-probs))
+}
+
+mu2_vals <- seq(2, 6, 0.01)
+
+loglik_vals <- sapply(mu2_vals, 
+                      function(mu2){compute_loglik(x, lambda, c(1, mu2), sigma)})
+
+q_vals <- sapply(mu2_vals, 
+                 function(mu2){compute_q(x, lambda, c(1, mu2), sigma, probs)})
+
+plot(mu2_vals, loglik_vals, type="l", xlab = "mu2", ylab="")
+lines(mu2_vals, q_vals, col="red")
+legend("bottom",
+       legend=c("True log-likelihood (l)","Lower bound (Q)"), 
+       col=c("black", "red"), lty=c(1, 1))
+```
+
+
+## Doing the calculus
+
+\begin{tiny}
+$$Q(\theta | \theta^{(t)}) = \sum \limits_{i=1}^n \sum \limits_{j=1}^k \gamma_{ij}^{(t)} \log \left(\lambda_j \frac{1}{\sqrt{2 \pi \sigma_j^2}} \exp \left\lbrace -\frac{1}{2 \sigma_j^2} (X_i - \mu_j)^2 \right\rbrace \right) - \sum \limits_{i=1}^n \sum \limits_{j=1}^k \gamma_{ij}^{(t)} \log(\gamma_{ij}^{(t)})$$
+\end{tiny}
+
+\vspace{6cm}
+
+## Summary: EM algorithm
+
+**Want** to maximize
+
+$$\ell(\theta) = \sum \limits_{i=1}^n \log \left( \sum \limits_{j=1}^k \lambda_j f(X_i | Z_i = j) \right)$$
+Define
+
+$$Q(\theta | \theta^{(t)}) = \sum \limits_{i=1}^n \sum \limits_{j=1}^k \gamma_{ij}^{(t)} \log (\lambda_j f(X_i | Z_i = j)) - \sum \limits_{i=1}^n \sum \limits_{j=1}^k \gamma_{ij}^{(t)} \log(\gamma_{ij}^{(t)})$$
+
+EM algorithm:
+
+1. Begin with $\theta^{(0)}$
+2. Calculate $Q(\theta | \theta^{(0)})$
+3. $\theta^{(1)}$ maximizes $Q(\theta | \theta^{(0)})$
+4. Iterate between steps 2 and 3 until $\ell(\theta)$ stops changing
+
+
+

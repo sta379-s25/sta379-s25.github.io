@@ -46,7 +46,7 @@ That is, the probability of belonging to group $j$ is $\lambda_j$, and the distr
 
 \section*{Parameter estimation}
 
-How do we estimate the parameters in a Gaussian mixture model? As we have seen throughout the course, fitting a statistical model involves optimizing some function of the data (e.g., minimizing the residual sum of squares for a linear regression model).
+How do we estimate the parameters in a Gaussian mixture model? As we have seen throughout the course, fitting a statistical model involves optimizing some function of the data (e.g., minimizing the residual sum of squares for a linear regression model).\\
 
 In the case of the Gaussian mixture model, the quantity we \textbf{want} to optimize is called the \textbf{log-likelihood}, and it is given by
 
@@ -123,7 +123,7 @@ be the posterior probabilities calculated with $\theta^{(t)}$. Then define
 
 $$Q(\theta | \theta^{(t)}) = \sum \limits_{i=1}^n \sum \limits_{j=1}^k \gamma_{ij}^{(t)} \log (\lambda_j f(X_i | Z_i = j)) - \sum \limits_{i=1}^n \sum \limits_{j=1}^k \gamma_{ij}^{(t)} \log(\gamma_{ij}^{(t)})$$
 
-To important results can be shown (you do not need to prove these results!):
+Two important results can be shown (you do not need to prove these results!):
 
 \begin{itemize}
 \item $\ell(\lambda, \mu, \sigma) \geq Q(\theta | \theta^{(t)})$ (this is a result of a probability inequality called \textit{Jensen's inequality})
