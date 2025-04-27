@@ -221,7 +221,7 @@ Write a function in R called `legendre_roots` to compute the $n$ roots of the $n
 
 Using the definitions above, the weights $w_i$ corresponding to the nodes $x_i$ in Gaussian quadrature can be found with the formula
 
-$$w_i = \frac{2}{(1 - x_i)^2(p_n'(x_i))^2}$$
+$$w_i = \frac{2}{(1 - x_i^2)(p_n'(x_i))^2}$$
 
 :::{.question}
 #### Question 5 (code)
